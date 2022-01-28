@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: machine-api-controllers
+  namespace: openshift-machine-api
+  labels:
+    api: clusterapi
+    k8s-app: controller
+    tectonic-operators.coreos.com/managed-by: machine-api-operator
+spec:
+  selector:
+    matchLabels:
+      api: clusterapi
+      k8s-app: controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        api: clusterapi
+        k8s-app: controller
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoExecute
+        key: node.alpha.kubernetes.io/notReady
+        operator: Exists
+      - effect: NoExecute
+        key: node.alpha.kubernetes.io/unreachable
+        operator: Exists
+      containers:
+      - name: machine-controller
+        image: openshift/origin-powervs-machine-controllers:latest
+        imagePullPolicy: Always
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+        command:
+          - /machine-controller-manager
+        args:
+          - --logtostderr=true
+          - --v=3
+      - name: nodelink-controller
+        image: openshift/origin-machine-api-operator:latest
+        imagePullPolicy: Always
+        command:
+          - /nodelink-controller
+        args:
+          - --logtostderr=true
+          - --v=3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 100m
+            memory: 30Mi
+      - name: machine-healthcheck-controller
+        image: openshift/origin-machine-api-operator:latest
+        imagePullPolicy: Always
+        command:
+          - /machine-healthcheck
+        args:
+          - --logtostderr=true
+          - --v=3
+          - --namespace=openshift-machine-api
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        ports:
+          - containerPort: 9442
+            name: healthz
+            protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: healthz
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: healthz
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1

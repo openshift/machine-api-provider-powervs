@@ -1,0 +1,8 @@
+reviewers:
+- mkumatag
+- Karthik-K-N
+approvers:
+- mkumatag
+
+component: "Cloud Compute"
+subcomponent: "Other Providers"

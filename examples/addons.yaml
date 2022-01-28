@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: powervs-credentials
+  namespace: openshift-machine-api
+type: Opaque
+data:
+  ibmcloud_api_key:

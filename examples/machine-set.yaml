@@ -1,0 +1,38 @@
+---
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: local-powervs-machineset
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: powervs-k8s-cluster
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-machineset: test-master
+      machine.openshift.io/cluster-api-cluster: powervs-k8s-cluster
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-machineset: test-master
+        machine.openshift.io/cluster-api-cluster: powervs-k8s-cluster
+    spec:
+      providerSpec:
+        value:
+          apiVersion: powervsproviderconfig.openshift.io/v1alpha1
+          kind: PowerVSMachineProviderConfig
+          serviceInstanceID: e449d86e-c3a0-4c07-959e-8557fdf55482
+          image:
+            name: rhcos-49-84-202108041519-0
+          userDataSecret:
+            name: worker-user-data
+          credentialsSecret:
+            name: powervs-credentials
+          sysType: s922
+          procType: shared
+          processors: 0.25
+          memory: 8
+          network:
+            name: pvs-ipi-net
+          keyPairName: karthik-ssh
