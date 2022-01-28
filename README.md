@@ -1,6 +1,6 @@
-# OpenShift cluster-api-provider-powervs
+# Machine API Provider Power VS
 
-This repository hosts an implementation of a provider for PowerVS for the
+This repository contains implementations of Power VS Provider for the
 OpenShift [machine-api](https://github.com/openshift/cluster-api).
 
 This provider runs as a machine-controller deployed by the
