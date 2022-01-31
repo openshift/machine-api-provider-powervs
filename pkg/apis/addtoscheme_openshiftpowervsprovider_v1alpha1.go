@@ -17,7 +17,7 @@ limitations under the License.
 package apis
 
 import (
-	"github.com/openshift/cluster-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
+	"github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 )
 
 func init() {

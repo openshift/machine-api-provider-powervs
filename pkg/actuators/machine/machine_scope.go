@@ -11,10 +11,10 @@ import (
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	machinev1 "github.com/openshift/api/machine/v1beta1"
-	powervsproviderv1 "github.com/openshift/cluster-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
-	powervsclient "github.com/openshift/cluster-api-provider-powervs/pkg/client"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/options"
 	machineapierros "github.com/openshift/machine-api-operator/pkg/controller/machine"
+	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
+	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 )
 
 const (

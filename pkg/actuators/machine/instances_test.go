@@ -12,8 +12,8 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
-	powervsclient "github.com/openshift/cluster-api-provider-powervs/pkg/client"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/client/mock"
+	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/client/mock"
 )
 
 func init() {

@@ -30,13 +30,13 @@ import (
 
 	configv1 "github.com/openshift/api/config/v1"
 	mapiv1beta1 "github.com/openshift/api/machine/v1beta1"
-	machineactuator "github.com/openshift/cluster-api-provider-powervs/pkg/actuators/machine"
-	powervsclient "github.com/openshift/cluster-api-provider-powervs/pkg/client"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/controller/nodeupdate"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/options"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/version"
 	"github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"
+	machineactuator "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machine"
+	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/controller/nodeupdate"
+	"github.com/openshift/machine-api-provider-powervs/pkg/options"
+	"github.com/openshift/machine-api-provider-powervs/pkg/version"
 )
 
 // The default durations for the leader electrion operations.
@@ -119,7 +119,7 @@ func main() {
 	opts := manager.Options{
 		LeaderElection:          *leaderElect,
 		LeaderElectionNamespace: *leaderElectResourceNamespace,
-		LeaderElectionID:        "cluster-api-provider-powervs-leader",
+		LeaderElectionID:        "machine-api-provider-powervs-leader",
 		LeaseDuration:           leaderElectLeaseDuration,
 		HealthProbeBindAddress:  *healthAddr,
 		SyncPeriod:              &syncPeriod,
