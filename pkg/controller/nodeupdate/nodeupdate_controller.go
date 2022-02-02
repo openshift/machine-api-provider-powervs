@@ -19,8 +19,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	powervsclient "github.com/openshift/cluster-api-provider-powervs/pkg/client"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/options"
+	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 )
 
 const (

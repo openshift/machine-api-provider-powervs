@@ -6,11 +6,13 @@ import (
 	"strconv"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
-	machinev1 "github.com/openshift/api/machine/v1beta1"
-	powervsproviderv1 "github.com/openshift/cluster-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
-	powervsclient "github.com/openshift/cluster-api-provider-powervs/pkg/client"
-	mapierrors "github.com/openshift/machine-api-operator/pkg/controller/machine"
+
 	"k8s.io/klog/v2"
+
+	machinev1 "github.com/openshift/api/machine/v1beta1"
+	mapierrors "github.com/openshift/machine-api-operator/pkg/controller/machine"
+	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
+	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 )
 
 // removeStoppedMachine removes all instances of a specific machine that are in a stopped state.

@@ -71,7 +71,7 @@ Note: this info is RH only, it needs to be backported every time the `README.md`
 2. **Build and run powervs actuator from outside the cluster**
 
    ```sh
-   $ go build -o bin/machine-controller-manager github.com/openshift/cluster-api-provider-powervs/cmd/manager
+   $ go build -o bin/machine-controller-manager github.com/openshift/machine-api-provider-powervs/cmd/manager
    ```
 
    ```sh

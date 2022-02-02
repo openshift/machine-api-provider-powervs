@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
-	"github.com/openshift/cluster-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/client"
 
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"

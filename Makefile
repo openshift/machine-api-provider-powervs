@@ -26,7 +26,7 @@ GOGCFLAGS ?= -gcflags=all="-N -l"
 endif
 
 VERSION     ?= $(shell git describe --always --abbrev=7)
-REPO_PATH   ?= github.com/openshift/cluster-api-provider-powervs
+REPO_PATH   ?= github.com/openshift/machine-api-provider-powervs
 LD_FLAGS    ?= -X $(REPO_PATH)/pkg/version.Raw=$(VERSION) -extldflags "-static"
 MUTABLE_TAG ?= latest
 IMAGE        = origin-powervs-machine-controllers
@@ -53,7 +53,7 @@ ifeq ($(NO_DOCKER), 1)
   DOCKER_CMD =
   IMAGE_BUILD_CMD = imagebuilder
 else
-  DOCKER_CMD := $(ENGINE) run --rm -v "$(PWD)":/go/src/github.com/openshift/cluster-api-provider-powervs:Z -w /go/src/github.com/openshift/cluster-api-provider-powervs openshift/origin-release:golang-1.16
+  DOCKER_CMD := $(ENGINE) run --rm -v "$(PWD)":/go/src/github.com/openshift/machine-api-provider-powervs:Z -w /go/src/github.com/openshift/machine-api-provider-powervs openshift/origin-release:golang-1.16
   IMAGE_BUILD_CMD = $(ENGINE) build
 endif
 
@@ -107,7 +107,7 @@ test-e2e: ## Run e2e tests
 
 .PHONY: lint
 lint: ## Go lint your code
-	$(DOCKER_CMD) hack/go-lint.sh -min_confidence 0.3 $$(go list -f '{{ .ImportPath }}' ./... | grep -v -e 'github.com/openshift/cluster-api-provider-powervs/test' -e 'github.com/openshift/cluster-api-provider-powervs/pkg/client/mock')
+	$(DOCKER_CMD) hack/go-lint.sh -min_confidence 0.3 $$(go list -f '{{ .ImportPath }}' ./... | grep -v -e 'github.com/openshift/machine-api-provider-powervs/test' -e 'github.com/openshift/machine-api-provider-powervs/pkg/client/mock')
 
 .PHONY: fmt
 fmt: ## Go fmt your code

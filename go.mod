@@ -1,4 +1,4 @@
-module github.com/openshift/cluster-api-provider-powervs
+module github.com/openshift/machine-api-provider-powervs
 
 go 1.17
 
