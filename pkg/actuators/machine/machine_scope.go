@@ -3,6 +3,7 @@ package machine
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
 
@@ -154,19 +155,19 @@ func (s *machineScope) setProviderStatus(instance *models.PVMInstance, condition
 		s.providerStatus.InstanceID = instance.PvmInstanceID
 		s.providerStatus.InstanceState = instance.Status
 
-		for _, i := range instance.Networks {
-			if i.ExternalIP != "" {
+		for _, network := range instance.Networks {
+			if strings.TrimSpace(network.ExternalIP) != "" {
 				networkAddresses = append(networkAddresses,
 					corev1.NodeAddress{
 						Type:    corev1.NodeExternalIP,
-						Address: i.ExternalIP,
+						Address: strings.TrimSpace(network.ExternalIP),
 					})
 			}
-			if i.IPAddress != "" {
+			if strings.TrimSpace(network.IPAddress) != "" {
 				networkAddresses = append(networkAddresses,
 					corev1.NodeAddress{
 						Type:    corev1.NodeInternalIP,
-						Address: i.IPAddress,
+						Address: strings.TrimSpace(network.IPAddress),
 					})
 			}
 		}
