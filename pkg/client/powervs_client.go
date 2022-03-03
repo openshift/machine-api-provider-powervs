@@ -18,8 +18,8 @@ import (
 	bxsession "github.com/IBM-Cloud/bluemix-go/session"
 	"github.com/IBM-Cloud/power-go-client/clients/instance"
 	"github.com/IBM-Cloud/power-go-client/ibmpisession"
-	"github.com/IBM-Cloud/power-go-client/power/client/p_cloud_networks"
 	"github.com/IBM-Cloud/power-go-client/power/models"
+	"github.com/IBM/go-sdk-core/v5/core"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
@@ -115,8 +115,7 @@ func GetAPIKey(ctrlRuntimeClient client.Client, secretName, namespace string) (a
 }
 
 //NewValidatedClient creates and return a new Power VS client
-func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, cloudInstanceID string,
-	debug bool) (Client, error) {
+func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, cloudInstanceID string, debug bool) (Client, error) {
 	apikey, err := GetAPIKey(ctrlRuntimeClient, secretName, namespace)
 	if err != nil {
 		return nil, err
@@ -170,7 +169,22 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 
 	zone := resource.RegionID
 
-	c.session, err = ibmpisession.New(c.Config.IAMAccessToken, r, debug, c.User.Account, zone)
+	// Create the authenticator
+	authenticator := &core.IamAuthenticator{
+		ApiKey: apikey,
+	}
+
+	// Create the session options struct
+	options := &ibmpisession.IBMPIOptions{
+		Authenticator: authenticator,
+		UserAccount:   c.User.Account,
+		Region:        r,
+		Zone:          zone,
+		Debug:         debug,
+	}
+
+	// Construct the session service instance
+	c.session, err = ibmpisession.NewIBMPISession(options)
 	if err != nil {
 		return nil, err
 	}
@@ -227,13 +241,7 @@ func (p *powerVSClient) GetImages() (*models.Images, error) {
 }
 
 func (p *powerVSClient) GetNetworks() (*models.Networks, error) {
-	params := p_cloud_networks.NewPcloudNetworksGetallParamsWithTimeout(TIMEOUT).WithCloudInstanceID(p.cloudInstanceID)
-	resp, err := p.session.Power.PCloudNetworks.PcloudNetworksGetall(params, ibmpisession.NewAuth(p.session, p.cloudInstanceID))
-
-	if err != nil || resp.Payload == nil {
-		return nil, err
-	}
-	return resp.Payload, nil
+	return p.NetworkClient.GetAll()
 }
 
 func (p *powerVSClient) DeleteInstance(id string) error {
