@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"log"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -143,8 +142,4 @@ func stubStatus() configv1.InfrastructureStatus {
 			},
 		},
 	}
-}
-
-func getEnvironmentalVariableValue(key string) string {
-	return os.Getenv(key)
 }

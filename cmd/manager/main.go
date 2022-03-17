@@ -34,7 +34,6 @@ import (
 	"github.com/openshift/machine-api-operator/pkg/metrics"
 	machineactuator "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machine"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
-	"github.com/openshift/machine-api-provider-powervs/pkg/controller/nodeupdate"
 	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 	"github.com/openshift/machine-api-provider-powervs/pkg/version"
 )
@@ -168,11 +167,6 @@ func main() {
 
 	if err := machine.AddWithActuator(mgr, machineActuator); err != nil {
 		klog.Fatalf("Error adding actuator: %v", err)
-	}
-
-	if err := nodeupdate.Add(mgr); err != nil {
-		klog.Fatalf("failed to add providerID reconciler, with error: %v", err)
-
 	}
 
 	ctrl.SetLogger(klogr.New())

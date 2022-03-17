@@ -55,8 +55,11 @@ const (
 	// globalInfrastuctureName default name for infrastructure object
 	globalInfrastuctureName = "cluster"
 
-	//regionEnvironmentalVariable is the environmental variable to set the region
+	// regionEnvironmentalVariable is the environmental variable to set the region
 	regionEnvironmentalVariable = "IBMCLOUD_REGION"
+
+	// zoneEnvironmentalVariable is the environmental variable to set the powervs zone
+	zoneEnvironmentalVariable = "POWERVS_ZONE"
 
 	//powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
 	powerIaaSCustomEndpointName = "pi"
@@ -77,8 +80,9 @@ var (
 )
 
 //FormatProviderID formats and returns the provided instanceID
-func FormatProviderID(instanceID string) string {
-	return fmt.Sprintf("ibmpowervs:///%s", instanceID)
+func FormatProviderID(region, zone, serviceInstanceID, vmInstanceID string) string {
+	// ProviderID format: ibmpowervs://<region>/<zone>/<service_instance_id>/<powervs_machine_id>
+	return fmt.Sprintf("ibmpowervs://%s/%s/%s/%s", region, zone, serviceInstanceID, vmInstanceID)
 }
 
 //PowerVSClientBuilderFuncType is function type for building the Power VS client
@@ -169,6 +173,11 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 
 	zone := resource.RegionID
 
+	err = setEnvironmentVariables(zoneEnvironmentalVariable, zone)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create the authenticator
 	authenticator := &core.IamAuthenticator{
 		ApiKey: apikey,
@@ -194,32 +203,6 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	c.NetworkClient = instance.NewIBMPINetworkClient(ctx, c.session, cloudInstanceID)
 	c.ImageClient = instance.NewIBMPIImageClient(ctx, c.session, cloudInstanceID)
 	return c, err
-}
-
-// NewClientMinimal is bare minimal client can be used for quarrying the resources
-func NewClientMinimal(ctrlRuntimeClient client.Client, apiKey string) (Client, error) {
-
-	if err := getAndSetServiceEndpoints(ctrlRuntimeClient); err != nil {
-		return nil, err
-	}
-
-	s, err := bxsession.New(&bluemix.Config{BluemixAPIKey: apiKey})
-	if err != nil {
-		return nil, err
-	}
-
-	c := &powerVSClient{
-		Session: s,
-	}
-
-	ctrlv2, err := controllerv2.New(s)
-	if err != nil {
-		return c, err
-	}
-
-	c.ResourceClient = ctrlv2.ResourceServiceInstanceV2()
-
-	return c, nil
 }
 
 type powerVSClient struct {
@@ -398,6 +381,10 @@ func setEnvironmentVariables(key, val string) error {
 	return nil
 }
 
+func getEnvironmentalVariableValue(key string) string {
+	return os.Getenv(key)
+}
+
 func getAndSetServiceEndpoints(ctrlRuntimeClient client.Client) error {
 	customEndpointsMap, err := resolveEndpoints(ctrlRuntimeClient)
 	if err != nil {
@@ -418,4 +405,14 @@ func getCustomEndPointKeys(customEndpointsMap map[string]string) []string {
 		keys = append(keys, key)
 	}
 	return keys
+}
+
+// GetRegion return the PowerVS region
+func GetRegion() string {
+	return getEnvironmentalVariableValue(regionEnvironmentalVariable)
+}
+
+// GetZone return the PowerVS zone
+func GetZone() string {
+	return getEnvironmentalVariableValue(zoneEnvironmentalVariable)
 }
