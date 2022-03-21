@@ -3,6 +3,7 @@ package machine
 import (
 	"encoding/base64"
 	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
@@ -116,21 +117,30 @@ func getImageID(image powervsproviderv1.PowerVSResourceReference, client powervs
 func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
 	if network.ID != nil {
 		return network.ID, nil
-	} else if network.Name != nil {
+	} else {
 		networks, err := client.GetNetworks()
 		if err != nil {
 			klog.Errorf("failed to get networks, err: %v", err)
 			return nil, err
 		}
-		for _, nw := range networks.Networks {
-			if *network.Name == *nw.Name {
-				klog.Infof("network %s found with ID: %s", *network.Name, *nw.NetworkID)
-				return nw.NetworkID, nil
+		if network.Name != nil {
+			for _, nw := range networks.Networks {
+				if *network.Name == *nw.Name {
+					klog.Infof("network %s found with ID: %s", *network.Name, *nw.NetworkID)
+					return nw.NetworkID, nil
+				}
+			}
+		} else {
+			for _, nw := range networks.Networks {
+				match, err := regexp.Match("^DHCPSERVER[0-9a-z]{32}_Private$", []byte(*nw.Name))
+				if err != nil {
+					return nil, err
+				} else if match {
+					klog.Infof("DHCP network %s found with ID: %s", *nw.Name, *nw.NetworkID)
+					return nw.NetworkID, nil
+				}
 			}
 		}
-	} else {
-		return nil, fmt.Errorf("both ID and Name can't be nil")
 	}
-
 	return nil, fmt.Errorf("failed to find a network ID")
 }
