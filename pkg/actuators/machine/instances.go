@@ -150,3 +150,33 @@ func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client pow
 	}
 	return nil, fmt.Errorf("failed to find a network ID")
 }
+
+func getServiceInstanceID(serviceInstance powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
+	if serviceInstance.ID != nil {
+		klog.Infof("Found the service %v", serviceInstance)
+		return serviceInstance.ID, nil
+	} else if serviceInstance.Name != nil {
+		serviceInstances, err := client.GetCloudServiceInstances()
+		if err != nil {
+			klog.Errorf("failed to get serviceInstances, err: %v", err)
+			return nil, err
+		}
+		// Create a instanceMap check whether there exist two service instances with same name
+		instanceMap := make(map[string]string)
+		for _, si := range serviceInstances {
+			if val, ok := instanceMap[si.Name]; ok {
+				errStr := fmt.Errorf("there exist two service instance ID with guid %s, %s with same name %s", val, si.Guid, si.Name)
+				klog.Errorf(errStr.Error())
+				return nil, errStr
+			}
+			instanceMap[si.Name] = si.Guid
+		}
+		if val, ok := instanceMap[*serviceInstance.Name]; ok {
+			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstance.Name, val)
+			return &val, nil
+		}
+		return nil, fmt.Errorf("failed to find a service ID with name %s", *serviceInstance.Name)
+	} else {
+		return nil, fmt.Errorf("failed to find serviceinstanceID both ServiceInstanceID and ServiceInstanceName can't be nil")
+	}
+}

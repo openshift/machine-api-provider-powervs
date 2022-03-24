@@ -35,7 +35,8 @@ type machineScopeParams struct {
 	// machine resource
 	machine *machinev1.Machine
 	// api server controller runtime client for the openshift-config-managed namespace
-	configManagedClient runtimeclient.Client
+	configManagedClient  runtimeclient.Client
+	powerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
 }
 
 type machineScope struct {
@@ -69,8 +70,24 @@ func newMachineScope(params machineScopeParams) (*machineScope, error) {
 		credentialsSecretName = providerSpec.CredentialsSecret.Name
 	}
 
+	var serviceInstanceID *string
+
+	if providerSpec.ServiceInstanceID != "" {
+		klog.Warningf("ServiceInstanceID is set but its depreciated, Please use serviceInstance instead")
+		serviceInstanceID = &providerSpec.ServiceInstanceID
+	} else {
+		minimalPowerVSClient, err := params.powerVSMinimalClient(params.client)
+		if err != nil {
+			return nil, machineapierros.InvalidMachineConfiguration("failed creating minimalPowerVS client Error: %v", err)
+		}
+		serviceInstanceID, err = getServiceInstanceID(providerSpec.ServiceInstance, minimalPowerVSClient)
+		if err != nil {
+			return nil, machineapierros.InvalidMachineConfiguration("error getting ServiceInstance ID, Error: %v", err)
+		}
+	}
+
 	powerVSClient, err := params.powerVSClientBuilder(params.client, credentialsSecretName, params.machine.Namespace,
-		providerSpec.ServiceInstanceID, options.GetDebugMode())
+		*serviceInstanceID, options.GetDebugMode())
 	if err != nil {
 		return nil, machineapierros.InvalidMachineConfiguration("failed to create powervs client: %v", err.Error())
 	}

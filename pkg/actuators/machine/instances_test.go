@@ -6,14 +6,19 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/rand"
 
+	bluemixmodels "github.com/IBM-Cloud/bluemix-go/models"
 	"github.com/IBM-Cloud/power-go-client/power/models"
+	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/golang/mock/gomock"
 
 	"k8s.io/client-go/kubernetes/scheme"
 
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
+	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client/mock"
+
+	. "github.com/onsi/gomega"
 )
 
 func init() {
@@ -135,6 +140,123 @@ func TestLaunchInstance(t *testing.T) {
 			} else {
 				if launchErr != nil {
 					t.Errorf("Call to launchInstance did not succeed as expected")
+				}
+			}
+		})
+	}
+}
+
+func TestGetServiceInstanceID(t *testing.T) {
+	g := NewWithT(t)
+	cases := []struct {
+		name                           string
+		serviceInstance                powervsproviderv1.PowerVSResourceReference
+		getCloudServiceInstancesValues []bluemixmodels.ServiceInstanceV2
+		getCloudServiceInstancesError  error
+		expectedError                  string
+	}{
+		{
+			name: "With ServiceInstanceID",
+			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+				ID: core.StringPtr(instanceID),
+			},
+		},
+		{
+			name: "With valid ServiceInstanceName",
+			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+				Name: core.StringPtr(instanceName),
+				ID:   core.StringPtr(instanceID),
+			},
+			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
+				{
+					ServiceInstance: bluemixmodels.ServiceInstance{
+						MetadataType: &bluemixmodels.MetadataType{
+							ID: instanceID,
+						},
+						Name: instanceName,
+					},
+				},
+			},
+		},
+		{
+			name: "With not existing service instance",
+			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+				Name: core.StringPtr(inValidInstance),
+			},
+			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
+				{
+					ServiceInstance: bluemixmodels.ServiceInstance{
+						Name: instanceName,
+						MetadataType: &bluemixmodels.MetadataType{
+							Guid: instanceGUID,
+						},
+					},
+				},
+			},
+			expectedError: "failed to find a service ID with name testInValidInstanceName",
+		},
+		{
+			name: "With two service instance with same name ",
+			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+				Name: core.StringPtr(instanceName),
+			},
+			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
+				{
+					ServiceInstance: bluemixmodels.ServiceInstance{
+						Name: instanceName,
+						MetadataType: &bluemixmodels.MetadataType{
+							Guid: instanceGUID,
+						},
+					},
+				},
+				{
+					ServiceInstance: bluemixmodels.ServiceInstance{
+						Name: instanceName,
+						MetadataType: &bluemixmodels.MetadataType{
+							Guid: "TestGUIDOne",
+						},
+					},
+				},
+			},
+			expectedError: "there exist two service instance ID with guid testGUID, TestGUIDOne with same name testInstanceName",
+		},
+		{
+			name: "With zero service instances",
+			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+				Name: core.StringPtr(instanceName),
+			},
+			expectedError: "failed to find a service ID with name testInstanceName",
+		},
+		{
+			name: "With failed to get service instances",
+			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+				Name: core.StringPtr(instanceName),
+			},
+			getCloudServiceInstancesError: fmt.Errorf("failed to connect to cloud"),
+			expectedError:                 "failed to connect to cloud",
+		},
+		{
+			name:          "Without ServiceInstanceName or ID",
+			expectedError: "failed to find serviceinstanceID both ServiceInstanceID and ServiceInstanceName can't be nil",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			mockCtrl := gomock.NewController(t)
+			mockPowerVSClient := mock.NewMockClient(mockCtrl)
+			mockPowerVSClient.EXPECT().GetCloudServiceInstances().Return(tc.getCloudServiceInstancesValues, tc.getCloudServiceInstancesError).AnyTimes()
+
+			instance, err := getServiceInstanceID(tc.serviceInstance, mockPowerVSClient)
+			if tc.expectedError != "" {
+				if err == nil {
+					t.Errorf("Call to getServiceInstanceID did not fail as expected")
+				}
+				g.Expect(err).ToNot(BeNil())
+				g.Expect(err.Error()).To(BeEquivalentTo(tc.expectedError))
+			} else {
+				g.Expect(err).To(BeNil())
+				if tc.serviceInstance.ID != nil {
+					g.Expect(*tc.serviceInstance.ID).To(BeEquivalentTo(*instance))
 				}
 			}
 		})

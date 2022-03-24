@@ -162,6 +162,7 @@ func main() {
 		Client:               mgr.GetClient(),
 		EventRecorder:        mgr.GetEventRecorderFor("powervscontroller"),
 		PowerVSClientBuilder: powervsclient.NewValidatedClient,
+		PowerVSMinimalClient: powervsclient.NewMinimalPowerVSClient,
 		//ConfigManagedClient:  configManagedClient,
 	})
 

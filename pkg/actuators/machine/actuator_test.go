@@ -182,6 +182,10 @@ func TestActuatorEvents(t *testing.T) {
 				return mockPowerVSClient, nil
 			}
 
+			minimalPowerVSClient := func(client client.Client) (powervsClient.Client, error) {
+				return mockPowerVSClient, nil
+			}
+
 			//Setup the mocks
 			mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), nil).AnyTimes()
 			mockPowerVSClient.EXPECT().CreateInstance(gomock.Any()).Return(stubGetInstances(), nil).AnyTimes()
@@ -196,6 +200,7 @@ func TestActuatorEvents(t *testing.T) {
 				Client:               k8sClient,
 				EventRecorder:        eventRecorder,
 				PowerVSClientBuilder: powerVSClientBuilder,
+				PowerVSMinimalClient: minimalPowerVSClient,
 			}
 			actuator := NewActuator(params)
 			tc.operation(actuator, machine)
@@ -258,7 +263,9 @@ func TestActuatorExists(t *testing.T) {
 				debug bool) (powervsClient.Client, error) {
 				return mockPowerVSClient, nil
 			}
-
+			minimalPowerVSClient := func(client client.Client) (powervsClient.Client, error) {
+				return mockPowerVSClient, nil
+			}
 			//Setup the mocks
 			mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), nil).AnyTimes()
 
@@ -266,6 +273,7 @@ func TestActuatorExists(t *testing.T) {
 				Client:               k8sClient,
 				EventRecorder:        eventRecorder,
 				PowerVSClientBuilder: powerVSClientBuilder,
+				PowerVSMinimalClient: minimalPowerVSClient,
 			}
 			actuator := NewActuator(params)
 

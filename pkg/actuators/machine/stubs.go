@@ -24,6 +24,10 @@ const (
 	networkNamePrefix     = "test-network"
 	testRegion            = "test-region"
 	testZone              = "test-zone"
+	instanceID            = "testInstanceID"
+	instanceName          = "testInstanceName"
+	inValidInstance       = "testInValidInstanceName"
+	instanceGUID          = "testGUID"
 )
 
 func stubUserDataSecret(name string) *corev1.Secret {
@@ -87,6 +91,9 @@ func stubProviderConfig(name string) *v1alpha1.PowerVSMachineProviderConfig {
 		},
 		Network: v1alpha1.PowerVSResourceReference{
 			Name: core.StringPtr(networkNamePrefix + "-1"),
+		},
+		ServiceInstance: v1alpha1.PowerVSResourceReference{
+			ID: core.StringPtr(instanceID),
 		},
 	}
 }

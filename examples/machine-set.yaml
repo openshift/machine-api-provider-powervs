@@ -22,7 +22,8 @@ spec:
         value:
           apiVersion: powervsproviderconfig.openshift.io/v1alpha1
           kind: PowerVSMachineProviderConfig
-          serviceInstanceID: e449d86e-c3a0-4c07-959e-8557fdf55482
+          serviceInstance:
+            id: e449d86e-c3a0-4c07-959e-8557fdf55482
           image:
             name: rhcos-49-84-202108041519-0
           userDataSecret:
