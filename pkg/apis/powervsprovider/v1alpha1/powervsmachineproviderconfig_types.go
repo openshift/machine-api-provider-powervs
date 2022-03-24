@@ -74,6 +74,10 @@ type PowerVSResourceReference struct {
 	// Name of resource
 	// +optional
 	Name *string `json:"name,omitempty"`
+
+	// Regex to find resource
+	// +optional
+	RegEx *string `json:"regex,omitempty"`
 }
 
 //+kubebuilder:object:root=true

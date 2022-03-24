@@ -117,30 +117,36 @@ func getImageID(image powervsproviderv1.PowerVSResourceReference, client powervs
 func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
 	if network.ID != nil {
 		return network.ID, nil
-	} else {
-		networks, err := client.GetNetworks()
-		if err != nil {
-			klog.Errorf("failed to get networks, err: %v", err)
+	}
+	networks, err := client.GetNetworks()
+	if err != nil {
+		klog.Errorf("failed to get networks, err: %v", err)
+		return nil, err
+	}
+	if network.Name != nil {
+		for _, nw := range networks.Networks {
+			if *network.Name == *nw.Name {
+				klog.Infof("network %s found with ID: %s", *network.Name, *nw.NetworkID)
+				return nw.NetworkID, nil
+			}
+		}
+	} else if network.RegEx != nil {
+		var (
+			re  *regexp.Regexp
+			err error
+		)
+
+		if re, err = regexp.Compile(*network.RegEx); err != nil {
 			return nil, err
 		}
-		if network.Name != nil {
-			for _, nw := range networks.Networks {
-				if *network.Name == *nw.Name {
-					klog.Infof("network %s found with ID: %s", *network.Name, *nw.NetworkID)
-					return nw.NetworkID, nil
-				}
-			}
-		} else {
-			for _, nw := range networks.Networks {
-				match, err := regexp.Match("^DHCPSERVER[0-9a-z]{32}_Private$", []byte(*nw.Name))
-				if err != nil {
-					return nil, err
-				} else if match {
-					klog.Infof("DHCP network %s found with ID: %s", *nw.Name, *nw.NetworkID)
-					return nw.NetworkID, nil
-				}
+		for _, nw := range networks.Networks {
+			if match := re.Match([]byte(*nw.Name)); match {
+				klog.Infof("DHCP network %s found with ID: %s", *nw.Name, *nw.NetworkID)
+				return nw.NetworkID, nil
 			}
 		}
+	} else {
+		return nil, fmt.Errorf("specify one of ID, Name, or RegEx")
 	}
 	return nil, fmt.Errorf("failed to find a network ID")
 }
