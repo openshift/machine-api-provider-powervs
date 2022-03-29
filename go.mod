@@ -10,8 +10,8 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/mock v1.5.0
 	github.com/onsi/gomega v1.17.0
-	github.com/openshift/api v0.0.0-20211217221424-8779abfbd571
-	github.com/openshift/machine-api-operator v0.2.1-0.20211220105028-362d5b50beca
+	github.com/openshift/api v0.0.0-20220322000322-9c4998a4d646
+	github.com/openshift/machine-api-operator v0.2.1-0.20220327131531-58ba8507d869
 	github.com/pkg/errors v0.9.1
 	github.com/ppc64le-cloud/powervs-utils v0.0.0-20210415051532-4cdd6a79c8fa
 
@@ -63,7 +63,7 @@ require (
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.1.2 // indirect
+	github.com/google/uuid v1.2.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -87,10 +87,11 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/openshift/client-go v0.0.0-20211209144617-7385dd6338e3 // indirect
+	github.com/openshift/library-go v0.0.0-20220121154930-b7889002d63e // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.11.0 // indirect
+	github.com/prometheus/client_golang v1.11.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.28.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
