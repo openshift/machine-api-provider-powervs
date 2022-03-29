@@ -55,12 +55,6 @@ const (
 	// globalInfrastuctureName default name for infrastructure object
 	globalInfrastuctureName = "cluster"
 
-	// regionEnvironmentalVariable is the environmental variable to set the region
-	regionEnvironmentalVariable = "IBMCLOUD_REGION"
-
-	// zoneEnvironmentalVariable is the environmental variable to set the powervs zone
-	zoneEnvironmentalVariable = "POWERVS_ZONE"
-
 	//powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
 	powerIaaSCustomEndpointName = "pi"
 )
@@ -164,19 +158,8 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	if err != nil {
 		return nil, err
 	}
-
-	//Setting the region here so that corresponding power endpoint can be fetched from it
-	err = setEnvironmentVariables(regionEnvironmentalVariable, r)
-	if err != nil {
-		return nil, err
-	}
-
-	zone := resource.RegionID
-
-	err = setEnvironmentVariables(zoneEnvironmentalVariable, zone)
-	if err != nil {
-		return nil, err
-	}
+	c.region = r
+	c.zone = resource.RegionID
 
 	// Create the authenticator
 	authenticator := &core.IamAuthenticator{
@@ -187,8 +170,8 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	options := &ibmpisession.IBMPIOptions{
 		Authenticator: authenticator,
 		UserAccount:   c.User.Account,
-		Region:        r,
-		Zone:          zone,
+		Region:        c.region,
+		Zone:          c.zone,
 		Debug:         debug,
 	}
 
@@ -271,6 +254,14 @@ func (p *powerVSClient) GetCloudServiceInstances() ([]bluemixmodels.ServiceInsta
 		}
 	}
 	return instances, nil
+}
+
+func (p *powerVSClient) GetZone() string {
+	return p.zone
+}
+
+func (p *powerVSClient) GetRegion() string {
+	return p.region
 }
 
 func authenticateAPIKey(sess *bxsession.Session) error {
@@ -405,14 +396,4 @@ func getCustomEndPointKeys(customEndpointsMap map[string]string) []string {
 		keys = append(keys, key)
 	}
 	return keys
-}
-
-// GetRegion return the PowerVS region
-func GetRegion() string {
-	return getEnvironmentalVariableValue(regionEnvironmentalVariable)
-}
-
-// GetZone return the PowerVS zone
-func GetZone() string {
-	return getEnvironmentalVariableValue(zoneEnvironmentalVariable)
 }

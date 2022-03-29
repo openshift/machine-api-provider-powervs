@@ -189,6 +189,8 @@ func TestActuatorEvents(t *testing.T) {
 			mockPowerVSClient.EXPECT().GetImages().Return(stubGetImages(imageNamePrefix, 3), nil).AnyTimes()
 			mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworks(networkNamePrefix, 3), nil).AnyTimes()
 			mockPowerVSClient.EXPECT().DeleteInstance(gomock.Any()).Return(nil).AnyTimes()
+			mockPowerVSClient.EXPECT().GetRegion().Return(testRegion).AnyTimes()
+			mockPowerVSClient.EXPECT().GetZone().Return(testZone).AnyTimes()
 
 			params := ActuatorParams{
 				Client:               k8sClient,

@@ -23,7 +23,8 @@ var (
 		"rc":  "https://test.resource-controller.cloud.ibm.com",
 		"pi":  "https://test-region.power-iaas.cloud.ibm.com",
 	}
-	testRegion = "test-region"
+	regionEnvironmentalVariable = "IBMCLOUD_REGION"
+	testRegion                  = "test-region"
 )
 
 func TestSetEnvironmentVariables(t *testing.T) {

@@ -158,6 +158,8 @@ func TestCreate(t *testing.T) {
 	mockPowerVSClient.EXPECT().DeleteInstance(gomock.Any()).Return(nil).AnyTimes()
 	mockPowerVSClient.EXPECT().GetImages().Return(stubGetImages(imageNamePrefix, 3), nil)
 	mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworks(networkNamePrefix, 3), nil)
+	mockPowerVSClient.EXPECT().GetRegion().Return(testRegion)
+	mockPowerVSClient.EXPECT().GetZone().Return(testZone)
 
 	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
 	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))

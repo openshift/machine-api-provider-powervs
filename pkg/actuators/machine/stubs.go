@@ -22,6 +22,8 @@ const (
 	nameLength            = 5
 	imageNamePrefix       = "test-image"
 	networkNamePrefix     = "test-network"
+	testRegion            = "test-region"
+	testZone              = "test-zone"
 )
 
 func stubUserDataSecret(name string) *corev1.Secret {

@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/IBM-Cloud/bluemix-go v0.0.0-20211102075456-ffc4e11dfb16
-	github.com/IBM-Cloud/power-go-client v1.1.4
+	github.com/IBM-Cloud/power-go-client v1.1.5
 	github.com/IBM/go-sdk-core/v5 v5.9.1
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/golang-jwt/jwt/v4 v4.1.0
