@@ -287,6 +287,23 @@ func (p *powerVSClient) GetCloudServiceInstances() ([]bluemixmodels.ServiceInsta
 	return instances, nil
 }
 
+func (p *powerVSClient) GetCloudServiceInstanceByName(name string) ([]bluemixmodels.ServiceInstanceV2, error) {
+	var instances []bluemixmodels.ServiceInstanceV2
+	svcs, err := p.ResourceClient.ListInstances(controllerv2.ServiceInstanceQuery{
+		Type: "service_instance",
+		Name: name,
+	})
+	if err != nil {
+		return svcs, fmt.Errorf("failed to list the service instances: %v", err)
+	}
+	for _, svc := range svcs {
+		if svc.Crn.ServiceName == PowerServiceType {
+			instances = append(instances, svc)
+		}
+	}
+	return instances, nil
+}
+
 func (p *powerVSClient) GetZone() string {
 	return p.zone
 }

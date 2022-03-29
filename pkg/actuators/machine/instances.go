@@ -156,26 +156,25 @@ func getServiceInstanceID(serviceInstance powervsproviderv1.PowerVSResourceRefer
 		klog.Infof("Found the service %v", serviceInstance)
 		return serviceInstance.ID, nil
 	} else if serviceInstance.Name != nil {
-		serviceInstances, err := client.GetCloudServiceInstances()
+		serviceInstances, err := client.GetCloudServiceInstanceByName(*serviceInstance.Name)
 		if err != nil {
 			klog.Errorf("failed to get serviceInstances, err: %v", err)
 			return nil, err
 		}
-		// Create a instanceMap check whether there exist two service instances with same name
-		instanceMap := make(map[string]string)
-		for _, si := range serviceInstances {
-			if val, ok := instanceMap[si.Name]; ok {
-				errStr := fmt.Errorf("there exist two service instance ID with guid %s, %s with same name %s", val, si.Guid, si.Name)
-				klog.Errorf(errStr.Error())
-				return nil, errStr
-			}
-			instanceMap[si.Name] = si.Guid
+		// log useful error message
+		switch len(serviceInstances) {
+		case 0:
+			errStr := fmt.Errorf("does exist any cloud service instance with name %s", *serviceInstance.Name)
+			klog.Errorf(errStr.Error())
+			return nil, errStr
+		case 1:
+			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstance.Name, serviceInstances[0].Guid)
+			return &serviceInstances[0].Guid, nil
+		default:
+			errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", *serviceInstance.Name)
+			klog.Errorf(errStr.Error())
+			return nil, errStr
 		}
-		if val, ok := instanceMap[*serviceInstance.Name]; ok {
-			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstance.Name, val)
-			return &val, nil
-		}
-		return nil, fmt.Errorf("failed to find a service ID with name %s", *serviceInstance.Name)
 	} else {
 		return nil, fmt.Errorf("failed to find serviceinstanceID both ServiceInstanceID and ServiceInstanceName can't be nil")
 	}

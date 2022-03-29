@@ -150,6 +150,7 @@ func TestGetServiceInstanceID(t *testing.T) {
 	g := NewWithT(t)
 	cases := []struct {
 		name                           string
+		instanceName                   string
 		serviceInstance                powervsproviderv1.PowerVSResourceReference
 		getCloudServiceInstancesValues []bluemixmodels.ServiceInstanceV2
 		getCloudServiceInstancesError  error
@@ -162,7 +163,8 @@ func TestGetServiceInstanceID(t *testing.T) {
 			},
 		},
 		{
-			name: "With valid ServiceInstanceName",
+			name:         "With valid ServiceInstanceName",
+			instanceName: instanceName,
 			serviceInstance: powervsproviderv1.PowerVSResourceReference{
 				Name: core.StringPtr(instanceName),
 				ID:   core.StringPtr(instanceID),
@@ -179,24 +181,16 @@ func TestGetServiceInstanceID(t *testing.T) {
 			},
 		},
 		{
-			name: "With not existing service instance",
+			name:         "With not existing service instance",
+			instanceName: inValidInstance,
 			serviceInstance: powervsproviderv1.PowerVSResourceReference{
 				Name: core.StringPtr(inValidInstance),
 			},
-			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
-				{
-					ServiceInstance: bluemixmodels.ServiceInstance{
-						Name: instanceName,
-						MetadataType: &bluemixmodels.MetadataType{
-							Guid: instanceGUID,
-						},
-					},
-				},
-			},
-			expectedError: "failed to find a service ID with name testInValidInstanceName",
+			expectedError: "does exist any cloud service instance with name testInValidInstanceName",
 		},
 		{
-			name: "With two service instance with same name ",
+			name:         "With two service instance with same name ",
+			instanceName: instanceName,
 			serviceInstance: powervsproviderv1.PowerVSResourceReference{
 				Name: core.StringPtr(instanceName),
 			},
@@ -218,17 +212,19 @@ func TestGetServiceInstanceID(t *testing.T) {
 					},
 				},
 			},
-			expectedError: "there exist two service instance ID with guid testGUID, TestGUIDOne with same name testInstanceName",
+			expectedError: "there exist more than one service instance ID with with same name testInstanceName, Try setting serviceInstance.ID",
 		},
 		{
-			name: "With zero service instances",
+			name:         "With zero service instances",
+			instanceName: instanceName,
 			serviceInstance: powervsproviderv1.PowerVSResourceReference{
 				Name: core.StringPtr(instanceName),
 			},
-			expectedError: "failed to find a service ID with name testInstanceName",
+			expectedError: "does exist any cloud service instance with name testInstanceName",
 		},
 		{
-			name: "With failed to get service instances",
+			name:         "With failed to get service instances",
+			instanceName: instanceName,
 			serviceInstance: powervsproviderv1.PowerVSResourceReference{
 				Name: core.StringPtr(instanceName),
 			},
@@ -244,7 +240,7 @@ func TestGetServiceInstanceID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			mockCtrl := gomock.NewController(t)
 			mockPowerVSClient := mock.NewMockClient(mockCtrl)
-			mockPowerVSClient.EXPECT().GetCloudServiceInstances().Return(tc.getCloudServiceInstancesValues, tc.getCloudServiceInstancesError).AnyTimes()
+			mockPowerVSClient.EXPECT().GetCloudServiceInstanceByName(tc.instanceName).Return(tc.getCloudServiceInstancesValues, tc.getCloudServiceInstancesError).AnyTimes()
 
 			instance, err := getServiceInstanceID(tc.serviceInstance, mockPowerVSClient)
 			if tc.expectedError != "" {
