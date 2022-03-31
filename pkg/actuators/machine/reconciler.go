@@ -243,6 +243,20 @@ func (r *Reconciler) setMachineCloudProviderSpecifics(instance *models.PVMInstan
 		r.machine.Annotations[machinecontroller.MachineInstanceStateAnnotationName] = *instance.Status
 	}
 
+	region := r.powerVSClient.GetRegion()
+	if region != "" {
+		r.machine.Labels[machinecontroller.MachineRegionLabelName] = region
+	}
+
+	zone := r.powerVSClient.GetZone()
+	if zone != "" {
+		r.machine.Labels[machinecontroller.MachineAZLabelName] = zone
+	}
+
+	if instance.SysType != "" {
+		r.machine.Labels[machinecontroller.MachineInstanceTypeLabelName] = instance.SysType
+	}
+
 	return nil
 }
 

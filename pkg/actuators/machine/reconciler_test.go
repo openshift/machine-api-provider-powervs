@@ -127,13 +127,18 @@ func TestGetMachineInstances(t *testing.T) {
 
 func TestSetMachineCloudProviderSpecifics(t *testing.T) {
 	testStatus := "testStatus"
+	mockCtrl := gomock.NewController(t)
+	mockPowerVSClient := mock.NewMockClient(mockCtrl)
+	mockPowerVSClient.EXPECT().GetRegion().Return(testRegion)
+	mockPowerVSClient.EXPECT().GetZone().Return(testZone)
 
 	r := Reconciler{
 		machineScope: &machineScope{
 			machine: &machinev1beta1.Machine{
 				ObjectMeta: metav1.ObjectMeta{},
 			},
-			providerSpec: &v1alpha1.PowerVSMachineProviderConfig{},
+			providerSpec:  &v1alpha1.PowerVSMachineProviderConfig{},
+			powerVSClient: mockPowerVSClient,
 		},
 	}
 	instance := &models.PVMInstance{
@@ -145,6 +150,16 @@ func TestSetMachineCloudProviderSpecifics(t *testing.T) {
 	actualInstanceStateAnnotation := r.machine.Annotations[machinecontroller.MachineInstanceStateAnnotationName]
 	if actualInstanceStateAnnotation != *instance.Status {
 		t.Errorf("Expected instance state annotation: %v, got: %v", actualInstanceStateAnnotation, instance.Status)
+	}
+
+	machineRegionLabel := r.machine.Labels[machinecontroller.MachineRegionLabelName]
+	if machineRegionLabel != testRegion {
+		t.Errorf("Expected machine %s label value as %s: but got: %s", machinecontroller.MachineRegionLabelName, testRegion, machineRegionLabel)
+	}
+
+	machineZoneLabel := r.machine.Labels[machinecontroller.MachineAZLabelName]
+	if machineRegionLabel != testRegion {
+		t.Errorf("Expected machine %s label value as %s: but got: %s", machinecontroller.MachineAZLabelName, testZone, machineZoneLabel)
 	}
 }
 
@@ -158,8 +173,8 @@ func TestCreate(t *testing.T) {
 	mockPowerVSClient.EXPECT().DeleteInstance(gomock.Any()).Return(nil).AnyTimes()
 	mockPowerVSClient.EXPECT().GetImages().Return(stubGetImages(imageNamePrefix, 3), nil)
 	mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworks(networkNamePrefix, 3), nil)
-	mockPowerVSClient.EXPECT().GetRegion().Return(testRegion)
-	mockPowerVSClient.EXPECT().GetZone().Return(testZone)
+	mockPowerVSClient.EXPECT().GetRegion().Return(testRegion).AnyTimes()
+	mockPowerVSClient.EXPECT().GetZone().Return(testZone).AnyTimes()
 
 	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
 	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
