@@ -153,3 +153,31 @@ func (mr *MockClientMockRecorder) GetNetworks() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetworks", reflect.TypeOf((*MockClient)(nil).GetNetworks))
 }
+
+// GetRegion mocks base method.
+func (m *MockClient) GetRegion() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRegion")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetRegion indicates an expected call of GetRegion.
+func (mr *MockClientMockRecorder) GetRegion() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRegion", reflect.TypeOf((*MockClient)(nil).GetRegion))
+}
+
+// GetZone mocks base method.
+func (m *MockClient) GetZone() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetZone")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetZone indicates an expected call of GetZone.
+func (mr *MockClientMockRecorder) GetZone() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetZone", reflect.TypeOf((*MockClient)(nil).GetZone))
+}

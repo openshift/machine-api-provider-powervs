@@ -33,4 +33,7 @@ type Client interface {
 	GetImages() (*models.Images, error)
 	GetNetworks() (*models.Networks, error)
 	GetCloudServiceInstances() ([]bluemixmodels.ServiceInstanceV2, error)
+
+	GetZone() string
+	GetRegion() string
 }

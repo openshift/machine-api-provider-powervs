@@ -211,8 +211,7 @@ func (r *Reconciler) setProviderID(instance *models.PVMInstance) error {
 		return nil
 	}
 
-	//TODO: need to figure out a proper providerID here!
-	providerID := client.FormatProviderID(*instance.PvmInstanceID)
+	providerID := client.FormatProviderID(r.powerVSClient.GetRegion(), r.powerVSClient.GetZone(), r.providerSpec.ServiceInstanceID, *instance.PvmInstanceID)
 
 	if existingProviderID != nil && *existingProviderID == providerID {
 		klog.Infof("%s: ProviderID already set in the machine Spec with value:%s", r.machine.Name, *existingProviderID)

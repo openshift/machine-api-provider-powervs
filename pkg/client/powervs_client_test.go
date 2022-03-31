@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"log"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -24,7 +23,8 @@ var (
 		"rc":  "https://test.resource-controller.cloud.ibm.com",
 		"pi":  "https://test-region.power-iaas.cloud.ibm.com",
 	}
-	testRegion = "test-region"
+	regionEnvironmentalVariable = "IBMCLOUD_REGION"
+	testRegion                  = "test-region"
 )
 
 func TestSetEnvironmentVariables(t *testing.T) {
@@ -143,8 +143,4 @@ func stubStatus() configv1.InfrastructureStatus {
 			},
 		},
 	}
-}
-
-func getEnvironmentalVariableValue(key string) string {
-	return os.Getenv(key)
 }
