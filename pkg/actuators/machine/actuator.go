@@ -43,6 +43,7 @@ type Actuator struct {
 	eventRecorder        record.EventRecorder
 	powerVSClientBuilder powervsclient.PowerVSClientBuilderFuncType
 	configManagedClient  runtimeclient.Client
+	powerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
 }
 
 // ActuatorParams holds parameter information for Actuator.
@@ -51,6 +52,7 @@ type ActuatorParams struct {
 	EventRecorder        record.EventRecorder
 	PowerVSClientBuilder powervsclient.PowerVSClientBuilderFuncType
 	ConfigManagedClient  runtimeclient.Client
+	PowerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
 }
 
 // NewActuator returns an actuator.
@@ -60,6 +62,7 @@ func NewActuator(params ActuatorParams) *Actuator {
 		eventRecorder:        params.EventRecorder,
 		powerVSClientBuilder: params.PowerVSClientBuilder,
 		configManagedClient:  params.ConfigManagedClient,
+		powerVSMinimalClient: params.PowerVSMinimalClient,
 	}
 }
 
@@ -82,6 +85,7 @@ func (a *Actuator) Create(ctx context.Context, machine *machinev1.Machine) error
 		machine:              machine,
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
+		powerVSMinimalClient: a.powerVSMinimalClient,
 	})
 	if err != nil {
 		fmtErr := fmt.Errorf(scopeFailFmt, machine.GetName(), err)
@@ -108,6 +112,7 @@ func (a *Actuator) Exists(ctx context.Context, machine *machinev1.Machine) (bool
 		machine:              machine,
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
+		powerVSMinimalClient: a.powerVSMinimalClient,
 	})
 	if err != nil {
 		return false, fmt.Errorf(scopeFailFmt, machine.GetName(), err)
@@ -124,6 +129,7 @@ func (a *Actuator) Update(ctx context.Context, machine *machinev1.Machine) error
 		machine:              machine,
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
+		powerVSMinimalClient: a.powerVSMinimalClient,
 	})
 	if err != nil {
 		fmtErr := fmt.Errorf(scopeFailFmt, machine.GetName(), err)
@@ -163,6 +169,7 @@ func (a *Actuator) Delete(ctx context.Context, machine *machinev1.Machine) error
 		machine:              machine,
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
+		powerVSMinimalClient: a.powerVSMinimalClient,
 	})
 	if err != nil {
 		fmtErr := fmt.Errorf(scopeFailFmt, machine.GetName(), err)

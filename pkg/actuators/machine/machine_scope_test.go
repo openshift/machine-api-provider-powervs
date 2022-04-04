@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/rand"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -66,6 +65,9 @@ func TestNewMachineScope(t *testing.T) {
 				client: fakeClient,
 				powerVSClientBuilder: func(client client.Client, secretName, namespace,
 					cloudInstanceID string, debug bool) (powervsClient.Client, error) {
+					return nil, nil
+				},
+				powerVSMinimalClient: func(client client.Client) (powervsClient.Client, error) {
 					return nil, nil
 				},
 				machine: &machinev1.Machine{
@@ -359,6 +361,9 @@ func TestPatchMachine(t *testing.T) {
 				machine: machine,
 				powerVSClientBuilder: func(client client.Client, secretName, namespace, cloudInstanceID string,
 					debug bool) (powervsClient.Client, error) {
+					return nil, nil
+				},
+				powerVSMinimalClient: func(client client.Client) (powervsClient.Client, error) {
 					return nil, nil
 				},
 			})

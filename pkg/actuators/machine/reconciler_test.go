@@ -111,6 +111,9 @@ func TestGetMachineInstances(t *testing.T) {
 					debug bool) (client.Client, error) {
 					return mockPowerVSClient, nil
 				},
+				powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+					return nil, nil
+				},
 			})
 			if err != nil {
 				t.Fatal(err)
@@ -216,6 +219,9 @@ func TestCreate(t *testing.T) {
 				debug bool) (client.Client, error) {
 				return mockPowerVSClient, nil
 			},
+			powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+				return nil, nil
+			},
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -248,12 +254,20 @@ func TestExists(t *testing.T) {
 
 	mockPowerVSClient.EXPECT().GetInstanceByName(gomock.Any()).Return(stubGetInstance(), nil)
 
+	machine, err := stubMachine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	machineScope, err := newMachineScope(machineScopeParams{
 		client:  fakeClient,
-		machine: &machinev1beta1.Machine{},
+		machine: machine,
 		powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
 			debug bool) (client.Client, error) {
 			return mockPowerVSClient, nil
+		},
+		powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+			return nil, nil
 		},
 	})
 	if err != nil {
@@ -274,12 +288,20 @@ func TestDelete(t *testing.T) {
 	mockPowerVSClient.EXPECT().GetInstanceByName(gomock.Any()).Return(stubGetInstance(), nil)
 	mockPowerVSClient.EXPECT().DeleteInstance(gomock.Any()).Return(nil)
 
+	machine, err := stubMachine()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	machineScope, err := newMachineScope(machineScopeParams{
 		client:  fakeClient,
-		machine: &machinev1beta1.Machine{},
+		machine: machine,
 		powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
 			debug bool) (client.Client, error) {
 			return mockPowerVSClient, nil
+		},
+		powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+			return nil, nil
 		},
 	})
 	if err != nil {

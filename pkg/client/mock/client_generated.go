@@ -64,6 +64,21 @@ func (mr *MockClientMockRecorder) DeleteInstance(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInstance", reflect.TypeOf((*MockClient)(nil).DeleteInstance), id)
 }
 
+// GetCloudServiceInstanceByName mocks base method.
+func (m *MockClient) GetCloudServiceInstanceByName(name string) ([]models.ServiceInstanceV2, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCloudServiceInstanceByName", name)
+	ret0, _ := ret[0].([]models.ServiceInstanceV2)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCloudServiceInstanceByName indicates an expected call of GetCloudServiceInstanceByName.
+func (mr *MockClientMockRecorder) GetCloudServiceInstanceByName(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCloudServiceInstanceByName", reflect.TypeOf((*MockClient)(nil).GetCloudServiceInstanceByName), name)
+}
+
 // GetCloudServiceInstances mocks base method.
 func (m *MockClient) GetCloudServiceInstances() ([]models.ServiceInstanceV2, error) {
 	m.ctrl.T.Helper()

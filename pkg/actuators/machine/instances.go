@@ -150,3 +150,32 @@ func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client pow
 	}
 	return nil, fmt.Errorf("failed to find a network ID")
 }
+
+func getServiceInstanceID(serviceInstance powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
+	if serviceInstance.ID != nil {
+		klog.Infof("Found the service %v", serviceInstance)
+		return serviceInstance.ID, nil
+	} else if serviceInstance.Name != nil {
+		serviceInstances, err := client.GetCloudServiceInstanceByName(*serviceInstance.Name)
+		if err != nil {
+			klog.Errorf("failed to get serviceInstances, err: %v", err)
+			return nil, err
+		}
+		// log useful error message
+		switch len(serviceInstances) {
+		case 0:
+			errStr := fmt.Errorf("does exist any cloud service instance with name %s", *serviceInstance.Name)
+			klog.Errorf(errStr.Error())
+			return nil, errStr
+		case 1:
+			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstance.Name, serviceInstances[0].Guid)
+			return &serviceInstances[0].Guid, nil
+		default:
+			errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", *serviceInstance.Name)
+			klog.Errorf(errStr.Error())
+			return nil, errStr
+		}
+	} else {
+		return nil, fmt.Errorf("failed to find serviceinstanceID both ServiceInstanceID and ServiceInstanceName can't be nil")
+	}
+}

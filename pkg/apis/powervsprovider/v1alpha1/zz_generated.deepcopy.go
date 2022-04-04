@@ -48,6 +48,7 @@ func (in *PowerVSMachineProviderConfig) DeepCopyInto(out *PowerVSMachineProvider
 	*out = *in
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
+	in.ServiceInstance.DeepCopyInto(&out.ServiceInstance)
 	in.Image.DeepCopyInto(&out.Image)
 	if in.UserDataSecret != nil {
 		in, out := &in.UserDataSecret, &out.UserDataSecret

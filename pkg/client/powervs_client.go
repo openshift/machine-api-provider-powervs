@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"k8s.io/klog/v2"
+
 	"github.com/IBM-Cloud/bluemix-go"
 	"github.com/IBM-Cloud/bluemix-go/api/resource/resourcev2/controllerv2"
 	"github.com/IBM-Cloud/bluemix-go/authentication"
@@ -82,6 +84,9 @@ func FormatProviderID(region, zone, serviceInstanceID, vmInstanceID string) stri
 //PowerVSClientBuilderFuncType is function type for building the Power VS client
 type PowerVSClientBuilderFuncType func(client client.Client, secretName, namespace, cloudInstanceID string,
 	debug bool) (Client, error)
+
+//MinimalPowerVSClientBuilderFuncType is function type for building the Power VS client
+type MinimalPowerVSClientBuilderFuncType func(client client.Client) (Client, error)
 
 func apiKeyFromSecret(secret *corev1.Secret) (apiKey string, err error) {
 	switch {
@@ -188,6 +193,32 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	return c, err
 }
 
+// NewMinimalPowerVSClient is bare minimal client can be used for querying the resources
+func NewMinimalPowerVSClient(ctrlRuntimeClient client.Client) (Client, error) {
+	if err := getAndSetServiceEndpoints(ctrlRuntimeClient); err != nil {
+		return nil, err
+	}
+	apiKey, err := GetAPIKey(ctrlRuntimeClient, DefaultCredentialSecret, DefaultCredentialNamespace)
+	if err != nil {
+		klog.Errorf("failed to read the API key from the secret: %v", err)
+		return nil, err
+	}
+
+	s, err := bxsession.New(&bluemix.Config{BluemixAPIKey: apiKey})
+	if err != nil {
+		return nil, err
+	}
+	c := &powerVSClient{
+		Session: s,
+	}
+	ctrlv2, err := controllerv2.New(s)
+	if err != nil {
+		return c, err
+	}
+	c.ResourceClient = ctrlv2.ResourceServiceInstanceV2()
+	return c, nil
+}
+
 type powerVSClient struct {
 	region          string
 	zone            string
@@ -225,7 +256,7 @@ func (p *powerVSClient) GetInstance(id string) (*models.PVMInstance, error) {
 func (p *powerVSClient) GetInstanceByName(name string) (*models.PVMInstance, error) {
 	instances, err := p.GetInstances()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get the instance list")
+		return nil, fmt.Errorf("failed to get the instance list, Error: %v", err)
 	}
 
 	for _, i := range instances.PvmInstances {
@@ -244,6 +275,23 @@ func (p *powerVSClient) GetCloudServiceInstances() ([]bluemixmodels.ServiceInsta
 	var instances []bluemixmodels.ServiceInstanceV2
 	svcs, err := p.ResourceClient.ListInstances(controllerv2.ServiceInstanceQuery{
 		Type: "service_instance",
+	})
+	if err != nil {
+		return svcs, fmt.Errorf("failed to list the service instances: %v", err)
+	}
+	for _, svc := range svcs {
+		if svc.Crn.ServiceName == PowerServiceType {
+			instances = append(instances, svc)
+		}
+	}
+	return instances, nil
+}
+
+func (p *powerVSClient) GetCloudServiceInstanceByName(name string) ([]bluemixmodels.ServiceInstanceV2, error) {
+	var instances []bluemixmodels.ServiceInstanceV2
+	svcs, err := p.ResourceClient.ListInstances(controllerv2.ServiceInstanceQuery{
+		Type: "service_instance",
+		Name: name,
 	})
 	if err != nil {
 		return svcs, fmt.Errorf("failed to list the service instances: %v", err)
