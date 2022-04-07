@@ -122,6 +122,11 @@ func (in *PowerVSMachineProviderStatus) DeepCopyInto(out *PowerVSMachineProvider
 		*out = new(string)
 		**out = **in
 	}
+	if in.ServiceInstanceID != nil {
+		in, out := &in.ServiceInstanceID, &out.ServiceInstanceID
+		*out = new(string)
+		**out = **in
+	}
 	if in.InstanceState != nil {
 		in, out := &in.InstanceState, &out.InstanceState
 		*out = new(string)

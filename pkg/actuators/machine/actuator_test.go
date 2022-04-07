@@ -144,6 +144,18 @@ func TestActuatorEvents(t *testing.T) {
 	}
 
 	for _, tc := range cases {
+		eventList := &corev1.EventList{}
+		err := k8sClient.List(context.Background(), eventList, client.InNamespace("default"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i := range eventList.Items {
+			err := k8sClient.Delete(context.Background(), &eventList.Items[i])
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
 		t.Run(tc.name, func(t *testing.T) {
 			gs := NewWithT(t)
 
@@ -173,6 +185,10 @@ func TestActuatorEvents(t *testing.T) {
 				return k8sClient.Get(context.Background(), machineKey, machine)
 			}
 			gs.Eventually(getMachine, timeout).Should(Succeed())
+
+			providerStatus, err := v1alpha1.RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
+			gs.Expect(err).ToNot(HaveOccurred())
+			machine.Status.ProviderStatus = providerStatus
 
 			mockCtrl := gomock.NewController(t)
 			mockPowerVSClient := mock.NewMockClient(mockCtrl)

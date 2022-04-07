@@ -30,6 +30,8 @@ const (
 	instanceGUID          = "testGUID"
 )
 
+var powerVSProviderID = fmt.Sprintf("powervs://test-region/test-zone/test-service-instanceid/test-instanceid")
+
 func stubUserDataSecret(name string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -95,6 +97,12 @@ func stubProviderConfig(name string) *v1alpha1.PowerVSMachineProviderConfig {
 		ServiceInstance: v1alpha1.PowerVSResourceReference{
 			ID: core.StringPtr(instanceID),
 		},
+	}
+}
+
+func stubProviderStatus(serviceInstanceID string) *v1alpha1.PowerVSMachineProviderStatus {
+	return &v1alpha1.PowerVSMachineProviderStatus{
+		ServiceInstanceID: core.StringPtr(serviceInstanceID),
 	}
 }
 
