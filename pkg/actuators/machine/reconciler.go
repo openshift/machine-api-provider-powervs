@@ -5,13 +5,17 @@ import (
 	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
-	"github.com/openshift/machine-api-provider-powervs/pkg/client"
 
-	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
-	"github.com/openshift/machine-api-operator/pkg/metrics"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
+
+	machineapierros "github.com/openshift/machine-api-operator/pkg/controller/machine"
+	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
+	"github.com/openshift/machine-api-operator/pkg/metrics"
+	"github.com/openshift/machine-api-provider-powervs/pkg/client"
+
+	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 )
 
 const (
@@ -210,8 +214,22 @@ func (r *Reconciler) setProviderID(instance *models.PVMInstance) error {
 	if instance == nil {
 		return nil
 	}
+	providerStatus, err := powervsproviderv1.ProviderStatusFromRawExtension(r.machine.Status.ProviderStatus)
+	if err != nil {
+		return machineapierros.InvalidMachineConfiguration("failed to get machine provider status: %v", err.Error())
+	}
 
-	providerID := client.FormatProviderID(r.powerVSClient.GetRegion(), r.powerVSClient.GetZone(), r.providerSpec.ServiceInstanceID, *instance.PvmInstanceID)
+	var serviceInstanceID string
+	if providerStatus.ServiceInstanceID != nil {
+		serviceInstanceID = *providerStatus.ServiceInstanceID
+		klog.Infof("Found ServiceInstanceID from providerStatus %s", serviceInstanceID)
+	} else {
+		errStr := fmt.Errorf("serviceInstanceID is empty, Cannot set providerID")
+		klog.Errorf(errStr.Error())
+		return errStr
+	}
+
+	providerID := client.FormatProviderID(r.powerVSClient.GetRegion(), r.powerVSClient.GetZone(), serviceInstanceID, *instance.PvmInstanceID)
 
 	if existingProviderID != nil && *existingProviderID == providerID {
 		klog.Infof("%s: ProviderID already set in the machine Spec with value:%s", r.machine.Name, *existingProviderID)

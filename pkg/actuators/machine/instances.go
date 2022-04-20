@@ -153,7 +153,7 @@ func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client pow
 
 func getServiceInstanceID(serviceInstance powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
 	if serviceInstance.ID != nil {
-		klog.Infof("Found the service %v", serviceInstance)
+		klog.Infof("Found the service with ID %s", *serviceInstance.ID)
 		return serviceInstance.ID, nil
 	} else if serviceInstance.Name != nil {
 		serviceInstances, err := client.GetCloudServiceInstanceByName(*serviceInstance.Name)

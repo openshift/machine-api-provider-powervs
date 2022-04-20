@@ -200,15 +200,20 @@ func TestCreate(t *testing.T) {
 		// create fake resources
 		t.Logf("testCase: %v", tc.testcase)
 
-		encodedProviderConfig, err := v1alpha1.RawExtensionFromProviderSpec(tc.providerConfig)
-		if err != nil {
-			t.Fatalf("Unexpected error")
-		}
 		machine, err := stubMachine()
 		if err != nil {
 			t.Fatal(err)
 		}
+		encodedProviderConfig, err := v1alpha1.RawExtensionFromProviderSpec(tc.providerConfig)
+		if err != nil {
+			t.Fatalf("Unexpected error")
+		}
+		providerStatus, err := v1alpha1.RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
+		if err != nil {
+			t.Fatalf("Failed to set providerStatus")
+		}
 		machine.Spec.ProviderSpec = machinev1beta1.ProviderSpec{Value: encodedProviderConfig}
+		machine.Status.ProviderStatus = providerStatus
 
 		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, tc.powerVSCredentialsSecret, tc.userDataSecret)
 

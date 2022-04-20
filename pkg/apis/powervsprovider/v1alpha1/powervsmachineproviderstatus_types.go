@@ -31,6 +31,10 @@ type PowerVSMachineProviderStatus struct {
 	// +optional
 	InstanceID *string `json:"instanceId,omitempty"`
 
+	// ServiceInstanceID is the reference to the Power VS ServiceInstance on which the machine instance will be created.
+	// +optional
+	ServiceInstanceID *string `json:"serviceInstanceID,omitempty"`
+
 	// InstanceState is the state of the PowerVS instance for this machine
 	// +optional
 	InstanceState *string `json:"instanceState,omitempty"`
