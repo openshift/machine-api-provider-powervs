@@ -9,10 +9,11 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/rand"
 
-	machinev1 "github.com/openshift/api/machine/v1beta1"
-	"github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
+	machinev1 "github.com/openshift/api/machine/v1"
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 )
 
 const (
@@ -56,52 +57,55 @@ func stubPowerVSCredentialsSecret(name string) *corev1.Secret {
 	}
 }
 
-func stubMachine() (*machinev1.Machine, error) {
+func stubMachine() (*machinev1beta1.Machine, error) {
 
 	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
-	providerSpec, err := v1alpha1.RawExtensionFromProviderSpec(stubProviderConfig(credSecretName))
+	providerSpec, err := RawExtensionFromProviderSpec(stubProviderConfig(credSecretName))
 	if err != nil {
 		return nil, err
 	}
 
-	return &machinev1.Machine{
+	return &machinev1beta1.Machine{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test",
 			Namespace: defaultNamespace,
 			Labels: map[string]string{
-				machinev1.MachineClusterIDLabel: "CLUSTERID",
+				machinev1beta1.MachineClusterIDLabel: "CLUSTERID",
 			},
 		},
-		Spec: machinev1.MachineSpec{
-			ProviderSpec: machinev1.ProviderSpec{
+		Spec: machinev1beta1.MachineSpec{
+			ProviderSpec: machinev1beta1.ProviderSpec{
 				Value: providerSpec,
 			},
 		}}, nil
 }
 
-func stubProviderConfig(name string) *v1alpha1.PowerVSMachineProviderConfig {
+func stubProviderConfig(name string) *machinev1.PowerVSMachineProviderConfig {
 	testKeyPair := "Test-KeyPair"
-	return &v1alpha1.PowerVSMachineProviderConfig{
-		CredentialsSecret: &corev1.LocalObjectReference{
+	return &machinev1.PowerVSMachineProviderConfig{
+		CredentialsSecret: &machinev1.PowerVSSecretReference{
 			Name: name,
 		},
-		Memory:      "32",
-		Processors:  "0.5",
+		MemoryGiB:   32,
+		Processors:  intstr.FromString("0.5"),
 		KeyPairName: testKeyPair,
-		Image: v1alpha1.PowerVSResourceReference{
+		Image: machinev1.PowerVSResource{
+			Type: machinev1.PowerVSResourceTypeName,
 			Name: core.StringPtr(imageNamePrefix + "-1"),
 		},
-		Network: v1alpha1.PowerVSResourceReference{
+		Network: machinev1.PowerVSResource{
+			Type: machinev1.PowerVSResourceTypeName,
 			Name: core.StringPtr(networkNamePrefix + "-1"),
 		},
-		ServiceInstance: v1alpha1.PowerVSResourceReference{
-			ID: core.StringPtr(instanceID),
+		ServiceInstance: machinev1.PowerVSResource{
+			Type: machinev1.PowerVSResourceTypeID,
+			ID:   core.StringPtr(instanceID),
 		},
 	}
 }
 
-func stubProviderStatus(serviceInstanceID string) *v1alpha1.PowerVSMachineProviderStatus {
-	return &v1alpha1.PowerVSMachineProviderStatus{
+func stubProviderStatus(serviceInstanceID string) *machinev1.PowerVSMachineProviderStatus {
+	return &machinev1.PowerVSMachineProviderStatus{
 		ServiceInstanceID: core.StringPtr(serviceInstanceID),
 	}
 }

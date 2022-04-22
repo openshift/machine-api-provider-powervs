@@ -17,14 +17,16 @@ limitations under the License.
 package machine
 
 import (
-	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
+	"encoding/json"
+	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/klog/v2"
 
-	machinev1 "github.com/openshift/api/machine/v1beta1"
+	machinev1 "github.com/openshift/api/machine/v1"
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
-	//"k8s.io/klog/v2"
 )
 
 const (
@@ -38,11 +40,10 @@ const (
 // a condition will be added to the slice
 // If the machine does already have a condition with the specified type,
 // the condition will be updated if either of the following are true.
-func setPowerVSMachineProviderCondition(condition powervsproviderv1.PowerVSMachineProviderCondition, conditions []powervsproviderv1.PowerVSMachineProviderCondition) []powervsproviderv1.PowerVSMachineProviderCondition {
+func setPowerVSMachineProviderCondition(condition metav1.Condition, conditions []metav1.Condition) []metav1.Condition {
 	now := metav1.Now()
 
 	if existingCondition := findProviderCondition(conditions, condition.Type); existingCondition == nil {
-		condition.LastProbeTime = now
 		condition.LastTransitionTime = now
 		conditions = append(conditions, condition)
 	} else {
@@ -52,7 +53,7 @@ func setPowerVSMachineProviderCondition(condition powervsproviderv1.PowerVSMachi
 	return conditions
 }
 
-func findProviderCondition(conditions []powervsproviderv1.PowerVSMachineProviderCondition, conditionType powervsproviderv1.PowerVSMachineProviderConditionType) *powervsproviderv1.PowerVSMachineProviderCondition {
+func findProviderCondition(conditions []metav1.Condition, conditionType string) *metav1.Condition {
 	for i := range conditions {
 		if conditions[i].Type == conditionType {
 			return &conditions[i]
@@ -61,7 +62,7 @@ func findProviderCondition(conditions []powervsproviderv1.PowerVSMachineProvider
 	return nil
 }
 
-func updateExistingCondition(newCondition, existingCondition *powervsproviderv1.PowerVSMachineProviderCondition) {
+func updateExistingCondition(newCondition, existingCondition *metav1.Condition) {
 	if !shouldUpdateCondition(newCondition, existingCondition) {
 		return
 	}
@@ -72,46 +73,109 @@ func updateExistingCondition(newCondition, existingCondition *powervsproviderv1.
 	existingCondition.Status = newCondition.Status
 	existingCondition.Reason = newCondition.Reason
 	existingCondition.Message = newCondition.Message
-	existingCondition.LastProbeTime = newCondition.LastProbeTime
 }
 
-func shouldUpdateCondition(newCondition, existingCondition *powervsproviderv1.PowerVSMachineProviderCondition) bool {
+func shouldUpdateCondition(newCondition, existingCondition *metav1.Condition) bool {
 	return newCondition.Reason != existingCondition.Reason || newCondition.Message != existingCondition.Message
 }
 
-func conditionSuccess() powervsproviderv1.PowerVSMachineProviderCondition {
-	return powervsproviderv1.PowerVSMachineProviderCondition{
-		Type:    powervsproviderv1.MachineCreation,
-		Status:  corev1.ConditionTrue,
-		Reason:  powervsproviderv1.MachineCreationSucceeded,
+func conditionSuccess() metav1.Condition {
+	return metav1.Condition{
+		Type:    string(machinev1beta1.MachineCreation),
+		Status:  metav1.ConditionTrue,
+		Reason:  machinev1beta1.MachineCreationSucceededConditionReason,
 		Message: "Machine successfully created",
 	}
 }
 
-func conditionFailed() powervsproviderv1.PowerVSMachineProviderCondition {
-	return powervsproviderv1.PowerVSMachineProviderCondition{
-		Type:   powervsproviderv1.MachineCreation,
-		Status: corev1.ConditionFalse,
-		Reason: powervsproviderv1.MachineCreationFailed,
+func conditionFailed() metav1.Condition {
+	return metav1.Condition{
+		Type:   string(machinev1beta1.MachineCreation),
+		Status: metav1.ConditionFalse,
+		Reason: machinev1beta1.MachineCreationFailedConditionReason,
 	}
 }
 
 // validateMachine check the label that a machine must have to identify the cluster to which it belongs is present.
-func validateMachine(machine machinev1.Machine) error {
-	if machine.Labels[machinev1.MachineClusterIDLabel] == "" {
-		return machinecontroller.InvalidMachineConfiguration("%v: missing %q label", machine.GetName(), machinev1.MachineClusterIDLabel)
+func validateMachine(machine machinev1beta1.Machine) error {
+	if machine.Labels[machinev1beta1.MachineClusterIDLabel] == "" {
+		return machinecontroller.InvalidMachineConfiguration("%v: missing %q label", machine.GetName(), machinev1beta1.MachineClusterIDLabel)
 	}
 
 	return nil
 }
 
 // getClusterID get cluster ID by machine.openshift.io/cluster-api-cluster label
-func getClusterID(machine *machinev1.Machine) (string, bool) {
-	clusterID, ok := machine.Labels[machinev1.MachineClusterIDLabel]
+func getClusterID(machine *machinev1beta1.Machine) (string, bool) {
+	clusterID, ok := machine.Labels[machinev1beta1.MachineClusterIDLabel]
 	// TODO: remove 347-350
 	// NOTE: This block can be removed after the label renaming transition to machine.openshift.io
 	if !ok {
 		clusterID, ok = machine.Labels[upstreamMachineClusterIDLabel]
 	}
 	return clusterID, ok
+}
+
+// RawExtensionFromProviderSpec marshals the machine provider spec.
+func RawExtensionFromProviderSpec(spec *machinev1.PowerVSMachineProviderConfig) (*runtime.RawExtension, error) {
+	if spec == nil {
+		return &runtime.RawExtension{}, nil
+	}
+
+	var rawBytes []byte
+	var err error
+	if rawBytes, err = json.Marshal(spec); err != nil {
+		return nil, fmt.Errorf("error marshalling providerSpec: %v", err)
+	}
+
+	return &runtime.RawExtension{
+		Raw: rawBytes,
+	}, nil
+}
+
+// RawExtensionFromProviderStatus marshals the machine provider status
+func RawExtensionFromProviderStatus(status *machinev1.PowerVSMachineProviderStatus) (*runtime.RawExtension, error) {
+	if status == nil {
+		return &runtime.RawExtension{}, nil
+	}
+
+	var rawBytes []byte
+	var err error
+	if rawBytes, err = json.Marshal(status); err != nil {
+		return nil, fmt.Errorf("error marshalling providerStatus: %v", err)
+	}
+
+	return &runtime.RawExtension{
+		Raw: rawBytes,
+	}, nil
+}
+
+// ProviderSpecFromRawExtension unmarshals a raw extension into an PowerVSMachineProviderConfig type
+func ProviderSpecFromRawExtension(rawExtension *runtime.RawExtension) (*machinev1.PowerVSMachineProviderConfig, error) {
+	if rawExtension == nil {
+		return &machinev1.PowerVSMachineProviderConfig{}, nil
+	}
+
+	spec := new(machinev1.PowerVSMachineProviderConfig)
+	if err := json.Unmarshal(rawExtension.Raw, &spec); err != nil {
+		return nil, fmt.Errorf("error unmarshalling providerSpec: %v", err)
+	}
+
+	klog.V(5).Infof("Got provider Spec from raw extension: %+v", spec)
+	return spec, nil
+}
+
+// ProviderStatusFromRawExtension unmarshals a raw extension into an PowerVSMachineProviderStatus type
+func ProviderStatusFromRawExtension(rawExtension *runtime.RawExtension) (*machinev1.PowerVSMachineProviderStatus, error) {
+	if rawExtension == nil {
+		return &machinev1.PowerVSMachineProviderStatus{}, nil
+	}
+
+	providerStatus := new(machinev1.PowerVSMachineProviderStatus)
+	if err := json.Unmarshal(rawExtension.Raw, providerStatus); err != nil {
+		return nil, fmt.Errorf("error unmarshalling providerStatus: %v", err)
+	}
+
+	klog.V(5).Infof("Got provider Status from raw extension: %+v", providerStatus)
+	return providerStatus, nil
 }

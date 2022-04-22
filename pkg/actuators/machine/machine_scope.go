@@ -8,12 +8,13 @@ import (
 	"github.com/IBM-Cloud/power-go-client/power/models"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	machinev1 "github.com/openshift/api/machine/v1beta1"
+	machinev1 "github.com/openshift/api/machine/v1"
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	machineapierros "github.com/openshift/machine-api-operator/pkg/controller/machine"
-	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 )
@@ -33,7 +34,7 @@ type machineScopeParams struct {
 	// api server controller runtime client
 	client runtimeclient.Client
 	// machine resource
-	machine *machinev1.Machine
+	machine *machinev1beta1.Machine
 	// api server controller runtime client for the openshift-config-managed namespace
 	configManagedClient  runtimeclient.Client
 	powerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
@@ -48,19 +49,19 @@ type machineScope struct {
 	// api server controller runtime client
 	client runtimeclient.Client
 	// machine resource
-	machine            *machinev1.Machine
+	machine            *machinev1beta1.Machine
 	machineToBePatched runtimeclient.Patch
-	providerSpec       *powervsproviderv1.PowerVSMachineProviderConfig
-	providerStatus     *powervsproviderv1.PowerVSMachineProviderStatus
+	providerSpec       *machinev1.PowerVSMachineProviderConfig
+	providerStatus     *machinev1.PowerVSMachineProviderStatus
 }
 
 func newMachineScope(params machineScopeParams) (*machineScope, error) {
-	providerSpec, err := powervsproviderv1.ProviderSpecFromRawExtension(params.machine.Spec.ProviderSpec.Value)
+	providerSpec, err := ProviderSpecFromRawExtension(params.machine.Spec.ProviderSpec.Value)
 	if err != nil {
 		return nil, machineapierros.InvalidMachineConfiguration("failed to get machine config: %v", err)
 	}
 
-	providerStatus, err := powervsproviderv1.ProviderStatusFromRawExtension(params.machine.Status.ProviderStatus)
+	providerStatus, err := ProviderStatusFromRawExtension(params.machine.Status.ProviderStatus)
 	if err != nil {
 		return nil, machineapierros.InvalidMachineConfiguration("failed to get machine provider status: %v", err.Error())
 	}
@@ -71,14 +72,9 @@ func newMachineScope(params machineScopeParams) (*machineScope, error) {
 	}
 
 	var serviceInstanceID *string
-
 	if providerStatus.ServiceInstanceID != nil {
 		serviceInstanceID = providerStatus.ServiceInstanceID
 		klog.Infof("Found ServiceInstanceID from providerStatus %s", *serviceInstanceID)
-	} else if providerSpec.ServiceInstanceID != "" {
-		klog.Warningf("ServiceInstanceID is set but its depreciated, Please use serviceInstance instead")
-		serviceInstanceID = &providerSpec.ServiceInstanceID
-		providerStatus.ServiceInstanceID = serviceInstanceID
 	} else {
 		minimalPowerVSClient, err := params.powerVSMinimalClient(params.client)
 		if err != nil {
@@ -113,7 +109,7 @@ func newMachineScope(params machineScopeParams) (*machineScope, error) {
 func (s *machineScope) patchMachine() error {
 	klog.V(3).Infof("%v: patching machine", s.machine.GetName())
 
-	providerStatus, err := powervsproviderv1.RawExtensionFromProviderStatus(s.providerStatus)
+	providerStatus, err := RawExtensionFromProviderStatus(s.providerStatus)
 	if err != nil {
 		return machineapierros.InvalidMachineConfiguration("failed to get machine provider status: %v", err.Error())
 	}
@@ -164,7 +160,7 @@ func (s *machineScope) getUserData() ([]byte, error) {
 	return userData, nil
 }
 
-func (s *machineScope) setProviderStatus(instance *models.PVMInstance, condition powervsproviderv1.PowerVSMachineProviderCondition) {
+func (s *machineScope) setProviderStatus(instance *models.PVMInstance, condition metav1.Condition) {
 	klog.Infof("%s: Updating status", s.machine.Name)
 
 	networkAddresses := []corev1.NodeAddress{}

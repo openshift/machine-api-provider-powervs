@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	configv1 "github.com/openshift/api/config/v1"
-	mapiv1beta1 "github.com/openshift/api/machine/v1beta1"
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	"github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"
 	machineactuator "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machine"
@@ -139,11 +139,11 @@ func main() {
 	}
 
 	// Setup Scheme for all resources
-	if err := mapiv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := machinev1beta1.Install(mgr.GetScheme()); err != nil {
 		klog.Fatalf("Error setting up scheme: %v", err)
 	}
 
-	if err := configv1.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := configv1.Install(mgr.GetScheme()); err != nil {
 		klog.Fatal(err)
 	}
 
@@ -151,19 +151,12 @@ func main() {
 		klog.Fatal(err)
 	}
 
-	//configManagedClient, startCache, err := newConfigManagedClient(mgr)
-	//if err != nil {
-	//	klog.Fatal(err)
-	//}
-	//mgr.Add(startCache)
-
 	// Initialize machine actuator.
 	machineActuator := machineactuator.NewActuator(machineactuator.ActuatorParams{
 		Client:               mgr.GetClient(),
 		EventRecorder:        mgr.GetEventRecorderFor("powervscontroller"),
 		PowerVSClientBuilder: powervsclient.NewValidatedClient,
 		PowerVSMinimalClient: powervsclient.NewMinimalPowerVSClient,
-		//ConfigManagedClient:  configManagedClient,
 	})
 
 	if err := machine.AddWithActuator(mgr, machineActuator); err != nil {

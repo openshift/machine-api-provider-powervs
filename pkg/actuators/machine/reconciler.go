@@ -14,8 +14,6 @@ import (
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client"
-
-	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 )
 
 const (
@@ -214,7 +212,7 @@ func (r *Reconciler) setProviderID(instance *models.PVMInstance) error {
 	if instance == nil {
 		return nil
 	}
-	providerStatus, err := powervsproviderv1.ProviderStatusFromRawExtension(r.machine.Status.ProviderStatus)
+	providerStatus, err := ProviderStatusFromRawExtension(r.machine.Status.ProviderStatus)
 	if err != nil {
 		return machineapierros.InvalidMachineConfiguration("failed to get machine provider status: %v", err.Error())
 	}

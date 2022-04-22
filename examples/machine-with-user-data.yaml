@@ -9,20 +9,23 @@ metadata:
 spec:
   providerSpec:
     value:
-      apiVersion: powervsproviderconfig.openshift.io/v1alpha1
+      apiVersion: machine.openshift.io/v1
       kind: PowerVSMachineProviderConfig
       serviceInstance:
+        type: ID
         id: e449d86e-c3a0-4c07-959e-8557fdf55482
       image:
+        type: Name
         name: rhcos-49-84-202108041519-0
+      network:
+        type: Name
+        name: pvs-ipi-net
+      systemType: s922
+      processorType: shared
+      processors: "0.25"
+      memoryGiB: 8
+      keyPairName: karthik-ssh
       userDataSecret:
         name: worker-user-data
       credentialsSecret:
         name: powervs-credentials
-      sysType: s922
-      procType: shared
-      processors: 0.25
-      memory: 8
-      network:
-        name: pvs-ipi-net
-      keyPairName: karthik-ssh
