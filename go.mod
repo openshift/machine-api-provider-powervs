@@ -1,6 +1,6 @@
 module github.com/openshift/machine-api-provider-powervs
 
-go 1.17
+go 1.18
 
 require (
 	github.com/IBM-Cloud/bluemix-go v0.0.0-20211102075456-ffc4e11dfb16
