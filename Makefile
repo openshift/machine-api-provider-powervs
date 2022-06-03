@@ -30,7 +30,7 @@ REPO_PATH   ?= github.com/openshift/machine-api-provider-powervs
 LD_FLAGS    ?= -X $(REPO_PATH)/pkg/version.Raw=$(VERSION) -extldflags "-static"
 MUTABLE_TAG ?= latest
 IMAGE        = origin-powervs-machine-controllers
-BUILD_IMAGE ?= registry.ci.openshift.org/openshift/release:golang-1.17
+BUILD_IMAGE ?= registry.ci.openshift.org/openshift/release:golang-1.18
 
 NO_DOCKER ?= 0
 
