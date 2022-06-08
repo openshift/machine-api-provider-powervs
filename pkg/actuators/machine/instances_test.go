@@ -13,8 +13,8 @@ import (
 
 	"k8s.io/client-go/kubernetes/scheme"
 
+	machinev1 "github.com/openshift/api/machine/v1"
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
-	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client/mock"
 
@@ -23,7 +23,7 @@ import (
 
 func init() {
 	// Add types to scheme
-	machinev1beta1.AddToScheme(scheme.Scheme)
+	machinev1beta1.Install(scheme.Scheme)
 }
 
 func TestRemoveStoppedMachine(t *testing.T) {
@@ -151,21 +151,23 @@ func TestGetServiceInstanceID(t *testing.T) {
 	cases := []struct {
 		name                           string
 		instanceName                   string
-		serviceInstance                powervsproviderv1.PowerVSResourceReference
+		serviceInstance                machinev1.PowerVSResource
 		getCloudServiceInstancesValues []bluemixmodels.ServiceInstanceV2
 		getCloudServiceInstancesError  error
 		expectedError                  string
 	}{
 		{
 			name: "With ServiceInstanceID",
-			serviceInstance: powervsproviderv1.PowerVSResourceReference{
-				ID: core.StringPtr(instanceID),
+			serviceInstance: machinev1.PowerVSResource{
+				Type: machinev1.PowerVSResourceTypeID,
+				ID:   core.StringPtr(instanceID),
 			},
 		},
 		{
 			name:         "With valid ServiceInstanceName",
 			instanceName: instanceName,
-			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+			serviceInstance: machinev1.PowerVSResource{
+				Type: machinev1.PowerVSResourceTypeName,
 				Name: core.StringPtr(instanceName),
 				ID:   core.StringPtr(instanceID),
 			},
@@ -173,7 +175,7 @@ func TestGetServiceInstanceID(t *testing.T) {
 				{
 					ServiceInstance: bluemixmodels.ServiceInstance{
 						MetadataType: &bluemixmodels.MetadataType{
-							ID: instanceID,
+							Guid: instanceID,
 						},
 						Name: instanceName,
 					},
@@ -183,7 +185,8 @@ func TestGetServiceInstanceID(t *testing.T) {
 		{
 			name:         "With not existing service instance",
 			instanceName: inValidInstance,
-			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+			serviceInstance: machinev1.PowerVSResource{
+				Type: machinev1.PowerVSResourceTypeName,
 				Name: core.StringPtr(inValidInstance),
 			},
 			expectedError: "does exist any cloud service instance with name testInValidInstanceName",
@@ -191,7 +194,8 @@ func TestGetServiceInstanceID(t *testing.T) {
 		{
 			name:         "With two service instance with same name ",
 			instanceName: instanceName,
-			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+			serviceInstance: machinev1.PowerVSResource{
+				Type: machinev1.PowerVSResourceTypeName,
 				Name: core.StringPtr(instanceName),
 			},
 			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
@@ -217,7 +221,8 @@ func TestGetServiceInstanceID(t *testing.T) {
 		{
 			name:         "With zero service instances",
 			instanceName: instanceName,
-			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+			serviceInstance: machinev1.PowerVSResource{
+				Type: machinev1.PowerVSResourceTypeName,
 				Name: core.StringPtr(instanceName),
 			},
 			expectedError: "does exist any cloud service instance with name testInstanceName",
@@ -225,7 +230,8 @@ func TestGetServiceInstanceID(t *testing.T) {
 		{
 			name:         "With failed to get service instances",
 			instanceName: instanceName,
-			serviceInstance: powervsproviderv1.PowerVSResourceReference{
+			serviceInstance: machinev1.PowerVSResource{
+				Type: machinev1.PowerVSResourceTypeName,
 				Name: core.StringPtr(instanceName),
 			},
 			getCloudServiceInstancesError: fmt.Errorf("failed to connect to cloud"),
@@ -233,7 +239,7 @@ func TestGetServiceInstanceID(t *testing.T) {
 		},
 		{
 			name:          "Without ServiceInstanceName or ID",
-			expectedError: "failed to find serviceinstanceID both ServiceInstanceID and ServiceInstanceName can't be nil",
+			expectedError: "failed to find an ServiceInstanceID, Unexpected serviceInstanceResource type:  supports only ID and Name",
 		},
 	}
 	for _, tc := range cases {

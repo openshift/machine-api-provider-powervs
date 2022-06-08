@@ -19,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
-	"github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 	powervsClient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client/mock"
 
@@ -28,7 +27,7 @@ import (
 
 func init() {
 	// Add types to scheme
-	machinev1beta1.AddToScheme(scheme.Scheme)
+	machinev1beta1.Install(scheme.Scheme)
 }
 
 func TestActuatorEvents(t *testing.T) {
@@ -49,7 +48,7 @@ func TestActuatorEvents(t *testing.T) {
 	}()
 
 	credSecretName = fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
-	providerSpec, err := v1alpha1.RawExtensionFromProviderSpec(stubProviderConfig(credSecretName))
+	providerSpec, err := RawExtensionFromProviderSpec(stubProviderConfig(credSecretName))
 	g.Expect(err).ToNot(HaveOccurred())
 	g.Expect(providerSpec).ToNot(BeNil())
 
@@ -72,7 +71,7 @@ func TestActuatorEvents(t *testing.T) {
 				actuator.Create(context.Background(), machine)
 			},
 
-			event: "test: failed to create scope for machine: failed to get machine config: error unmarshalling providerSpec: error unmarshaling JSON: while decoding JSON: json: cannot unmarshal number into Go value of type v1alpha1.PowerVSMachineProviderConfig",
+			event: "test: failed to create scope for machine: failed to get machine config: error unmarshalling providerSpec: json: cannot unmarshal number into Go value of type v1.PowerVSMachineProviderConfig",
 		},
 
 		{
@@ -102,7 +101,7 @@ func TestActuatorEvents(t *testing.T) {
 				}
 				actuator.Update(context.Background(), machine)
 			},
-			event: "test: failed to create scope for machine: failed to get machine config: error unmarshalling providerSpec: error unmarshaling JSON: while decoding JSON: json: cannot unmarshal number into Go value of type v1alpha1.PowerVSMachineProviderConfig",
+			event: "test: failed to create scope for machine: failed to get machine config: error unmarshalling providerSpec: json: cannot unmarshal number into Go value of type v1.PowerVSMachineProviderConfig",
 		},
 		{
 			name: "Update machine event failed, reconciler's update failed",
@@ -132,7 +131,7 @@ func TestActuatorEvents(t *testing.T) {
 				}
 				actuator.Delete(context.Background(), machine)
 			},
-			event: "test: failed to create scope for machine: failed to get machine config: error unmarshalling providerSpec: error unmarshaling JSON: while decoding JSON: json: cannot unmarshal number into Go value of type v1alpha1.PowerVSMachineProviderConfig",
+			event: "test: failed to create scope for machine: failed to get machine config: error unmarshalling providerSpec: json: cannot unmarshal number into Go value of type v1.PowerVSMachineProviderConfig",
 		},
 		{
 			name: "Delete machine event succeed",
@@ -186,7 +185,7 @@ func TestActuatorEvents(t *testing.T) {
 			}
 			gs.Eventually(getMachine, timeout).Should(Succeed())
 
-			providerStatus, err := v1alpha1.RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
+			providerStatus, err := RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
 			gs.Expect(err).ToNot(HaveOccurred())
 			machine.Status.ProviderStatus = providerStatus
 

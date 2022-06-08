@@ -15,26 +15,26 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	machinev1 "github.com/openshift/api/machine/v1beta1"
-	"github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
+	machinev1 "github.com/openshift/api/machine/v1"
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	powervsClient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 
 	. "github.com/onsi/gomega"
 )
 
-func machineWithSpec(spec *v1alpha1.PowerVSMachineProviderConfig) *machinev1.Machine {
-	rawSpec, err := v1alpha1.RawExtensionFromProviderSpec(spec)
+func machineWithSpec(spec *machinev1.PowerVSMachineProviderConfig) *machinev1beta1.Machine {
+	rawSpec, err := RawExtensionFromProviderSpec(spec)
 	if err != nil {
 		panic("Failed to encode raw extension from provider spec")
 	}
 
-	return &machinev1.Machine{
+	return &machinev1beta1.Machine{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "powerVS-test",
 			Namespace: defaultNamespace,
 		},
-		Spec: machinev1.MachineSpec{
-			ProviderSpec: machinev1.ProviderSpec{
+		Spec: machinev1beta1.MachineSpec{
+			ProviderSpec: machinev1beta1.ProviderSpec{
 				Value: rawSpec,
 			},
 		},
@@ -51,7 +51,7 @@ func TestNewMachineScope(t *testing.T) {
 
 	fakeClient := fake.NewFakeClient(userDataSecret, credentialsSecret)
 	credSecretName = fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
-	validProviderSpec, err := v1alpha1.RawExtensionFromProviderSpec(stubProviderConfig(credSecretName))
+	validProviderSpec, err := RawExtensionFromProviderSpec(stubProviderConfig(credSecretName))
 	g.Expect(err).ToNot(HaveOccurred())
 
 	cases := []struct {
@@ -70,16 +70,16 @@ func TestNewMachineScope(t *testing.T) {
 				powerVSMinimalClient: func(client client.Client) (powervsClient.Client, error) {
 					return nil, nil
 				},
-				machine: &machinev1.Machine{
+				machine: &machinev1beta1.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "test",
 						Namespace: defaultNamespace,
 						Labels: map[string]string{
-							machinev1.MachineClusterIDLabel: "CLUSTERID",
+							machinev1beta1.MachineClusterIDLabel: "CLUSTERID",
 						},
 					},
-					Spec: machinev1.MachineSpec{
-						ProviderSpec: machinev1.ProviderSpec{
+					Spec: machinev1beta1.MachineSpec{
+						ProviderSpec: machinev1beta1.ProviderSpec{
 							Value: validProviderSpec,
 						},
 					}},
@@ -93,23 +93,23 @@ func TestNewMachineScope(t *testing.T) {
 					cloudInstanceID string, debug bool) (powervsClient.Client, error) {
 					return nil, nil
 				},
-				machine: &machinev1.Machine{
+				machine: &machinev1beta1.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "test",
 						Namespace: defaultNamespace,
 						Labels: map[string]string{
-							machinev1.MachineClusterIDLabel: "CLUSTERID",
+							machinev1beta1.MachineClusterIDLabel: "CLUSTERID",
 						},
 					},
-					Spec: machinev1.MachineSpec{
-						ProviderSpec: machinev1.ProviderSpec{
+					Spec: machinev1beta1.MachineSpec{
+						ProviderSpec: machinev1beta1.ProviderSpec{
 							Value: &runtime.RawExtension{
 								Raw: []byte{'1'},
 							},
 						},
 					}},
 			},
-			expectedError: errors.New("failed to get machine config: error unmarshalling providerSpec: error unmarshaling JSON: while decoding JSON: json: cannot unmarshal number into Go value of type v1alpha1.PowerVSMachineProviderConfig"),
+			expectedError: errors.New("failed to get machine config: error unmarshalling providerSpec: json: cannot unmarshal number into Go value of type v1.PowerVSMachineProviderConfig"),
 		},
 		{
 			name: "fail to get provider status",
@@ -119,27 +119,27 @@ func TestNewMachineScope(t *testing.T) {
 					cloudInstanceID string, debug bool) (powervsClient.Client, error) {
 					return nil, nil
 				},
-				machine: &machinev1.Machine{
+				machine: &machinev1beta1.Machine{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "test",
 						Namespace: defaultNamespace,
 						Labels: map[string]string{
-							machinev1.MachineClusterIDLabel: "CLUSTERID",
+							machinev1beta1.MachineClusterIDLabel: "CLUSTERID",
 						},
 					},
-					Spec: machinev1.MachineSpec{
-						ProviderSpec: machinev1.ProviderSpec{
+					Spec: machinev1beta1.MachineSpec{
+						ProviderSpec: machinev1beta1.ProviderSpec{
 							Value: validProviderSpec,
 						},
 					},
-					Status: machinev1.MachineStatus{
+					Status: machinev1beta1.MachineStatus{
 						ProviderStatus: &runtime.RawExtension{
 							Raw: []byte{'1'},
 						},
 					},
 				},
 			},
-			expectedError: errors.New("failed to get machine provider status: error unmarshalling providerStatus: error unmarshaling JSON: while decoding JSON: json: cannot unmarshal number into Go value of type v1alpha1.PowerVSMachineProviderStatus"),
+			expectedError: errors.New("failed to get machine provider status: error unmarshalling providerStatus: json: cannot unmarshal number into Go value of type v1.PowerVSMachineProviderStatus"),
 		},
 	}
 
@@ -160,8 +160,8 @@ func TestNewMachineScope(t *testing.T) {
 func TestGetUserData(t *testing.T) {
 	userDataSecretName := "PowerVS-ignition"
 
-	defaultProviderSpec := &v1alpha1.PowerVSMachineProviderConfig{
-		UserDataSecret: &corev1.LocalObjectReference{
+	defaultProviderSpec := &machinev1.PowerVSMachineProviderConfig{
+		UserDataSecret: &machinev1.PowerVSSecretReference{
 			Name: userDataSecretName,
 		},
 	}
@@ -169,7 +169,7 @@ func TestGetUserData(t *testing.T) {
 	testCases := []struct {
 		testCase         string
 		userDataSecret   *corev1.Secret
-		providerSpec     *v1alpha1.PowerVSMachineProviderConfig
+		providerSpec     *machinev1.PowerVSMachineProviderConfig
 		expectedUserdata []byte
 		expectError      bool
 	}{
@@ -218,7 +218,7 @@ func TestGetUserData(t *testing.T) {
 		{
 			testCase:         "no user-data in provider spec",
 			userDataSecret:   nil,
-			providerSpec:     &v1alpha1.PowerVSMachineProviderConfig{},
+			providerSpec:     &machinev1.PowerVSMachineProviderConfig{},
 			expectError:      false,
 			expectedUserdata: nil,
 		},
@@ -274,20 +274,20 @@ func TestPatchMachine(t *testing.T) {
 
 	failedPhase := "Failed"
 
-	providerStatus := &v1alpha1.PowerVSMachineProviderStatus{}
+	providerStatus := &machinev1.PowerVSMachineProviderStatus{}
 
 	testCases := []struct {
 		name   string
-		mutate func(*machinev1.Machine)
-		expect func(*machinev1.Machine) error
+		mutate func(*machinev1beta1.Machine)
+		expect func(*machinev1beta1.Machine) error
 	}{
 		//TODO: Investigate why test fails with inclusion of race flag
 		//{
 		//	name: "Test changing labels",
-		//	mutate: func(m *machinev1.Machine) {
+		//	mutate: func(m *machinev1beta1.Machine) {
 		//		m.ObjectMeta.Labels["testlabel"] = "test"
 		//	},
-		//	expect: func(m *machinev1.Machine) error {
+		//	expect: func(m *machinev1beta1.Machine) error {
 		//		if m.ObjectMeta.Labels["testlabel"] != "test" {
 		//			return fmt.Errorf("label \"testlabel\" %q not equal expected \"test\"", m.ObjectMeta.Labels["test"])
 		//		}
@@ -296,10 +296,10 @@ func TestPatchMachine(t *testing.T) {
 		//},
 		{
 			name: "Test setting phase",
-			mutate: func(m *machinev1.Machine) {
+			mutate: func(m *machinev1beta1.Machine) {
 				m.Status.Phase = &failedPhase
 			},
-			expect: func(m *machinev1.Machine) error {
+			expect: func(m *machinev1beta1.Machine) error {
 				if m.Status.Phase != nil && *m.Status.Phase == failedPhase {
 					return nil
 				}
@@ -308,14 +308,14 @@ func TestPatchMachine(t *testing.T) {
 		},
 		{
 			name: "Test setting provider status",
-			mutate: func(m *machinev1.Machine) {
+			mutate: func(m *machinev1beta1.Machine) {
 				instanceID := "123"
 				instanceState := "running"
 				providerStatus.InstanceID = &instanceID
 				providerStatus.InstanceState = &instanceState
 			},
-			expect: func(m *machinev1.Machine) error {
-				providerStatus, err := v1alpha1.ProviderStatusFromRawExtension(m.Status.ProviderStatus)
+			expect: func(m *machinev1beta1.Machine) error {
+				providerStatus, err := ProviderStatusFromRawExtension(m.Status.ProviderStatus)
 				if err != nil {
 					return fmt.Errorf("unable to get provider status: %v", err)
 				}

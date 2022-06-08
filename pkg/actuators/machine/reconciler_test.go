@@ -17,9 +17,9 @@ import (
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	machinev1 "github.com/openshift/api/machine/v1"
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
-	"github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client/mock"
 )
@@ -44,13 +44,13 @@ func TestGetMachineInstances(t *testing.T) {
 
 	testCases := []struct {
 		testcase          string
-		providerStatus    v1alpha1.PowerVSMachineProviderStatus
+		providerStatus    machinev1.PowerVSMachineProviderStatus
 		powerVSClientFunc func(*gomock.Controller) client.Client
 		exists            bool
 	}{
 		{
 			testcase:       "get-instances",
-			providerStatus: v1alpha1.PowerVSMachineProviderStatus{},
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
 			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
 				mockPowerVSClient := mock.NewMockClient(ctrl)
 				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), nil)
@@ -60,7 +60,7 @@ func TestGetMachineInstances(t *testing.T) {
 		},
 		{
 			testcase: "has-status-search-by-id-running",
-			providerStatus: v1alpha1.PowerVSMachineProviderStatus{
+			providerStatus: machinev1.PowerVSMachineProviderStatus{
 				InstanceID: &instanceID,
 			},
 			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
@@ -72,7 +72,7 @@ func TestGetMachineInstances(t *testing.T) {
 		},
 		{
 			testcase: "has-status-search-by-id-terminated",
-			providerStatus: v1alpha1.PowerVSMachineProviderStatus{
+			providerStatus: machinev1.PowerVSMachineProviderStatus{
 				InstanceID: &instanceID,
 			},
 			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
@@ -93,7 +93,7 @@ func TestGetMachineInstances(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			powerVAStatusRaw, err := v1alpha1.RawExtensionFromProviderStatus(&tc.providerStatus)
+			powerVAStatusRaw, err := RawExtensionFromProviderStatus(&tc.providerStatus)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -140,7 +140,7 @@ func TestSetMachineCloudProviderSpecifics(t *testing.T) {
 			machine: &machinev1beta1.Machine{
 				ObjectMeta: metav1.ObjectMeta{},
 			},
-			providerSpec:  &v1alpha1.PowerVSMachineProviderConfig{},
+			providerSpec:  &machinev1.PowerVSMachineProviderConfig{},
 			powerVSClient: mockPowerVSClient,
 		},
 	}
@@ -183,7 +183,7 @@ func TestCreate(t *testing.T) {
 	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
 	testCases := []struct {
 		testcase                 string
-		providerConfig           *v1alpha1.PowerVSMachineProviderConfig
+		providerConfig           *machinev1.PowerVSMachineProviderConfig
 		userDataSecret           *corev1.Secret
 		powerVSCredentialsSecret *corev1.Secret
 		expectedError            error
@@ -204,11 +204,11 @@ func TestCreate(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		encodedProviderConfig, err := v1alpha1.RawExtensionFromProviderSpec(tc.providerConfig)
+		encodedProviderConfig, err := RawExtensionFromProviderSpec(tc.providerConfig)
 		if err != nil {
 			t.Fatalf("Unexpected error")
 		}
-		providerStatus, err := v1alpha1.RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
+		providerStatus, err := RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
 		if err != nil {
 			t.Fatalf("Failed to set providerStatus")
 		}

@@ -5,19 +5,21 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
 
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/klog/v2"
 
-	machinev1 "github.com/openshift/api/machine/v1beta1"
+	machinev1 "github.com/openshift/api/machine/v1"
+	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	mapierrors "github.com/openshift/machine-api-operator/pkg/controller/machine"
-	powervsproviderv1 "github.com/openshift/machine-api-provider-powervs/pkg/apis/powervsprovider/v1alpha1"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 )
 
 // removeStoppedMachine removes all instances of a specific machine that are in a stopped state.
-func removeStoppedMachine(machine *machinev1.Machine, client powervsclient.Client) error {
+func removeStoppedMachine(machine *machinev1beta1.Machine, client powervsclient.Client) error {
 	instance, err := client.GetInstanceByName(machine.Name)
 	if err != nil && err != powervsclient.ErrorInstanceNotFound {
 		klog.Errorf("Error getting instance by name: %s, err: %v", machine.Name, err)
@@ -33,16 +35,18 @@ func removeStoppedMachine(machine *machinev1.Machine, client powervsclient.Clien
 	return nil
 }
 
-func launchInstance(machine *machinev1.Machine, machineProviderConfig *powervsproviderv1.PowerVSMachineProviderConfig, userData []byte, client powervsclient.Client) (*models.PVMInstance, error) {
-	// code for powervs
+func launchInstance(machine *machinev1beta1.Machine, machineProviderConfig *machinev1.PowerVSMachineProviderConfig, userData []byte, client powervsclient.Client) (*models.PVMInstance, error) {
+	var processors float64
+	var err error
 
-	memory, err := strconv.ParseFloat(machineProviderConfig.Memory, 64)
-	if err != nil {
-		return nil, mapierrors.InvalidMachineConfiguration("failed to convert memory(%s) to float64", machineProviderConfig.Memory)
-	}
-	processors, err := strconv.ParseFloat(machineProviderConfig.Processors, 64)
-	if err != nil {
-		return nil, mapierrors.InvalidMachineConfiguration("failed to convert Cores(%s) to float64", machineProviderConfig.Processors)
+	switch machineProviderConfig.Processors.Type {
+	case intstr.Int:
+		processors = float64(machineProviderConfig.Processors.IntVal)
+	case intstr.String:
+		processors, err = strconv.ParseFloat(machineProviderConfig.Processors.StrVal, 64)
+		if err != nil {
+			return nil, mapierrors.InvalidMachineConfiguration("failed to convert Processors %s to float64", machineProviderConfig.Processors.StrVal)
+		}
 	}
 
 	imageID, err := getImageID(machineProviderConfig.Image, client)
@@ -59,6 +63,9 @@ func launchInstance(machine *machinev1.Machine, machineProviderConfig *powervspr
 		{NetworkID: networkID},
 	}
 
+	memory := float64(machineProviderConfig.MemoryGiB)
+	procType := strings.ToLower(string(machineProviderConfig.ProcessorType))
+
 	params := &models.PVMInstanceCreate{
 		ImageID:     imageID,
 		KeyPairName: machineProviderConfig.KeyPairName,
@@ -66,8 +73,8 @@ func launchInstance(machine *machinev1.Machine, machineProviderConfig *powervspr
 		ServerName:  &machine.Name,
 		Memory:      &memory,
 		Processors:  &processors,
-		ProcType:    &machineProviderConfig.ProcType,
-		SysType:     machineProviderConfig.SysType,
+		ProcType:    &procType,
+		SysType:     strings.ToLower(machineProviderConfig.SystemType),
 		UserData:    base64.StdEncoding.EncodeToString(userData),
 	}
 
@@ -93,50 +100,71 @@ func launchInstance(machine *machinev1.Machine, machineProviderConfig *powervspr
 	return instance, nil
 }
 
-func getImageID(image powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
-	if image.ID != nil {
-		return image.ID, nil
-	} else if image.Name != nil {
+func getImageID(imageResource machinev1.PowerVSResource, client powervsclient.Client) (*string, error) {
+	switch imageResource.Type {
+	case machinev1.PowerVSResourceTypeID:
+		if imageResource.ID == nil {
+			return nil, fmt.Errorf("imageResource reference is specified as ID but it is nil")
+		}
+		return imageResource.ID, nil
+	case machinev1.PowerVSResourceTypeName:
+		if imageResource.Name == nil {
+			return nil, fmt.Errorf("imageResource reference is specified as Name but it is nil")
+		}
 		images, err := client.GetImages()
 		if err != nil {
 			klog.Errorf("failed to get images, err: %v", err)
 			return nil, err
 		}
 		for _, img := range images.Images {
-			if *image.Name == *img.Name {
-				klog.Infof("image %s found with ID: %s", *image.Name, *img.ImageID)
+			if *imageResource.Name == *img.Name {
+				klog.Infof("image %s found with ID: %s", *imageResource.Name, *img.ImageID)
 				return img.ImageID, nil
 			}
 		}
-	} else {
-		return nil, fmt.Errorf("both ID and Name can't be nil")
+		return nil, fmt.Errorf("failed to find an image ID with name %s", *imageResource.Name)
+	default:
+		return nil, fmt.Errorf("failed to find an image ID, Unexpected imageResource type %s supports only %s and %s", imageResource.Type, machinev1.PowerVSResourceTypeID, machinev1.PowerVSResourceTypeName)
 	}
-	return nil, fmt.Errorf("failed to find an image ID")
 }
 
-func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
-	if network.ID != nil {
-		return network.ID, nil
-	}
-	networks, err := client.GetNetworks()
-	if err != nil {
-		klog.Errorf("failed to get networks, err: %v", err)
-		return nil, err
-	}
-	if network.Name != nil {
+func getNetworkID(networkResource machinev1.PowerVSResource, client powervsclient.Client) (*string, error) {
+	switch networkResource.Type {
+	case machinev1.PowerVSResourceTypeID:
+		if networkResource.ID == nil {
+			return nil, fmt.Errorf("networkResource reference is specified as ID but it is nil")
+		}
+		return networkResource.ID, nil
+	case machinev1.PowerVSResourceTypeName:
+		if networkResource.Name == nil {
+			return nil, fmt.Errorf("networkResource reference is specified as Name but it is nil")
+		}
+		networks, err := client.GetNetworks()
+		if err != nil {
+			klog.Errorf("failed to get networks, err: %v", err)
+			return nil, err
+		}
 		for _, nw := range networks.Networks {
-			if *network.Name == *nw.Name {
-				klog.Infof("network %s found with ID: %s", *network.Name, *nw.NetworkID)
+			if *networkResource.Name == *nw.Name {
+				klog.Infof("network %s found with ID: %s", *networkResource.Name, *nw.NetworkID)
 				return nw.NetworkID, nil
 			}
 		}
-	} else if network.RegEx != nil {
+		return nil, fmt.Errorf("failed to find an network ID with name %s", *networkResource.Name)
+	case machinev1.PowerVSResourceTypeRegEx:
+		if networkResource.RegEx == nil {
+			return nil, fmt.Errorf("networkResource reference is specified as RegEx but it is nil")
+		}
 		var (
 			re  *regexp.Regexp
 			err error
 		)
-
-		if re, err = regexp.Compile(*network.RegEx); err != nil {
+		networks, err := client.GetNetworks()
+		if err != nil {
+			klog.Errorf("failed to get networks, err: %v", err)
+			return nil, err
+		}
+		if re, err = regexp.Compile(*networkResource.RegEx); err != nil {
 			return nil, err
 		}
 		for _, nw := range networks.Networks {
@@ -145,18 +173,25 @@ func getNetworkID(network powervsproviderv1.PowerVSResourceReference, client pow
 				return nw.NetworkID, nil
 			}
 		}
-	} else {
-		return nil, fmt.Errorf("specify one of ID, Name, or RegEx")
+		return nil, fmt.Errorf("failed to find an network ID with RegEx %s", *networkResource.RegEx)
+	default:
+		return nil, fmt.Errorf("failed to find an network ID, Unexpected networkResource type %s supports only %s, %s and %s", networkResource.Type, machinev1.PowerVSResourceTypeID, machinev1.PowerVSResourceTypeName, machinev1.PowerVSResourceTypeRegEx)
 	}
-	return nil, fmt.Errorf("failed to find a network ID")
 }
 
-func getServiceInstanceID(serviceInstance powervsproviderv1.PowerVSResourceReference, client powervsclient.Client) (*string, error) {
-	if serviceInstance.ID != nil {
-		klog.Infof("Found the service with ID %s", *serviceInstance.ID)
-		return serviceInstance.ID, nil
-	} else if serviceInstance.Name != nil {
-		serviceInstances, err := client.GetCloudServiceInstanceByName(*serviceInstance.Name)
+func getServiceInstanceID(serviceInstanceResource machinev1.PowerVSResource, client powervsclient.Client) (*string, error) {
+	switch serviceInstanceResource.Type {
+	case machinev1.PowerVSResourceTypeID:
+		if serviceInstanceResource.ID == nil {
+			return nil, fmt.Errorf("serviceInstanceResource reference is specified as ID but it is nil")
+		}
+		klog.Infof("Found the service with ID %s", *serviceInstanceResource.ID)
+		return serviceInstanceResource.ID, nil
+	case machinev1.PowerVSResourceTypeName:
+		if serviceInstanceResource.Name == nil {
+			return nil, fmt.Errorf("serviceInstanceResource reference is specified as Name but it is nil")
+		}
+		serviceInstances, err := client.GetCloudServiceInstanceByName(*serviceInstanceResource.Name)
 		if err != nil {
 			klog.Errorf("failed to get serviceInstances, err: %v", err)
 			return nil, err
@@ -164,18 +199,18 @@ func getServiceInstanceID(serviceInstance powervsproviderv1.PowerVSResourceRefer
 		// log useful error message
 		switch len(serviceInstances) {
 		case 0:
-			errStr := fmt.Errorf("does exist any cloud service instance with name %s", *serviceInstance.Name)
+			errStr := fmt.Errorf("does exist any cloud service instance with name %s", *serviceInstanceResource.Name)
 			klog.Errorf(errStr.Error())
 			return nil, errStr
 		case 1:
-			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstance.Name, serviceInstances[0].Guid)
+			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstanceResource.Name, serviceInstances[0].Guid)
 			return &serviceInstances[0].Guid, nil
 		default:
-			errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", *serviceInstance.Name)
+			errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", *serviceInstanceResource.Name)
 			klog.Errorf(errStr.Error())
 			return nil, errStr
 		}
-	} else {
-		return nil, fmt.Errorf("failed to find serviceinstanceID both ServiceInstanceID and ServiceInstanceName can't be nil")
+	default:
+		return nil, fmt.Errorf("failed to find an ServiceInstanceID, Unexpected serviceInstanceResource type: %s supports only %s and %s", serviceInstanceResource.Type, machinev1.PowerVSResourceTypeID, machinev1.PowerVSResourceTypeName)
 	}
 }
