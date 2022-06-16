@@ -11,7 +11,7 @@ require (
 	github.com/golang/mock v1.5.0
 	github.com/onsi/gomega v1.18.1
 	github.com/openshift/api v0.0.0-20220531073726-6c4f186339a7
-	github.com/openshift/machine-api-operator v0.2.1-0.20220601192856-d7fb6b5b87ef
+	github.com/openshift/machine-api-operator v0.2.1-0.20220608065814-f76a8f3ab734
 	github.com/pkg/errors v0.9.1
 	github.com/ppc64le-cloud/powervs-utils v0.0.0-20210415051532-4cdd6a79c8fa
 
@@ -22,7 +22,7 @@ require (
 	k8s.io/klog/v2 v2.60.1
 	sigs.k8s.io/controller-runtime v0.12.1
 	sigs.k8s.io/controller-tools v0.9.0
-	sigs.k8s.io/yaml v1.3.0
+	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
 require (
