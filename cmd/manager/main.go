@@ -26,6 +26,7 @@ import (
 	"k8s.io/klog/v2/klogr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -34,6 +35,7 @@ import (
 	"github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"
 	machineactuator "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machine"
+	machinesetcontroller "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machineset"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 	"github.com/openshift/machine-api-provider-powervs/pkg/version"
@@ -167,6 +169,14 @@ func main() {
 	}
 
 	ctrl.SetLogger(klogr.New())
+	setupLog := ctrl.Log.WithName("setup")
+	if err = (&machinesetcontroller.Reconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("MachineSet"),
+	}).SetupWithManager(mgr, controller.Options{}); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "MachineSet")
+		os.Exit(1)
+	}
 
 	if err := mgr.AddReadyzCheck("ping", healthz.Ping); err != nil {
 		klog.Fatal(err)
