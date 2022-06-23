@@ -3,12 +3,11 @@ package machine
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -38,6 +37,7 @@ type machineScopeParams struct {
 	// api server controller runtime client for the openshift-config-managed namespace
 	configManagedClient  runtimeclient.Client
 	powerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
+	dhcpIPCacheStore     cache.Store
 }
 
 type machineScope struct {
@@ -53,6 +53,7 @@ type machineScope struct {
 	machineToBePatched runtimeclient.Patch
 	providerSpec       *machinev1.PowerVSMachineProviderConfig
 	providerStatus     *machinev1.PowerVSMachineProviderStatus
+	dhcpIPCacheStore   cache.Store
 }
 
 func newMachineScope(params machineScopeParams) (*machineScope, error) {
@@ -102,6 +103,7 @@ func newMachineScope(params machineScopeParams) (*machineScope, error) {
 		machineToBePatched: runtimeclient.MergeFrom(params.machine.DeepCopy()),
 		providerSpec:       providerSpec,
 		providerStatus:     providerStatus,
+		dhcpIPCacheStore:   params.dhcpIPCacheStore,
 	}, nil
 }
 
@@ -162,9 +164,6 @@ func (s *machineScope) getUserData() ([]byte, error) {
 
 func (s *machineScope) setProviderStatus(instance *models.PVMInstance, condition metav1.Condition) {
 	klog.Infof("%s: Updating status", s.machine.Name)
-
-	networkAddresses := []corev1.NodeAddress{}
-
 	// TODO: remove 139-141, no need to clean instance id ands state
 	// Instance may have existed but been deleted outside our control, clear it's status if so:
 	if instance == nil {
@@ -173,31 +172,7 @@ func (s *machineScope) setProviderStatus(instance *models.PVMInstance, condition
 	} else {
 		s.providerStatus.InstanceID = instance.PvmInstanceID
 		s.providerStatus.InstanceState = instance.Status
-
-		for _, network := range instance.Networks {
-			if strings.TrimSpace(network.ExternalIP) != "" {
-				networkAddresses = append(networkAddresses,
-					corev1.NodeAddress{
-						Type:    corev1.NodeExternalIP,
-						Address: strings.TrimSpace(network.ExternalIP),
-					})
-			}
-			if strings.TrimSpace(network.IPAddress) != "" {
-				networkAddresses = append(networkAddresses,
-					corev1.NodeAddress{
-						Type:    corev1.NodeInternalIP,
-						Address: strings.TrimSpace(network.IPAddress),
-					})
-			}
-		}
-		networkAddresses = append(networkAddresses,
-			corev1.NodeAddress{
-				Type:    corev1.NodeInternalDNS,
-				Address: *instance.ServerName,
-			})
 	}
 	klog.Infof("%s: finished calculating PowerVS status", s.machine.Name)
-
-	s.machine.Status.Addresses = networkAddresses
 	s.providerStatus.Conditions = setPowerVSMachineProviderCondition(condition, s.providerStatus.Conditions)
 }

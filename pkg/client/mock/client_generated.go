@@ -94,6 +94,36 @@ func (mr *MockClientMockRecorder) GetCloudServiceInstances() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCloudServiceInstances", reflect.TypeOf((*MockClient)(nil).GetCloudServiceInstances))
 }
 
+// GetDHCPServerByID mocks base method.
+func (m *MockClient) GetDHCPServerByID(id string) (*models0.DHCPServerDetail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDHCPServerByID", id)
+	ret0, _ := ret[0].(*models0.DHCPServerDetail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDHCPServerByID indicates an expected call of GetDHCPServerByID.
+func (mr *MockClientMockRecorder) GetDHCPServerByID(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDHCPServerByID", reflect.TypeOf((*MockClient)(nil).GetDHCPServerByID), id)
+}
+
+// GetDHCPServers mocks base method.
+func (m *MockClient) GetDHCPServers() (models0.DHCPServers, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDHCPServers")
+	ret0, _ := ret[0].(models0.DHCPServers)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDHCPServers indicates an expected call of GetDHCPServers.
+func (mr *MockClientMockRecorder) GetDHCPServers() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDHCPServers", reflect.TypeOf((*MockClient)(nil).GetDHCPServers))
+}
+
 // GetImages mocks base method.
 func (m *MockClient) GetImages() (*models0.Images, error) {
 	m.ctrl.T.Helper()

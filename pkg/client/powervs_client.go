@@ -190,6 +190,7 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	c.InstanceClient = instance.NewIBMPIInstanceClient(ctx, c.session, cloudInstanceID)
 	c.NetworkClient = instance.NewIBMPINetworkClient(ctx, c.session, cloudInstanceID)
 	c.ImageClient = instance.NewIBMPIImageClient(ctx, c.session, cloudInstanceID)
+	c.DHCPClient = instance.NewIBMPIDhcpClient(ctx, c.session, cloudInstanceID)
 	return c, err
 }
 
@@ -231,6 +232,7 @@ type powerVSClient struct {
 	InstanceClient *instance.IBMPIInstanceClient
 	NetworkClient  *instance.IBMPINetworkClient
 	ImageClient    *instance.IBMPIImageClient
+	DHCPClient     *instance.IBMPIDhcpClient
 }
 
 func (p *powerVSClient) GetImages() (*models.Images, error) {
@@ -302,6 +304,14 @@ func (p *powerVSClient) GetCloudServiceInstanceByName(name string) ([]bluemixmod
 		}
 	}
 	return instances, nil
+}
+
+func (p *powerVSClient) GetDHCPServers() (models.DHCPServers, error) {
+	return p.DHCPClient.GetAll()
+}
+
+func (p *powerVSClient) GetDHCPServerByID(id string) (*models.DHCPServerDetail, error) {
+	return p.DHCPClient.Get(id)
 }
 
 func (p *powerVSClient) GetZone() string {
