@@ -20,7 +20,7 @@ github.com/IBM-Cloud/bluemix-go/models
 github.com/IBM-Cloud/bluemix-go/rest
 github.com/IBM-Cloud/bluemix-go/session
 github.com/IBM-Cloud/bluemix-go/trace
-# github.com/IBM-Cloud/power-go-client v1.1.5
+# github.com/IBM-Cloud/power-go-client v1.1.9
 ## explicit; go 1.17
 github.com/IBM-Cloud/power-go-client/clients/instance
 github.com/IBM-Cloud/power-go-client/errors
@@ -44,6 +44,7 @@ github.com/IBM-Cloud/power-go-client/power/client/p_cloud_p_vm_instances
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_placement_groups
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_s_a_p
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_service_d_h_c_p
+github.com/IBM-Cloud/power-go-client/power/client/p_cloud_shared_processor_pools
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_snapshots
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_storage_capacity
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_system_pools
@@ -52,14 +53,16 @@ github.com/IBM-Cloud/power-go-client/power/client/p_cloud_tenants
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_tenants_ssh_keys
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_v_p_n_connections
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_v_p_n_policies
+github.com/IBM-Cloud/power-go-client/power/client/p_cloud_volume_groups
+github.com/IBM-Cloud/power-go-client/power/client/p_cloud_volume_onboarding
 github.com/IBM-Cloud/power-go-client/power/client/p_cloud_volumes
 github.com/IBM-Cloud/power-go-client/power/client/service_bindings
 github.com/IBM-Cloud/power-go-client/power/client/service_instances
 github.com/IBM-Cloud/power-go-client/power/client/storage_types
 github.com/IBM-Cloud/power-go-client/power/client/swagger_spec
 github.com/IBM-Cloud/power-go-client/power/models
-# github.com/IBM/go-sdk-core/v5 v5.9.1
-## explicit; go 1.14
+# github.com/IBM/go-sdk-core/v5 v5.10.1
+## explicit; go 1.16
 github.com/IBM/go-sdk-core/v5/core
 # github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd
 ## explicit
@@ -226,7 +229,7 @@ github.com/gregjones/httpcache/diskcache
 # github.com/hashicorp/go-cleanhttp v0.5.2
 ## explicit; go 1.13
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-retryablehttp v0.7.0
+# github.com/hashicorp/go-retryablehttp v0.7.1
 ## explicit; go 1.13
 github.com/hashicorp/go-retryablehttp
 # github.com/imdario/mergo v0.3.12
@@ -342,7 +345,7 @@ github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/ppc64le-cloud/powervs-utils v0.0.0-20210415051532-4cdd6a79c8fa
+# github.com/ppc64le-cloud/powervs-utils v0.0.0-20220607051746-a593c549605b
 ## explicit; go 1.15
 github.com/ppc64le-cloud/powervs-utils
 # github.com/prometheus/client_golang v1.12.1
@@ -373,7 +376,7 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.7.1
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
