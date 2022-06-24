@@ -8,8 +8,10 @@ import (
 func GetRegion(zone string) (region string, err error) {
 	err = nil
 	switch {
-	case strings.HasPrefix(zone, "dal"), strings.HasPrefix(zone, "us-south"):
+	case strings.HasPrefix(zone, "us-south"):
 		region = "us-south"
+	case strings.HasPrefix(zone, "dal"):
+		region = "dal"
 	case strings.HasPrefix(zone, "sao"):
 		region = "sao"
 	case strings.HasPrefix(zone, "us-east"):
