@@ -21,6 +21,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -150,13 +151,15 @@ func main() {
 	if err := corev1.AddToScheme(mgr.GetScheme()); err != nil {
 		klog.Fatal(err)
 	}
-
+	// Create the cachestore to hold the DHCP IP
+	cacheStore := cache.NewTTLStore(machineactuator.CacheKeyFunc, machineactuator.CacheTTL)
 	// Initialize machine actuator.
 	machineActuator := machineactuator.NewActuator(machineactuator.ActuatorParams{
 		Client:               mgr.GetClient(),
 		EventRecorder:        mgr.GetEventRecorderFor("powervscontroller"),
 		PowerVSClientBuilder: powervsclient.NewValidatedClient,
 		PowerVSMinimalClient: powervsclient.NewMinimalPowerVSClient,
+		DHCPIPCacheStore:     cacheStore,
 	})
 
 	if err := machine.AddWithActuator(mgr, machineActuator); err != nil {

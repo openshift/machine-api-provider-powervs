@@ -2,6 +2,7 @@ package machine
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
@@ -102,6 +103,11 @@ func (r *Reconciler) delete() error {
 		return err
 	} else if err == client.ErrorInstanceNotFound {
 		klog.Warningf("%s: no instances found to delete for machine", r.machine.Name)
+		// Remove the cached VM IP
+		err = r.machineScope.dhcpIPCacheStore.Delete(vmIP{name: r.machine.Name})
+		if err != nil {
+			klog.Errorf("failed to delete the VM: %s entry from DHCP cache store err: %v", r.machine.Name, err)
+		}
 		return nil
 	}
 
@@ -114,7 +120,11 @@ func (r *Reconciler) delete() error {
 		})
 		return fmt.Errorf("failed to delete instaces: %w", err)
 	}
-
+	// Remove the cached VM IP
+	err = r.machineScope.dhcpIPCacheStore.Delete(vmIP{name: r.machine.Name})
+	if err != nil {
+		klog.Errorf("failed to delete the VM: %s entry from DHCP cache store err: %v", r.machine.Name, err)
+	}
 	klog.Infof("Deleted machine %v", r.machine.Name)
 
 	return nil
@@ -147,10 +157,13 @@ func (r *Reconciler) update() error {
 		return fmt.Errorf("failed to set machine cloud provider specifics: %w", err)
 	}
 
-	klog.Infof("Updated machine %s", r.machine.Name)
-
 	r.machineScope.setProviderStatus(existingInstance, conditionSuccess())
 
+	// Fetch and update the IP for machine object
+	if err := r.setMachineAddresses(existingInstance); err != nil {
+		klog.Errorf("Failed to fetch and update an IP address for the machine: %s error: %v", r.machine.Name, err)
+	}
+	klog.Infof("Updated machine %s", r.machine.Name)
 	return r.requeueIfInstanceBuilding(existingInstance)
 }
 
@@ -302,4 +315,134 @@ func (r *Reconciler) getMachineInstance() (*models.PVMInstance, error) {
 	}
 
 	return r.powerVSClient.GetInstanceByName(r.machine.Name)
+}
+
+func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
+	if instance == nil {
+		klog.Infof("VM instance is nil, Cannot fetch VM IP")
+		return nil
+	}
+	var networkAddresses []corev1.NodeAddress
+
+	// Set the NodeInternalDNS as VM name
+	networkAddresses = append(networkAddresses,
+		corev1.NodeAddress{
+			Type:    corev1.NodeInternalDNS,
+			Address: *instance.ServerName,
+		})
+
+	// Try to fetch the IP from instance networks fields
+	for _, network := range instance.Networks {
+		if strings.TrimSpace(network.ExternalIP) != "" {
+			networkAddresses = append(networkAddresses,
+				corev1.NodeAddress{
+					Type:    corev1.NodeExternalIP,
+					Address: strings.TrimSpace(network.ExternalIP),
+				})
+		}
+		if strings.TrimSpace(network.IPAddress) != "" {
+			networkAddresses = append(networkAddresses,
+				corev1.NodeAddress{
+					Type:    corev1.NodeInternalIP,
+					Address: strings.TrimSpace(network.IPAddress),
+				})
+		}
+	}
+	if len(networkAddresses) > 1 {
+		// If the networkAddress length is more than 1 means, either NodeInternalIP or NodeExternalIP is updated so return
+		r.machineScope.machine.Status.Addresses = networkAddresses
+		return nil
+	}
+	// In this case there is no IP found under instance.Networks, So try to fetch the IP from cache or DHCP server
+	// Look for DHCP IP from the cache
+	obj, exists, err := r.machineScope.dhcpIPCacheStore.GetByKey(*instance.ServerName)
+	if err != nil {
+		klog.Errorf("failed to fetch the DHCP IP address for VM : %s from cache store, error: %v", *instance.ServerName, err)
+	}
+	if exists {
+		klog.Infof("found IP: %s for VM: %s from DHCP cache", obj.(vmIP).ip, *instance.ServerName)
+		networkAddresses = append(networkAddresses, corev1.NodeAddress{
+			Type:    corev1.NodeInternalIP,
+			Address: obj.(vmIP).ip,
+		})
+		r.machineScope.machine.Status.Addresses = networkAddresses
+		return nil
+	}
+	// Fetch the VM network ID
+	networkID, err := getNetworkID(r.providerSpec.Network, r.powerVSClient)
+	if err != nil {
+		errStr := fmt.Errorf("failed to fetch network id from network resource for VM: %s error: %v", r.machine.Name, err)
+		klog.Errorf(errStr.Error())
+		return errStr
+	}
+	// Fetch the details of the network attached to the VM
+	var pvmNetwork *models.PVMInstanceNetwork
+	for _, network := range instance.Networks {
+		if network.NetworkID == *networkID {
+			pvmNetwork = network
+			klog.Infof("found network with ID %s attached to VM %s", network.NetworkID, *instance.ServerName)
+		}
+	}
+	if pvmNetwork == nil {
+		errStr := fmt.Errorf("failed to get network attached to VM %s with id %s", *instance.ServerName, *networkID)
+		klog.Errorf(errStr.Error())
+		return errStr
+	}
+	// Get all the DHCP servers
+	dhcpServer, err := r.powerVSClient.GetDHCPServers()
+	if err != nil {
+		errStr := fmt.Errorf("failed to get DHCP server error: %v", err)
+		klog.Errorf(errStr.Error())
+		return errStr
+	}
+	// Get the Details of DHCP server associated with the network
+	var dhcpServerDetails *models.DHCPServerDetail
+	for _, server := range dhcpServer {
+		if *server.Network.ID == *networkID {
+			klog.Infof("found DHCP server with ID %s for network ID %s", *server.Network.ID, *networkID)
+			dhcpServerDetails, err = r.powerVSClient.GetDHCPServerByID(*server.ID)
+			if err != nil || dhcpServerDetails == nil {
+				errStr := fmt.Errorf("failed to get DHCP server details with DHCP server ID: %s error: %v", *server.ID, err)
+				klog.Errorf(errStr.Error())
+				return errStr
+			}
+			break
+		}
+	}
+	if dhcpServerDetails == nil {
+		errStr := fmt.Errorf("DHCP server detailis not found for network with ID %s", *networkID)
+		klog.Errorf(errStr.Error())
+		return errStr
+	}
+
+	// Fetch the VM IP using VM's mac from DHCP server lease
+	var internalIP *string
+	for _, lease := range dhcpServerDetails.Leases {
+		if *lease.InstanceMacAddress == pvmNetwork.MacAddress {
+			klog.Infof("found internal ip %s for VM %s from DHCP lease", *lease.InstanceIP, *instance.ServerName)
+			internalIP = lease.InstanceIP
+			break
+		}
+	}
+	if internalIP == nil {
+		errStr := fmt.Errorf("failed to get internal IP, DHCP lease not found for VM %s with MAC %s in DHCP network %s", *instance.ServerName,
+			pvmNetwork.MacAddress, *dhcpServerDetails.ID)
+		klog.Errorf(errStr.Error())
+		return errStr
+	}
+	klog.Infof("found internal IP: %s for VM: %s from DHCP lease", *internalIP, *instance.ServerName)
+	networkAddresses = append(networkAddresses, corev1.NodeAddress{
+		Type:    corev1.NodeInternalIP,
+		Address: *internalIP,
+	})
+	// Update the cache with the ip and VM name
+	err = r.machineScope.dhcpIPCacheStore.Add(vmIP{
+		name: *instance.ServerName,
+		ip:   *internalIP,
+	})
+	if err != nil {
+		klog.Errorf("failed to update the DHCP cache store with the IP for VM %s error %v", *instance.ServerName, err)
+	}
+	r.machineScope.machine.Status.Addresses = networkAddresses
+	return nil
 }

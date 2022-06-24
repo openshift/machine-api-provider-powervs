@@ -34,6 +34,8 @@ type Client interface {
 	GetNetworks() (*models.Networks, error)
 	GetCloudServiceInstances() ([]bluemixmodels.ServiceInstanceV2, error)
 	GetCloudServiceInstanceByName(name string) ([]bluemixmodels.ServiceInstanceV2, error)
+	GetDHCPServers() (models.DHCPServers, error)
+	GetDHCPServerByID(id string) (*models.DHCPServerDetail, error)
 
 	GetZone() string
 	GetRegion() string

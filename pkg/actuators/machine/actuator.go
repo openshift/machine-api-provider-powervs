@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,6 +46,7 @@ type Actuator struct {
 	powerVSClientBuilder powervsclient.PowerVSClientBuilderFuncType
 	configManagedClient  runtimeclient.Client
 	powerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
+	dhcpIPCacheStore     cache.Store
 }
 
 // ActuatorParams holds parameter information for Actuator.
@@ -54,6 +56,7 @@ type ActuatorParams struct {
 	PowerVSClientBuilder powervsclient.PowerVSClientBuilderFuncType
 	ConfigManagedClient  runtimeclient.Client
 	PowerVSMinimalClient powervsclient.MinimalPowerVSClientBuilderFuncType
+	DHCPIPCacheStore     cache.Store
 }
 
 // NewActuator returns an actuator.
@@ -64,6 +67,7 @@ func NewActuator(params ActuatorParams) *Actuator {
 		powerVSClientBuilder: params.PowerVSClientBuilder,
 		configManagedClient:  params.ConfigManagedClient,
 		powerVSMinimalClient: params.PowerVSMinimalClient,
+		dhcpIPCacheStore:     params.DHCPIPCacheStore,
 	}
 }
 
@@ -87,6 +91,7 @@ func (a *Actuator) Create(ctx context.Context, machine *machinev1beta1.Machine) 
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
 		powerVSMinimalClient: a.powerVSMinimalClient,
+		dhcpIPCacheStore:     a.dhcpIPCacheStore,
 	})
 	if err != nil {
 		fmtErr := fmt.Errorf(scopeFailFmt, machine.GetName(), err)
@@ -114,6 +119,7 @@ func (a *Actuator) Exists(ctx context.Context, machine *machinev1beta1.Machine) 
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
 		powerVSMinimalClient: a.powerVSMinimalClient,
+		dhcpIPCacheStore:     a.dhcpIPCacheStore,
 	})
 	if err != nil {
 		return false, fmt.Errorf(scopeFailFmt, machine.GetName(), err)
@@ -131,6 +137,7 @@ func (a *Actuator) Update(ctx context.Context, machine *machinev1beta1.Machine) 
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
 		powerVSMinimalClient: a.powerVSMinimalClient,
+		dhcpIPCacheStore:     a.dhcpIPCacheStore,
 	})
 	if err != nil {
 		fmtErr := fmt.Errorf(scopeFailFmt, machine.GetName(), err)
@@ -171,6 +178,7 @@ func (a *Actuator) Delete(ctx context.Context, machine *machinev1beta1.Machine) 
 		powerVSClientBuilder: a.powerVSClientBuilder,
 		configManagedClient:  a.configManagedClient,
 		powerVSMinimalClient: a.powerVSMinimalClient,
+		dhcpIPCacheStore:     a.dhcpIPCacheStore,
 	})
 	if err != nil {
 		fmtErr := fmt.Errorf(scopeFailFmt, machine.GetName(), err)

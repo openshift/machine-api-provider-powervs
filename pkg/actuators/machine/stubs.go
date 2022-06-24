@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"k8s.io/utils/pointer"
+
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
 
@@ -150,4 +152,39 @@ func stubGetNetworks(nameprefix string, count int) *models.Networks {
 			})
 	}
 	return images
+}
+
+func stubGetDHCPServers(serverID, networkID string) models.DHCPServers {
+	return models.DHCPServers{
+		&models.DHCPServer{
+			ID: pointer.StringPtr(serverID),
+			Network: &models.DHCPServerNetwork{
+				ID: pointer.StringPtr(networkID),
+			},
+		},
+	}
+}
+
+func stubGetDHCPServerByID(id, ip, mac string) *models.DHCPServerDetail {
+	return &models.DHCPServerDetail{
+		ID: pointer.StringPtr(id),
+		Leases: []*models.DHCPServerLeases{
+			{
+				InstanceIP:         pointer.StringPtr(ip),
+				InstanceMacAddress: pointer.StringPtr(mac),
+			},
+		},
+	}
+}
+
+func stubGetNetworkWithName(name, id string) *models.Networks {
+	networks := &models.Networks{
+		Networks: []*models.NetworkReference{
+			{
+				Name:      pointer.StringPtr(name),
+				NetworkID: pointer.StringPtr(id),
+			},
+		},
+	}
+	return networks
 }

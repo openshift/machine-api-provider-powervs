@@ -4,16 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"testing"
-
-	"k8s.io/apimachinery/pkg/util/rand"
+	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/golang/mock/gomock"
+	"k8s.io/utils/pointer"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/cache"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -308,6 +311,7 @@ func TestDelete(t *testing.T) {
 		powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
 			return nil, nil
 		},
+		dhcpIPCacheStore: cache.NewTTLStore(CacheKeyFunc, CacheTTL),
 	})
 	if err != nil {
 		t.Fatalf("failed to create new machine scope error: %v", err)
@@ -317,5 +321,381 @@ func TestDelete(t *testing.T) {
 		if _, ok := err.(*machinecontroller.RequeueAfterError); !ok {
 			t.Errorf("reconciler was not expected to return error: %v", err)
 		}
+	}
+}
+
+func TestSetMachineAddresses(t *testing.T) {
+	instanceName := "test_vm"
+	networkName := "test-network-1"
+	networkID := "56a112ff-b2d7-4236-ad7b-c5772ffe9cb5"
+	dhcpServerID := "45a112gg-b2d7-4336-ad7b-cdf72f34e9cb5"
+	leaseIP := "192.168.0.10"
+	instanceMac := "ff:11:33:dd:00:22"
+
+	machine, err := stubMachine()
+	if err != nil {
+		t.Fatalf("unable to build stub machine: %v", err)
+	}
+
+	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
+	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
+	powerVSCredentialsSecret := stubPowerVSCredentialsSecret(credSecretName)
+	userDataSecret := stubUserDataSecret(userSecretName)
+
+	defaultDhcpCacheStoreFunc := func() cache.Store {
+		return cache.NewTTLStore(CacheKeyFunc, CacheTTL)
+	}
+
+	testCases := []struct {
+		testcase            string
+		powerVSClientFunc   func(*gomock.Controller) client.Client
+		pvmInstance         *models.PVMInstance
+		expectedNodeAddress []corev1.NodeAddress
+		expectedError       error
+		dhcpCacheStoreFunc  func() cache.Store
+	}{
+		{
+			testcase: "when instance is nil",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			pvmInstance:        nil,
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+		},
+		{
+			testcase: "with instance external ip set",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						ExternalIP: "10.11.2.3",
+					},
+				},
+				ServerName: pointer.StringPtr(instanceName),
+			},
+			expectedNodeAddress: []corev1.NodeAddress{
+				{
+					Type:    corev1.NodeInternalDNS,
+					Address: instanceName,
+				},
+				{
+					Type:    corev1.NodeExternalIP,
+					Address: "10.11.2.3",
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+		},
+		{
+			testcase: "with instance internal ip set",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress: "192.168.1.2",
+					},
+				},
+				ServerName: pointer.StringPtr(instanceName),
+			},
+			expectedNodeAddress: []corev1.NodeAddress{
+				{
+					Type:    corev1.NodeInternalDNS,
+					Address: instanceName,
+				},
+				{
+					Type:    corev1.NodeInternalIP,
+					Address: "192.168.1.2",
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+		},
+		{
+			testcase: "error while getting network id",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), fmt.Errorf("intentional error")).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError:      fmt.Errorf("failed to fetch network id from network resource for VM: test error: intentional error"),
+		},
+		{
+			testcase: "no network id associated with network name",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName("test-network", networkID), nil).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError:      fmt.Errorf("failed to fetch network id from network resource for VM: test error: failed to find an network ID with name %s", networkName),
+		},
+		{
+			testcase: "not able to find network matching vm network id",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError:      fmt.Errorf("failed to get network attached to VM test_vm with id %s", networkID),
+		},
+		{
+			testcase: "error on fetching DHCP server details",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServers().Return(stubGetDHCPServers(dhcpServerID, networkID), fmt.Errorf("intentional error")).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress: "",
+						NetworkID: networkID,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError:      fmt.Errorf("failed to get DHCP server error: intentional error"),
+		},
+		{
+			testcase: "DHCP server details not found associated to network id",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServers().Return(stubGetDHCPServers(dhcpServerID, "networkID"), nil).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress: "",
+						NetworkID: networkID,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError:      fmt.Errorf("DHCP server detailis not found for network with ID %s", networkID),
+		},
+		{
+			testcase: "error on getting DHCP server details",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServers().Return(stubGetDHCPServers(dhcpServerID, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServerByID(dhcpServerID).Return(stubGetDHCPServerByID(dhcpServerID, leaseIP, instanceMac),
+					fmt.Errorf("intentional error")).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress:  "",
+						NetworkID:  networkID,
+						MacAddress: instanceMac,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError:      fmt.Errorf("failed to get DHCP server details with DHCP server ID: %s error: intentional error", dhcpServerID),
+		},
+		{
+			testcase: "DHCP lease does not have lease for instance",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServers().Return(stubGetDHCPServers(dhcpServerID, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServerByID(dhcpServerID).Return(stubGetDHCPServerByID(dhcpServerID, leaseIP, "ff:11:33:dd:00:33"), nil).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress:  "",
+						NetworkID:  networkID,
+						MacAddress: instanceMac,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedError: fmt.Errorf("failed to get internal IP, DHCP lease not found for VM test_vm with MAC %s in DHCP network %s",
+				"ff:11:33:dd:00:22", dhcpServerID),
+		},
+		{
+			testcase: "success in fetching DHCP IP from server",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServers().Return(stubGetDHCPServers(dhcpServerID, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServerByID(dhcpServerID).Return(stubGetDHCPServerByID(dhcpServerID, leaseIP, instanceMac), nil).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress:  "",
+						NetworkID:  networkID,
+						MacAddress: instanceMac,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedNodeAddress: []corev1.NodeAddress{
+				{
+					Type:    corev1.NodeInternalDNS,
+					Address: instanceName,
+				},
+				{
+					Type:    corev1.NodeInternalIP,
+					Address: leaseIP,
+				},
+			},
+		},
+		{
+			testcase: "ip in cache expired, Fetch from dhcp server",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworkWithName(networkName, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServers().Return(stubGetDHCPServers(dhcpServerID, networkID), nil).Times(1)
+				mockPowerVSClient.EXPECT().GetDHCPServerByID(dhcpServerID).Return(stubGetDHCPServerByID(dhcpServerID, leaseIP, instanceMac), nil).Times(1)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress:  "",
+						NetworkID:  networkID,
+						MacAddress: instanceMac,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: func() cache.Store {
+				cacheStore := cache.NewTTLStore(CacheKeyFunc, time.Second)
+				cacheStore.Add(vmIP{
+					name: instanceName,
+					ip:   leaseIP,
+				})
+				time.Sleep(time.Second)
+				return cacheStore
+			},
+			expectedNodeAddress: []corev1.NodeAddress{
+				{
+					Type:    corev1.NodeInternalDNS,
+					Address: instanceName,
+				},
+				{
+					Type:    corev1.NodeInternalIP,
+					Address: leaseIP,
+				},
+			},
+		},
+		{
+			testcase: "success in fetching DHCP IP from cache",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			pvmInstance: &models.PVMInstance{
+				ServerName: pointer.StringPtr(instanceName),
+				Networks: []*models.PVMInstanceNetwork{
+					{
+						IPAddress:  "",
+						NetworkID:  networkID,
+						MacAddress: instanceMac,
+					},
+				},
+			},
+			dhcpCacheStoreFunc: func() cache.Store {
+				cacheStore := cache.NewTTLStore(CacheKeyFunc, CacheTTL)
+				cacheStore.Add(vmIP{
+					name: instanceName,
+					ip:   leaseIP,
+				})
+				return cacheStore
+			},
+			expectedNodeAddress: []corev1.NodeAddress{
+				{
+					Type:    corev1.NodeInternalDNS,
+					Address: instanceName,
+				},
+				{
+					Type:    corev1.NodeInternalIP,
+					Address: leaseIP,
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testcase, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			machineCopy := machine.DeepCopy()
+
+			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
+
+			machineScope, err := newMachineScope(machineScopeParams{
+				client:  fakeClient,
+				machine: machineCopy,
+				powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
+					debug bool) (client.Client, error) {
+					return mockPowerVSClient, nil
+				},
+				powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+					return nil, nil
+				},
+				dhcpIPCacheStore: tc.dhcpCacheStoreFunc(),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			reconciler := newReconciler(machineScope)
+
+			err = reconciler.setMachineAddresses(tc.pvmInstance)
+			if err != nil && tc.expectedError == nil {
+				t.Errorf("Unexpected error from getMachineInstance: %v", err)
+			}
+			if tc.expectedError != nil {
+				if err == nil {
+					t.Fatal("Expecting error but got nil")
+				}
+				if !reflect.DeepEqual(tc.expectedError.Error(), err.Error()) {
+					t.Errorf("expected %v, got: %v", tc.expectedError.Error(), err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Unexpected error %v", err)
+				}
+			}
+
+			if tc.expectedNodeAddress != nil {
+				if !reflect.DeepEqual(machineCopy.Status.Addresses, tc.expectedNodeAddress) {
+					t.Errorf("expected %v, got: %v", tc.expectedNodeAddress, machineCopy.Status.Addresses)
+				}
+			}
+		})
 	}
 }

@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/util/rand"
-
 	"github.com/golang/mock/gomock"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -216,6 +216,7 @@ func TestActuatorEvents(t *testing.T) {
 				EventRecorder:        eventRecorder,
 				PowerVSClientBuilder: powerVSClientBuilder,
 				PowerVSMinimalClient: minimalPowerVSClient,
+				DHCPIPCacheStore:     cache.NewTTLStore(CacheKeyFunc, CacheTTL),
 			}
 			actuator := NewActuator(params)
 			tc.operation(actuator, machine)
@@ -289,6 +290,7 @@ func TestActuatorExists(t *testing.T) {
 				EventRecorder:        eventRecorder,
 				PowerVSClientBuilder: powerVSClientBuilder,
 				PowerVSMinimalClient: minimalPowerVSClient,
+				DHCPIPCacheStore:     cache.NewTTLStore(CacheKeyFunc, CacheTTL),
 			}
 			actuator := NewActuator(params)
 
