@@ -7,8 +7,10 @@ require (
 	github.com/IBM-Cloud/power-go-client v1.1.9
 	github.com/IBM/go-sdk-core/v5 v5.10.1
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/go-logr/logr v1.2.2
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/mock v1.5.0
+	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.18.1
 	github.com/openshift/api v0.0.0-20220531073726-6c4f186339a7
 	github.com/openshift/machine-api-operator v0.2.1-0.20220608065814-f76a8f3ab734
@@ -24,11 +26,6 @@ require (
 	sigs.k8s.io/controller-runtime v0.12.1
 	sigs.k8s.io/controller-tools v0.9.0
 	sigs.k8s.io/yaml v1.3.0 // indirect
-)
-
-require (
-	github.com/go-logr/logr v1.2.2
-	github.com/onsi/ginkgo v1.16.5
 )
 
 require (

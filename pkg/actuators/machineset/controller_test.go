@@ -101,7 +101,7 @@ var _ = Describe("MachineSet Reconciler", func() {
 			memoryGiB:           32,
 			existingAnnotations: make(map[string]string),
 			expectedAnnotations: map[string]string{
-				cpuKey:    "0.5",
+				cpuKey:    "8",
 				memoryKey: "32768",
 			},
 			expectedEvents: []string{},
@@ -111,7 +111,17 @@ var _ = Describe("MachineSet Reconciler", func() {
 			memoryGiB:           64,
 			existingAnnotations: make(map[string]string),
 			expectedAnnotations: map[string]string{
-				cpuKey:    "1",
+				cpuKey:    "8",
+				memoryKey: "65536",
+			},
+			expectedEvents: []string{},
+		}),
+		Entry("with 2.5cpu 64GiB", reconcileTestCase{
+			processors:          intstr.FromString("2.5"),
+			memoryGiB:           64,
+			existingAnnotations: make(map[string]string),
+			expectedAnnotations: map[string]string{
+				cpuKey:    "24",
 				memoryKey: "65536",
 			},
 			expectedEvents: []string{},
@@ -170,7 +180,7 @@ func TestReconcile(t *testing.T) {
 			memoryGiB:           32,
 			existingAnnotations: make(map[string]string),
 			expectedAnnotations: map[string]string{
-				cpuKey:    "0.5",
+				cpuKey:    "8",
 				memoryKey: "32768",
 			},
 			expectErr: false,
@@ -181,7 +191,18 @@ func TestReconcile(t *testing.T) {
 			memoryGiB:           64,
 			existingAnnotations: make(map[string]string),
 			expectedAnnotations: map[string]string{
-				cpuKey:    "1",
+				cpuKey:    "8",
+				memoryKey: "65536",
+			},
+			expectErr: false,
+		},
+		{
+			name:                "with 1.5cpu 64GiB memory",
+			processors:          intstr.FromString("1.5"),
+			memoryGiB:           64,
+			existingAnnotations: make(map[string]string),
+			expectedAnnotations: map[string]string{
+				cpuKey:    "16",
 				memoryKey: "65536",
 			},
 			expectErr: false,
@@ -253,4 +274,56 @@ func providerSpecFromMachine(in *machinev1.PowerVSMachineProviderConfig) (machin
 	return machinev1beta1.ProviderSpec{
 		Value: &runtime.RawExtension{Raw: bytes},
 	}, nil
+}
+
+func TestGetPowerVSProcessorValue(t *testing.T) {
+	testCases := []struct {
+		name        string
+		processors  intstr.IntOrString
+		expectedCPU string
+		expectErr   bool
+	}{
+		{
+			name:        "with cpu in string and fractional",
+			processors:  intstr.FromString("0.5"),
+			expectedCPU: "8",
+		},
+		{
+			name:        "with cpu in string and fractional value greater than 1",
+			processors:  intstr.FromString("1.25"),
+			expectedCPU: "16",
+		},
+		{
+			name:        "with cpu in string and whole number",
+			processors:  intstr.FromString("2"),
+			expectedCPU: "16",
+		},
+		{
+			name:        "with cpu in int format",
+			processors:  intstr.FromInt(1),
+			expectedCPU: "8",
+		},
+		{
+			name:       "with invalid cpu",
+			processors: intstr.FromString("invalid_cpu"),
+			expectErr:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(tt *testing.T) {
+			g := NewWithT(tt)
+			cpu, err := getPowerVSProcessorValue(tc.processors)
+			if tc.expectErr {
+				if err == nil {
+					t.Fatal("getPowerVSProcessorValue expected to return an error")
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("getPowerVSProcessorValue is not expected to return an error, error: %v", err)
+				}
+				g.Expect(cpu).To(Equal(tc.expectedCPU))
+			}
+		})
+	}
 }

@@ -3,6 +3,7 @@ package machineset
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/go-logr/logr"
@@ -27,6 +28,8 @@ const (
 	// https://github.com/openshift/enhancements/pull/186
 	cpuKey    = "machine.openshift.io/vCPU"
 	memoryKey = "machine.openshift.io/memoryMb"
+	// defaultSMT is the default value of simultaneous multithreading
+	defaultSMT = 8
 )
 
 // Reconciler reconciles machineSets.
@@ -126,15 +129,26 @@ func reconcile(machineSet *machinev1beta1.MachineSet) (ctrl.Result, error) {
 }
 
 func getPowerVSProcessorValue(processor intstr.IntOrString) (string, error) {
-	var processors string
+	var cores float64
+	var virtualProcessors string
+	var err error
 	switch processor.Type {
 	case intstr.Int:
-		processors = strconv.FormatInt(int64(processor.IntVal), 10)
+		cores = float64(processor.IntVal)
 	case intstr.String:
-		if _, err := strconv.ParseFloat(processor.StrVal, 32); err != nil {
-			return processors, err
+		if cores, err = strconv.ParseFloat(processor.StrVal, 64); err != nil {
+			return virtualProcessors, err
 		}
-		processors = processor.StrVal
 	}
-	return processors, nil
+	// There is a core-to-lCPU ratio of 1:1 for Dedicated processors. For shared processors, fractional cores round up to the nearest whole number. For example, 1.25 cores equals 2 lCPUs.
+	// VM with 1 dedicated processor will see = 1 * SMT = 1 * 8 = 8 cpus in OS
+	// VM with 1.5 shared processor will see = 2 * SMT = 2 * 8 = 16 cpus in OS
+	// Here SMT: simultaneous multithreading which is default to 8
+	// Here lCPU: number of online logical processors
+	// example: on a Power VS machine with 0.5 cores
+	// $ lparstat
+	//	  System Configuration
+	//	  type=Shared mode=Uncapped smt=8 lcpu=1 mem=33413760 kB cpus=20 ent=0.50
+	virtualProcessors = fmt.Sprintf("%v", math.Ceil(cores)*defaultSMT)
+	return virtualProcessors, nil
 }
