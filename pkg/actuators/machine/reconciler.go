@@ -348,9 +348,9 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 				})
 		}
 	}
+	r.machineScope.machine.Status.Addresses = networkAddresses
 	if len(networkAddresses) > 1 {
 		// If the networkAddress length is more than 1 means, either NodeInternalIP or NodeExternalIP is updated so return
-		r.machineScope.machine.Status.Addresses = networkAddresses
 		return nil
 	}
 	// In this case there is no IP found under instance.Networks, So try to fetch the IP from cache or DHCP server
