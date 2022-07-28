@@ -345,14 +345,20 @@ func TestSetMachineAddresses(t *testing.T) {
 	defaultDhcpCacheStoreFunc := func() cache.Store {
 		return cache.NewTTLStore(CacheKeyFunc, CacheTTL)
 	}
+	defaultExpectedMachineAddress := []corev1.NodeAddress{
+		{
+			Type:    corev1.NodeInternalDNS,
+			Address: instanceName,
+		},
+	}
 
 	testCases := []struct {
-		testcase            string
-		powerVSClientFunc   func(*gomock.Controller) client.Client
-		pvmInstance         *models.PVMInstance
-		expectedNodeAddress []corev1.NodeAddress
-		expectedError       error
-		dhcpCacheStoreFunc  func() cache.Store
+		testcase               string
+		powerVSClientFunc      func(*gomock.Controller) client.Client
+		pvmInstance            *models.PVMInstance
+		expectedMachineAddress []corev1.NodeAddress
+		expectedError          error
+		dhcpCacheStoreFunc     func() cache.Store
 	}{
 		{
 			testcase: "when instance is nil",
@@ -377,16 +383,10 @@ func TestSetMachineAddresses(t *testing.T) {
 				},
 				ServerName: pointer.StringPtr(instanceName),
 			},
-			expectedNodeAddress: []corev1.NodeAddress{
-				{
-					Type:    corev1.NodeInternalDNS,
-					Address: instanceName,
-				},
-				{
-					Type:    corev1.NodeExternalIP,
-					Address: "10.11.2.3",
-				},
-			},
+			expectedMachineAddress: append(defaultExpectedMachineAddress, corev1.NodeAddress{
+				Type:    corev1.NodeExternalIP,
+				Address: "10.11.2.3",
+			}),
 			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
 		},
 		{
@@ -403,16 +403,10 @@ func TestSetMachineAddresses(t *testing.T) {
 				},
 				ServerName: pointer.StringPtr(instanceName),
 			},
-			expectedNodeAddress: []corev1.NodeAddress{
-				{
-					Type:    corev1.NodeInternalDNS,
-					Address: instanceName,
-				},
-				{
-					Type:    corev1.NodeInternalIP,
-					Address: "192.168.1.2",
-				},
-			},
+			expectedMachineAddress: append(defaultExpectedMachineAddress, corev1.NodeAddress{
+				Type:    corev1.NodeInternalIP,
+				Address: "192.168.1.2",
+			}),
 			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
 		},
 		{
@@ -425,8 +419,9 @@ func TestSetMachineAddresses(t *testing.T) {
 			pvmInstance: &models.PVMInstance{
 				ServerName: pointer.StringPtr(instanceName),
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedError:      fmt.Errorf("failed to fetch network id from network resource for VM: test error: intentional error"),
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
+			expectedError:          fmt.Errorf("failed to fetch network id from network resource for VM: test error: intentional error"),
 		},
 		{
 			testcase: "no network id associated with network name",
@@ -438,8 +433,9 @@ func TestSetMachineAddresses(t *testing.T) {
 			pvmInstance: &models.PVMInstance{
 				ServerName: pointer.StringPtr(instanceName),
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedError:      fmt.Errorf("failed to fetch network id from network resource for VM: test error: failed to find an network ID with name %s", networkName),
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
+			expectedError:          fmt.Errorf("failed to fetch network id from network resource for VM: test error: failed to find an network ID with name %s", networkName),
 		},
 		{
 			testcase: "not able to find network matching vm network id",
@@ -451,8 +447,9 @@ func TestSetMachineAddresses(t *testing.T) {
 			pvmInstance: &models.PVMInstance{
 				ServerName: pointer.StringPtr(instanceName),
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedError:      fmt.Errorf("failed to get network attached to VM test_vm with id %s", networkID),
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
+			expectedError:          fmt.Errorf("failed to get network attached to VM test_vm with id %s", networkID),
 		},
 		{
 			testcase: "error on fetching DHCP server details",
@@ -471,8 +468,9 @@ func TestSetMachineAddresses(t *testing.T) {
 					},
 				},
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedError:      fmt.Errorf("failed to get DHCP server error: intentional error"),
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
+			expectedError:          fmt.Errorf("failed to get DHCP server error: intentional error"),
 		},
 		{
 			testcase: "DHCP server details not found associated to network id",
@@ -491,8 +489,9 @@ func TestSetMachineAddresses(t *testing.T) {
 					},
 				},
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedError:      fmt.Errorf("DHCP server detailis not found for network with ID %s", networkID),
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
+			expectedError:          fmt.Errorf("DHCP server detailis not found for network with ID %s", networkID),
 		},
 		{
 			testcase: "error on getting DHCP server details",
@@ -514,8 +513,9 @@ func TestSetMachineAddresses(t *testing.T) {
 					},
 				},
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedError:      fmt.Errorf("failed to get DHCP server details with DHCP server ID: %s error: intentional error", dhcpServerID),
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
+			expectedError:          fmt.Errorf("failed to get DHCP server details with DHCP server ID: %s error: intentional error", dhcpServerID),
 		},
 		{
 			testcase: "DHCP lease does not have lease for instance",
@@ -536,7 +536,8 @@ func TestSetMachineAddresses(t *testing.T) {
 					},
 				},
 			},
-			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
+			expectedMachineAddress: defaultExpectedMachineAddress,
+			dhcpCacheStoreFunc:     defaultDhcpCacheStoreFunc,
 			expectedError: fmt.Errorf("failed to get internal IP, DHCP lease not found for VM test_vm with MAC %s in DHCP network %s",
 				"ff:11:33:dd:00:22", dhcpServerID),
 		},
@@ -560,16 +561,10 @@ func TestSetMachineAddresses(t *testing.T) {
 				},
 			},
 			dhcpCacheStoreFunc: defaultDhcpCacheStoreFunc,
-			expectedNodeAddress: []corev1.NodeAddress{
-				{
-					Type:    corev1.NodeInternalDNS,
-					Address: instanceName,
-				},
-				{
-					Type:    corev1.NodeInternalIP,
-					Address: leaseIP,
-				},
-			},
+			expectedMachineAddress: append(defaultExpectedMachineAddress, corev1.NodeAddress{
+				Type:    corev1.NodeInternalIP,
+				Address: leaseIP,
+			}),
 		},
 		{
 			testcase: "ip in cache expired, Fetch from dhcp server",
@@ -599,16 +594,10 @@ func TestSetMachineAddresses(t *testing.T) {
 				time.Sleep(time.Second)
 				return cacheStore
 			},
-			expectedNodeAddress: []corev1.NodeAddress{
-				{
-					Type:    corev1.NodeInternalDNS,
-					Address: instanceName,
-				},
-				{
-					Type:    corev1.NodeInternalIP,
-					Address: leaseIP,
-				},
-			},
+			expectedMachineAddress: append(defaultExpectedMachineAddress, corev1.NodeAddress{
+				Type:    corev1.NodeInternalIP,
+				Address: leaseIP,
+			}),
 		},
 		{
 			testcase: "success in fetching DHCP IP from cache",
@@ -634,16 +623,10 @@ func TestSetMachineAddresses(t *testing.T) {
 				})
 				return cacheStore
 			},
-			expectedNodeAddress: []corev1.NodeAddress{
-				{
-					Type:    corev1.NodeInternalDNS,
-					Address: instanceName,
-				},
-				{
-					Type:    corev1.NodeInternalIP,
-					Address: leaseIP,
-				},
-			},
+			expectedMachineAddress: append(defaultExpectedMachineAddress, corev1.NodeAddress{
+				Type:    corev1.NodeInternalIP,
+				Address: leaseIP,
+			}),
 		},
 	}
 
@@ -691,9 +674,9 @@ func TestSetMachineAddresses(t *testing.T) {
 				}
 			}
 
-			if tc.expectedNodeAddress != nil {
-				if !reflect.DeepEqual(machineCopy.Status.Addresses, tc.expectedNodeAddress) {
-					t.Errorf("expected %v, got: %v", tc.expectedNodeAddress, machineCopy.Status.Addresses)
+			if tc.expectedMachineAddress != nil {
+				if !reflect.DeepEqual(machineCopy.Status.Addresses, tc.expectedMachineAddress) {
+					t.Errorf("expected %v, got: %v", tc.expectedMachineAddress, machineCopy.Status.Addresses)
 				}
 			}
 		})
