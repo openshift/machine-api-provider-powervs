@@ -3,6 +3,7 @@ reviewers:
 - Karthik-K-N
 approvers:
 - mkumatag
+- Karthik-K-N
 
 component: "Cloud Compute"
 subcomponent: "Other Providers"
