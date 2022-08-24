@@ -4,6 +4,7 @@ reviewers:
 approvers:
 - mkumatag
 - Karthik-K-N
+- JoelSpeed
 
 component: "Cloud Compute"
 subcomponent: "Other Providers"
