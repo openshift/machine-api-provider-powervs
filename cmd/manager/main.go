@@ -37,6 +37,7 @@ import (
 	machineactuator "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machine"
 	machinesetcontroller "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machineset"
 	powervsclient "github.com/openshift/machine-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/controllers"
 	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 	"github.com/openshift/machine-api-provider-powervs/pkg/version"
 )
@@ -175,6 +176,14 @@ func main() {
 		Log:    ctrl.Log.WithName("controllers").WithName("MachineSet"),
 	}).SetupWithManager(mgr, controller.Options{}); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "MachineSet")
+		os.Exit(1)
+	}
+
+	if err := (&controllers.Reconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("CustomServiceEndpoint"),
+	}).SetupWithManager(mgr, controller.Options{}); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "CustomServiceEndpoint")
 		os.Exit(1)
 	}
 
