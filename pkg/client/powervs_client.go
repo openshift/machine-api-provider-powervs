@@ -75,17 +75,17 @@ var (
 	}
 )
 
-//FormatProviderID formats and returns the provided instanceID
+// FormatProviderID formats and returns the provided instanceID
 func FormatProviderID(region, zone, serviceInstanceID, vmInstanceID string) string {
 	// ProviderID format: ibmpowervs://<region>/<zone>/<service_instance_id>/<powervs_machine_id>
 	return fmt.Sprintf("ibmpowervs://%s/%s/%s/%s", region, zone, serviceInstanceID, vmInstanceID)
 }
 
-//PowerVSClientBuilderFuncType is function type for building the Power VS client
+// PowerVSClientBuilderFuncType is function type for building the Power VS client
 type PowerVSClientBuilderFuncType func(client client.Client, secretName, namespace, cloudInstanceID string,
 	debug bool) (Client, error)
 
-//MinimalPowerVSClientBuilderFuncType is function type for building the Power VS client
+// MinimalPowerVSClientBuilderFuncType is function type for building the Power VS client
 type MinimalPowerVSClientBuilderFuncType func(client client.Client) (Client, error)
 
 func apiKeyFromSecret(secret *corev1.Secret) (apiKey string, err error) {
@@ -98,7 +98,7 @@ func apiKeyFromSecret(secret *corev1.Secret) (apiKey string, err error) {
 	return
 }
 
-//GetAPIKey will return the api key read from given secretName in a given namespace
+// GetAPIKey will return the api key read from given secretName in a given namespace
 func GetAPIKey(ctrlRuntimeClient client.Client, secretName, namespace string) (apikey string, err error) {
 	if secretName == "" {
 		return "", machineapiapierrors.InvalidMachineConfiguration("empty secret name")
@@ -117,7 +117,7 @@ func GetAPIKey(ctrlRuntimeClient client.Client, secretName, namespace string) (a
 	return
 }
 
-//NewValidatedClient creates and return a new Power VS client
+// NewValidatedClient creates and return a new Power VS client
 func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, cloudInstanceID string, debug bool) (Client, error) {
 	apikey, err := GetAPIKey(ctrlRuntimeClient, secretName, namespace)
 	if err != nil {
@@ -335,7 +335,7 @@ func authenticateAPIKey(sess *bxsession.Session) error {
 	return tokenRefresher.AuthenticateAPIKey(config.BluemixAPIKey)
 }
 
-//User is used to hold the user details
+// User is used to hold the user details
 type User struct {
 	ID         string
 	Email      string

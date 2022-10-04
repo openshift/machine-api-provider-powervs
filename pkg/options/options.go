@@ -1,6 +1,6 @@
 package options
 
-//Debug is used to enable or disable the debug mode
+// Debug is used to enable or disable the debug mode
 var Debug *bool
 
 // GetDebugMode is used to safely access the debug flag value
