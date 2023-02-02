@@ -6,5 +6,4 @@ approvers:
 - Karthik-K-N
 - JoelSpeed
 
-component: "Cloud Compute"
-subcomponent: "Other Providers"
+component: "Multi-Arch / IBM P and Z"
