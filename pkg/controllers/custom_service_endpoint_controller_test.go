@@ -82,6 +82,11 @@ func TestResolveEndpoints(t *testing.T) {
 			updateStatus: configv1.InfrastructureStatus{
 				ControlPlaneTopology:   "HighlyAvailable",
 				InfrastructureTopology: "HighlyAvailable",
+				PlatformStatus: &configv1.PlatformStatus{
+					PowerVS: &configv1.PowerVSPlatformStatus{
+						ResourceGroup: "Default",
+					},
+				},
 			},
 			expectedInfraObj: expectedInfraObject(),
 		},
@@ -103,6 +108,7 @@ func TestResolveEndpoints(t *testing.T) {
 								URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 							},
 						},
+						ResourceGroup: "Default",
 					},
 				},
 			},
@@ -151,6 +157,7 @@ func TestResolveEndpoints(t *testing.T) {
 								URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 							},
 						},
+						ResourceGroup: "Default",
 					},
 				},
 			},
@@ -158,6 +165,7 @@ func TestResolveEndpoints(t *testing.T) {
 				Status: configv1.InfrastructureStatus{
 					ControlPlaneTopology:   "HighlyAvailable",
 					InfrastructureTopology: "HighlyAvailable",
+					CPUPartitioning:        configv1.CPUPartitioningNone,
 					PlatformStatus: &configv1.PlatformStatus{
 						PowerVS: &configv1.PowerVSPlatformStatus{
 							ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
@@ -174,6 +182,7 @@ func TestResolveEndpoints(t *testing.T) {
 									URL:  "https://test.resource-controller.cloud.ibm.com",
 								},
 							},
+							ResourceGroup: "Default",
 						},
 					},
 				},
@@ -201,6 +210,7 @@ func TestResolveEndpoints(t *testing.T) {
 								URL:  "https://test.resource-controller.cloud.ibm.com",
 							},
 						},
+						ResourceGroup: "Default",
 					},
 				},
 			},
@@ -289,6 +299,7 @@ func expectedInfraObject() *configv1.Infrastructure {
 		Status: configv1.InfrastructureStatus{
 			ControlPlaneTopology:   "HighlyAvailable",
 			InfrastructureTopology: "HighlyAvailable",
+			CPUPartitioning:        configv1.CPUPartitioningNone,
 			PlatformStatus: &configv1.PlatformStatus{
 				PowerVS: &configv1.PowerVSPlatformStatus{
 					ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
@@ -301,6 +312,7 @@ func expectedInfraObject() *configv1.Infrastructure {
 							URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 						},
 					},
+					ResourceGroup: "Default",
 				},
 			},
 		},

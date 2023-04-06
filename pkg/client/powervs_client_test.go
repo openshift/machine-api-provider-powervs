@@ -140,6 +140,7 @@ func stubStatus() configv1.InfrastructureStatus {
 						URL:  customEndpointsMap["rc"],
 					},
 				},
+				ResourceGroup: "Default",
 			},
 		},
 	}
