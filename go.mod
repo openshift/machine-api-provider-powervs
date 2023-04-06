@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/golang/mock v1.6.0
 	github.com/onsi/gomega v1.26.0
-	github.com/openshift/api v0.0.0-20230120195050-6ba31fa438f2
+	github.com/openshift/api v0.0.0-20230405120337-2cf811009be8
 	github.com/openshift/machine-api-operator v0.2.1-0.20230123164915-12484cb8eb53
 	github.com/pkg/errors v0.9.1
 	github.com/ppc64le-cloud/powervs-utils v0.0.0-20220607051746-a593c549605b
