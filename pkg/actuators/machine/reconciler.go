@@ -97,7 +97,7 @@ func (r *Reconciler) delete() error {
 		metrics.RegisterFailedInstanceDelete(&metrics.MachineLabels{
 			Name:      r.machine.Name,
 			Namespace: r.machine.Namespace,
-			Reason:    err.Error(),
+			Reason:    "error getting existing instance",
 		})
 		klog.Errorf("%s: error getting existing instances: %v", r.machine.Name, err)
 		return err
@@ -116,7 +116,7 @@ func (r *Reconciler) delete() error {
 		metrics.RegisterFailedInstanceDelete(&metrics.MachineLabels{
 			Name:      r.machine.Name,
 			Namespace: r.machine.Namespace,
-			Reason:    err.Error(),
+			Reason:    "failed to delete instance",
 		})
 		return fmt.Errorf("failed to delete instaces: %w", err)
 	}
@@ -143,7 +143,7 @@ func (r *Reconciler) update() error {
 		metrics.RegisterFailedInstanceUpdate(&metrics.MachineLabels{
 			Name:      r.machine.Name,
 			Namespace: r.machine.Namespace,
-			Reason:    err.Error(),
+			Reason:    "error getting existing instance",
 		})
 		klog.Errorf("%s: error getting existing instance: %v", r.machine.Name, err)
 		return err
@@ -177,7 +177,7 @@ func (r *Reconciler) exists() (bool, error) {
 		metrics.RegisterFailedInstanceUpdate(&metrics.MachineLabels{
 			Name:      r.machine.Name,
 			Namespace: r.machine.Namespace,
-			Reason:    err.Error(),
+			Reason:    "error getting existing instance",
 		})
 		klog.Errorf("%s: error getting existing instances: %v", r.machine.Name, err)
 		return false, err
