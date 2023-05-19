@@ -9,14 +9,15 @@ import (
 	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
+	"github.com/IBM/vpc-go-sdk/vpcv1"
 	"github.com/golang/mock/gomock"
-	"k8s.io/utils/pointer"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/utils/pointer"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -677,6 +678,725 @@ func TestSetMachineAddresses(t *testing.T) {
 			if tc.expectedMachineAddress != nil {
 				if !reflect.DeepEqual(machineCopy.Status.Addresses, tc.expectedMachineAddress) {
 					t.Errorf("expected %v, got: %v", tc.expectedMachineAddress, machineCopy.Status.Addresses)
+				}
+			}
+		})
+	}
+}
+
+func TestUpdateLoadBalancers(t *testing.T) {
+	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
+	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
+	powerVSCredentialsSecret := stubPowerVSCredentialsSecret(credSecretName)
+	userDataSecret := stubUserDataSecret(userSecretName)
+
+	testCases := []struct {
+		testcase          string
+		powerVSClientFunc func(*gomock.Controller) client.Client
+		expectedError     error
+		machineFunc       func() *machinev1beta1.Machine
+		internalIP        string
+	}{
+		{
+			testcase: "when loadBalancer is not configured",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine(nil, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase: "when different loadBalancer type is specified",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-loadBalancer"}, "network")
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase: "when listLoadBalancer fails",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(nil, nil, fmt.Errorf("failed to list loadBalancers")).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: failed to get loadbalancers details from cloud error listing loadbalancer failed to list loadBalancers"),
+		},
+		{
+			testcase: "when there no loadBalancers in cloud",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(nil, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: failed to get loadbalancers details from cloud no loadbalancer is retrieved"),
+		},
+		{
+			testcase: "when configured loadBalancer not present in cloud",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name: pointer.String("name"),
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: failed to get loadbalancers details from cloud not able to find all [test-lb] loadbalancer in cloud"),
+		},
+		{
+			testcase: "when loadBalancer not in active state",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name:               pointer.String("test-lb"),
+							ID:                 pointer.String("id"),
+							ProvisioningStatus: pointer.String("busy"),
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: cannot update load balancer test-lb, load balancer is not in active state"),
+		},
+		{
+			testcase: "when configured loadBalancer does not have pool",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name:               pointer.String("test-lb"),
+							ID:                 pointer.String("id"),
+							ProvisioningStatus: pointer.String(loadBalancerActiveState),
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: no pools exist for the load balancer test-lb"),
+		},
+		{
+			testcase: "failed to list loadBalancer pool",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(nil, nil, fmt.Errorf("failed to get pool from cloud")).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: failed to list pool-name LoadBalancer pool error: failed to get pool from cloud"),
+		},
+		{
+			testcase:   "internal IP already registered in loadBalancer pool",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+							Target: &vpcv1.LoadBalancerPoolMemberTarget{
+								Address: pointer.String("192.168.0.11"),
+							},
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase:   "failed to get loadBalancer details",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().GetLoadBalancer(gomock.Any()).Return(nil, nil, fmt.Errorf("failed to get loadbalancer"))
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: error getting loadbalancer details with id: id error: failed to get loadbalancer"),
+		},
+		{
+			testcase:   "failed to update pool member, loadBalancer is not in active state",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().GetLoadBalancer(gomock.Any()).Return(&vpcv1.LoadBalancer{
+					Name:               pointer.String("test-lb"),
+					ID:                 pointer.String("id"),
+					ProvisioningStatus: pointer.String("busy"),
+				}, nil, nil)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: requeue in: 20s"),
+		},
+		{
+			testcase:   "failed to create loadBalancer pool member",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().GetLoadBalancer(gomock.Any()).Return(stubGetLoadBalancerResult(), nil, nil)
+				mockPowerVSClient.EXPECT().CreateLoadBalancerPoolMember(gomock.Any()).Return(nil, nil, fmt.Errorf("failed to create pool memeber"))
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("test-vm: Failed to register application load balancers: error creating LoadBalacner pool member failed to create pool memeber"),
+		},
+		{
+			testcase:   "successfully to create loadBalancer pool member",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().GetLoadBalancer(gomock.Any()).Return(stubGetLoadBalancerResult(), nil, nil)
+				mockPowerVSClient.EXPECT().CreateLoadBalancerPoolMember(gomock.Any()).Return(nil, nil, nil)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase:   "successfully to create multiple loadBalancer pool member",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name:               pointer.String("test-lb"),
+							ID:                 pointer.String("id"),
+							ProvisioningStatus: pointer.String(loadBalancerActiveState),
+							Pools: []vpcv1.LoadBalancerPoolReference{
+								{
+									ID:   pointer.String("pool-id"),
+									Name: pointer.String("pool-name"),
+								},
+								{
+									ID:   pointer.String("pool-id-2"),
+									Name: pointer.String("pool-name-2"),
+								},
+							},
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+						},
+					},
+				}, nil, nil).Times(2)
+				mockPowerVSClient.EXPECT().GetLoadBalancer(gomock.Any()).Return(stubGetLoadBalancerResult(), nil, nil).Times(2)
+				mockPowerVSClient.EXPECT().CreateLoadBalancerPoolMember(gomock.Any()).Return(nil, nil, nil).Times(2)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testcase, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			machine := tc.machineFunc()
+
+			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
+
+			machineScope, err := newMachineScope(machineScopeParams{
+				client:  fakeClient,
+				machine: machine,
+				powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
+					debug bool) (client.Client, error) {
+					return mockPowerVSClient, nil
+				},
+				powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+					return nil, nil
+				},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			reconciler := newReconciler(machineScope)
+
+			err = reconciler.updateLoadBalancers(tc.internalIP)
+			if err != nil && tc.expectedError == nil {
+				t.Errorf("Unexpected error from updateLoadBalancers: %v", err)
+			}
+			if tc.expectedError != nil {
+				if err == nil {
+					t.Fatal("Expecting error but got nil")
+				}
+				if !reflect.DeepEqual(tc.expectedError.Error(), err.Error()) {
+					t.Errorf("expected %v, got: %v", tc.expectedError.Error(), err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Unexpected error %v", err)
+				}
+			}
+		})
+	}
+}
+
+func TestRemoveFromApplicationLoadBalancer(t *testing.T) {
+	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
+	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
+	powerVSCredentialsSecret := stubPowerVSCredentialsSecret(credSecretName)
+	userDataSecret := stubUserDataSecret(userSecretName)
+
+	testCases := []struct {
+		testcase          string
+		powerVSClientFunc func(*gomock.Controller) client.Client
+		expectedError     error
+		machineFunc       func() *machinev1beta1.Machine
+		internalIP        string
+	}{
+		{
+			testcase: "when loadBalancer is not configured",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine(nil, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase: "when different loadBalancer type is specified",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-loadBalancer"}, "network")
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase: "when listLoadBalancer fails",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(nil, nil, fmt.Errorf("failed to list loadBalancers")).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("failed to get loadbalancers details from cloud error listing loadbalancer failed to list loadBalancers"),
+		},
+		{
+			testcase: "when there no loadBalancers in cloud",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(nil, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("failed to get loadbalancers details from cloud no loadbalancer is retrieved"),
+		},
+		{
+			testcase: "when configured loadBalancer not present in cloud",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name: pointer.String("name"),
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("failed to get loadbalancers details from cloud not able to find all [test-lb] loadbalancer in cloud"),
+		},
+		{
+			testcase: "when loadBalancer not in active state",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name:               pointer.String("test-lb"),
+							ID:                 pointer.String("id"),
+							ProvisioningStatus: pointer.String("busy"),
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("cannot update load balancer test-lb, load balancer is not in active state"),
+		},
+		{
+			testcase: "when configured loadBalancer does not have pool",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name:               pointer.String("test-lb"),
+							ID:                 pointer.String("id"),
+							ProvisioningStatus: pointer.String(loadBalancerActiveState),
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("no pools exist for the load balancer test-lb"),
+		},
+		{
+			testcase: "failed to list loadBalancer pool",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(nil, nil, fmt.Errorf("failed to get pool from cloud")).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("failed to list pool-name LoadBalancer pool error: failed to get pool from cloud"),
+		},
+		{
+			testcase:   "internal IP not registered in loadBalancer pool",
+			internalIP: "192.168.0.10",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							Port: pointer.Int64(6443),
+							Target: &vpcv1.LoadBalancerPoolMemberTarget{
+								Address: pointer.String("192.168.0.11"),
+							},
+						},
+					},
+				}, nil, nil).Times(1)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase:   "failed to delete loadBalancer pool member",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							ID:   pointer.String("test-id"),
+							Port: pointer.Int64(6443),
+							Target: &vpcv1.LoadBalancerPoolMemberTarget{
+								Address: pointer.String("192.168.0.11"),
+							},
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().DeleteLoadBalancerPoolMember(gomock.Any()).Return(nil, fmt.Errorf("failed to delete pool memeber"))
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+			expectedError: fmt.Errorf("error deleting LoadBalacner pool member failed to delete pool memeber"),
+		},
+		{
+			testcase:   "successfully to delete loadBalancer pool member",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(stubGetLoadBalancerCollections(), nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							ID:   pointer.String("test-id"),
+							Port: pointer.Int64(6443),
+							Target: &vpcv1.LoadBalancerPoolMemberTarget{
+								Address: pointer.String("192.168.0.11"),
+							},
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().DeleteLoadBalancerPoolMember(gomock.Any()).Return(nil, nil)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+		{
+			testcase:   "successfully to delete multiple loadBalancer pool member",
+			internalIP: "192.168.0.11",
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().ListLoadBalancers(gomock.Any()).Return(&vpcv1.LoadBalancerCollection{
+					LoadBalancers: []vpcv1.LoadBalancer{
+						{
+							Name:               pointer.String("test-lb"),
+							ID:                 pointer.String("id"),
+							ProvisioningStatus: pointer.String(loadBalancerActiveState),
+							Pools: []vpcv1.LoadBalancerPoolReference{
+								{
+									ID:   pointer.String("pool-id"),
+									Name: pointer.String("pool-name"),
+								},
+								{
+									ID:   pointer.String("pool-id-2"),
+									Name: pointer.String("pool-name-2"),
+								},
+							},
+						},
+					},
+				}, nil, nil).Times(1)
+				mockPowerVSClient.EXPECT().ListLoadBalancerPoolMembers(gomock.Any()).Return(&vpcv1.LoadBalancerPoolMemberCollection{
+					Members: []vpcv1.LoadBalancerPoolMember{
+						{
+							ID:   pointer.String("test-id"),
+							Port: pointer.Int64(6443),
+							Target: &vpcv1.LoadBalancerPoolMemberTarget{
+								Address: pointer.String("192.168.0.11"),
+							},
+						},
+					},
+				}, nil, nil).Times(2)
+				mockPowerVSClient.EXPECT().DeleteLoadBalancerPoolMember(gomock.Any()).Return(nil, nil).Times(2)
+				return mockPowerVSClient
+			},
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubControlPlaneMachine([]string{"test-lb"}, machinev1.ApplicationLoadBalancerType)
+				if err != nil {
+					t.Fatalf("unable to build stub control plane machine: %v", err)
+				}
+				return machine
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.testcase, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			machine := tc.machineFunc()
+
+			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
+
+			machineScope, err := newMachineScope(machineScopeParams{
+				client:  fakeClient,
+				machine: machine,
+				powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
+					debug bool) (client.Client, error) {
+					return mockPowerVSClient, nil
+				},
+				powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+					return nil, nil
+				},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			reconciler := newReconciler(machineScope)
+
+			err = reconciler.removeFromApplicationLoadBalancers(tc.internalIP)
+			if err != nil && tc.expectedError == nil {
+				t.Errorf("Unexpected error from updateLoadBalancers: %v", err)
+			}
+			if tc.expectedError != nil {
+				if err == nil {
+					t.Fatal("Expecting error but got nil")
+				}
+				if !reflect.DeepEqual(tc.expectedError.Error(), err.Error()) {
+					t.Errorf("expected %v, got: %v", tc.expectedError.Error(), err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Unexpected error %v", err)
 				}
 			}
 		})

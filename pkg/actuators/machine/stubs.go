@@ -8,6 +8,7 @@ import (
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
+	"github.com/IBM/vpc-go-sdk/vpcv1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -187,4 +188,61 @@ func stubGetNetworkWithName(name, id string) *models.Networks {
 		},
 	}
 	return networks
+}
+
+func stubControlPlaneMachine(loadBalancerNames []string, loadBalancerType machinev1.IBMVPCLoadBalancerType) (*machinev1beta1.Machine, error) {
+
+	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
+	cpMachine := stubProviderConfig(credSecretName)
+
+	for _, lb := range loadBalancerNames {
+		cpMachine.LoadBalancers = append(cpMachine.LoadBalancers, machinev1.LoadBalancerReference{
+			Name: lb,
+			Type: loadBalancerType,
+		})
+	}
+	providerSpec, err := RawExtensionFromProviderSpec(cpMachine)
+	if err != nil {
+		return nil, err
+	}
+
+	return &machinev1beta1.Machine{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-vm",
+			Namespace: defaultNamespace,
+			Labels: map[string]string{
+				machinev1beta1.MachineClusterIDLabel: "CLUSTERID",
+			},
+		},
+		Spec: machinev1beta1.MachineSpec{
+			ProviderSpec: machinev1beta1.ProviderSpec{
+				Value: providerSpec,
+			},
+		}}, nil
+}
+
+func stubGetLoadBalancerResult() *vpcv1.LoadBalancer {
+	return &vpcv1.LoadBalancer{
+		Name:               pointer.String("test-lb"),
+		ID:                 pointer.String("id"),
+		ProvisioningStatus: pointer.String(loadBalancerActiveState),
+	}
+}
+
+func stubGetLoadBalancerCollections() *vpcv1.LoadBalancerCollection {
+	return &vpcv1.LoadBalancerCollection{
+		LoadBalancers: []vpcv1.LoadBalancer{
+			{
+				Name:               pointer.String("test-lb"),
+				ID:                 pointer.String("id"),
+				ProvisioningStatus: pointer.String(loadBalancerActiveState),
+				Pools: []vpcv1.LoadBalancerPoolReference{
+					{
+						ID:   pointer.String("pool-id"),
+						Name: pointer.String("pool-name"),
+					},
+				},
+			},
+		},
+	}
 }
