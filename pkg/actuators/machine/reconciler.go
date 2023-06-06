@@ -73,18 +73,7 @@ func (r *Reconciler) create() error {
 		r.machineScope.setProviderStatus(nil, conditionFailed)
 		return fmt.Errorf("failed to launch instance: %w", err)
 	}
-
 	klog.Infof("Created Machine %v", r.machine.Name)
-	if err = r.setProviderID(instance); err != nil {
-		return fmt.Errorf("failed to update machine object with providerID: %w", err)
-	}
-
-	if err = r.setMachineCloudProviderSpecifics(instance); err != nil {
-		return fmt.Errorf("failed to set machine cloud provider specifics: %w", err)
-	}
-
-	r.machineScope.setProviderStatus(instance, conditionSuccess())
-
 	return r.requeueIfInstanceBuilding(instance)
 }
 
