@@ -7,9 +7,9 @@ package mock
 import (
 	reflect "reflect"
 
-	models "github.com/IBM-Cloud/bluemix-go/models"
-	models0 "github.com/IBM-Cloud/power-go-client/power/models"
+	models "github.com/IBM-Cloud/power-go-client/power/models"
 	core "github.com/IBM/go-sdk-core/v5/core"
+	resourcecontrollerv2 "github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
 	vpcv1 "github.com/IBM/vpc-go-sdk/vpcv1"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -38,10 +38,10 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // CreateInstance mocks base method.
-func (m *MockClient) CreateInstance(createParams *models0.PVMInstanceCreate) (*models0.PVMInstanceList, error) {
+func (m *MockClient) CreateInstance(createParams *models.PVMInstanceCreate) (*models.PVMInstanceList, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateInstance", createParams)
-	ret0, _ := ret[0].(*models0.PVMInstanceList)
+	ret0, _ := ret[0].(*models.PVMInstanceList)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -98,10 +98,10 @@ func (mr *MockClientMockRecorder) DeleteLoadBalancerPoolMember(options interface
 }
 
 // GetCloudServiceInstanceByName mocks base method.
-func (m *MockClient) GetCloudServiceInstanceByName(name string) ([]models.ServiceInstanceV2, error) {
+func (m *MockClient) GetCloudServiceInstanceByName(name string) (*resourcecontrollerv2.ResourceInstance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCloudServiceInstanceByName", name)
-	ret0, _ := ret[0].([]models.ServiceInstanceV2)
+	ret0, _ := ret[0].(*resourcecontrollerv2.ResourceInstance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -113,10 +113,10 @@ func (mr *MockClientMockRecorder) GetCloudServiceInstanceByName(name interface{}
 }
 
 // GetCloudServiceInstances mocks base method.
-func (m *MockClient) GetCloudServiceInstances() ([]models.ServiceInstanceV2, error) {
+func (m *MockClient) GetCloudServiceInstances() ([]resourcecontrollerv2.ResourceInstance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCloudServiceInstances")
-	ret0, _ := ret[0].([]models.ServiceInstanceV2)
+	ret0, _ := ret[0].([]resourcecontrollerv2.ResourceInstance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -128,10 +128,10 @@ func (mr *MockClientMockRecorder) GetCloudServiceInstances() *gomock.Call {
 }
 
 // GetDHCPServerByID mocks base method.
-func (m *MockClient) GetDHCPServerByID(id string) (*models0.DHCPServerDetail, error) {
+func (m *MockClient) GetDHCPServerByID(id string) (*models.DHCPServerDetail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDHCPServerByID", id)
-	ret0, _ := ret[0].(*models0.DHCPServerDetail)
+	ret0, _ := ret[0].(*models.DHCPServerDetail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -143,10 +143,10 @@ func (mr *MockClientMockRecorder) GetDHCPServerByID(id interface{}) *gomock.Call
 }
 
 // GetDHCPServers mocks base method.
-func (m *MockClient) GetDHCPServers() (models0.DHCPServers, error) {
+func (m *MockClient) GetDHCPServers() (models.DHCPServers, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDHCPServers")
-	ret0, _ := ret[0].(models0.DHCPServers)
+	ret0, _ := ret[0].(models.DHCPServers)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -158,10 +158,10 @@ func (mr *MockClientMockRecorder) GetDHCPServers() *gomock.Call {
 }
 
 // GetImages mocks base method.
-func (m *MockClient) GetImages() (*models0.Images, error) {
+func (m *MockClient) GetImages() (*models.Images, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetImages")
-	ret0, _ := ret[0].(*models0.Images)
+	ret0, _ := ret[0].(*models.Images)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -173,10 +173,10 @@ func (mr *MockClientMockRecorder) GetImages() *gomock.Call {
 }
 
 // GetInstance mocks base method.
-func (m *MockClient) GetInstance(id string) (*models0.PVMInstance, error) {
+func (m *MockClient) GetInstance(id string) (*models.PVMInstance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetInstance", id)
-	ret0, _ := ret[0].(*models0.PVMInstance)
+	ret0, _ := ret[0].(*models.PVMInstance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -188,10 +188,10 @@ func (mr *MockClientMockRecorder) GetInstance(id interface{}) *gomock.Call {
 }
 
 // GetInstanceByName mocks base method.
-func (m *MockClient) GetInstanceByName(name string) (*models0.PVMInstance, error) {
+func (m *MockClient) GetInstanceByName(name string) (*models.PVMInstance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetInstanceByName", name)
-	ret0, _ := ret[0].(*models0.PVMInstance)
+	ret0, _ := ret[0].(*models.PVMInstance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -203,10 +203,10 @@ func (mr *MockClientMockRecorder) GetInstanceByName(name interface{}) *gomock.Ca
 }
 
 // GetInstances mocks base method.
-func (m *MockClient) GetInstances() (*models0.PVMInstances, error) {
+func (m *MockClient) GetInstances() (*models.PVMInstances, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetInstances")
-	ret0, _ := ret[0].(*models0.PVMInstances)
+	ret0, _ := ret[0].(*models.PVMInstances)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -234,10 +234,10 @@ func (mr *MockClientMockRecorder) GetLoadBalancer(arg0 interface{}) *gomock.Call
 }
 
 // GetNetworks mocks base method.
-func (m *MockClient) GetNetworks() (*models0.Networks, error) {
+func (m *MockClient) GetNetworks() (*models.Networks, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNetworks")
-	ret0, _ := ret[0].(*models0.Networks)
+	ret0, _ := ret[0].(*models.Networks)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
