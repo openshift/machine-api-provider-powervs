@@ -1,26 +1,31 @@
 package machine
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/IBM-Cloud/power-go-client/power/models"
+	"github.com/IBM/vpc-go-sdk/vpcv1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 
+	machinev1 "github.com/openshift/api/machine/v1"
 	machineapierros "github.com/openshift/machine-api-operator/pkg/controller/machine"
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client"
+	"github.com/openshift/machine-api-provider-powervs/pkg/utils"
 )
 
 const (
 	requeueAfterSeconds      = 20
 	requeueAfterFatalSeconds = 180
 	masterLabel              = "node-role.kubernetes.io/master"
+	loadBalancerActiveState  = "active"
 )
 
 // Reconciler runs the logic to reconciles a machine resource towards its desired state
@@ -42,7 +47,6 @@ func (r *Reconciler) create() error {
 		return fmt.Errorf("%v: failed validating machine provider spec: %w", r.machine.GetName(), err)
 	}
 
-	// TODO: remove 45 - 59, this logic is not needed anymore
 	// We explicitly do NOT want to remove stopped masters.
 	isMaster, err := r.isMaster()
 	if err != nil {
@@ -100,6 +104,18 @@ func (r *Reconciler) delete() error {
 		return nil
 	}
 
+	internalIP := r.getMachineInternalIP()
+	if internalIP != "" {
+		klog.Infof("deregister ip %s of machine %s from LoadBalancer", internalIP, r.machine.Name)
+		if err := r.removeFromApplicationLoadBalancers(internalIP); err != nil {
+			metrics.RegisterFailedInstanceDelete(&metrics.MachineLabels{
+				Name:      r.machine.Name,
+				Namespace: r.machine.Namespace,
+				Reason:    err.Error(),
+			})
+			return fmt.Errorf("failed to deregister instance %s from load balancers: %w", *existingInstance.ServerName, err)
+		}
+	}
 	err = r.powerVSClient.DeleteInstance(*existingInstance.PvmInstanceID)
 	if err != nil {
 		metrics.RegisterFailedInstanceDelete(&metrics.MachineLabels{
@@ -151,6 +167,20 @@ func (r *Reconciler) update() error {
 	// Fetch and update the IP for machine object
 	if err := r.setMachineAddresses(existingInstance); err != nil {
 		klog.Errorf("Failed to fetch and update an IP address for the machine: %s error: %v", r.machine.Name, err)
+	}
+
+	internalIP := r.getMachineInternalIP()
+	if internalIP != "" {
+		if err = r.updateLoadBalancers(internalIP); err != nil {
+			metrics.RegisterFailedInstanceCreate(&metrics.MachineLabels{
+				Name:      r.machine.Name,
+				Namespace: r.machine.Namespace,
+				Reason:    err.Error(),
+			})
+			return fmt.Errorf("failed to update load balancers: %w", err)
+		}
+	} else {
+		klog.Infof("Not able to update the LoadBalancer, Machine %s internal IP not yet set", r.machine.Name)
 	}
 	klog.Infof("Updated machine %s", r.machine.Name)
 	return r.requeueIfInstanceBuilding(existingInstance)
@@ -434,4 +464,241 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 	}
 	r.machineScope.machine.Status.Addresses = networkAddresses
 	return nil
+}
+
+// updateLoadBalancers adds a given machine instance to the load balancers specified in its provider config
+func (r *Reconciler) updateLoadBalancers(internalIP string) error {
+	if len(r.providerSpec.LoadBalancers) == 0 {
+		klog.V(3).Infof("%s: Instance has no load balancers configured. Skipping", r.machine.Name)
+		return nil
+	}
+	var applicationLoadBalancerNames []string
+	for _, loadBalancerRef := range r.providerSpec.LoadBalancers {
+		switch loadBalancerRef.Type {
+		case machinev1.ApplicationLoadBalancerType:
+			applicationLoadBalancerNames = append(applicationLoadBalancerNames, loadBalancerRef.Name)
+		}
+	}
+	if len(applicationLoadBalancerNames) == 0 {
+		klog.V(3).Infof("%s: Instance has no application load balancers configured. Skipping", r.machine.Name)
+		return nil
+	}
+	if err := registerWithApplicationLoadBalancers(r.powerVSClient, applicationLoadBalancerNames, internalIP); err != nil {
+		errStr := fmt.Errorf("%s: Failed to register application load balancers: %v", r.machine.Name, err)
+		klog.Error(errStr)
+		return errStr
+	}
+	return nil
+}
+
+func registerWithApplicationLoadBalancers(powerVSClient client.Client, loadBalancerNames []string, internalIP string) error {
+	lbMap, err := getLoadBalancers(powerVSClient, loadBalancerNames)
+	if err != nil {
+		return fmt.Errorf("failed to get loadbalancers details from cloud %v", err)
+	}
+	return createLoadBalancerPoolMember(powerVSClient, lbMap, internalIP)
+}
+
+type loadBalanacerOptions struct {
+	id    string
+	pools []vpcv1.LoadBalancerPoolReference
+	state string
+}
+
+func getLoadBalancers(powerVSClient client.Client, loadBalancerNames []string) (map[string]loadBalanacerOptions, error) {
+	// construct the map from provided LoadBalancer names for easy search
+	loadBalancerNamesMap := make(map[string]struct{})
+	for _, lb := range loadBalancerNames {
+		loadBalancerNamesMap[lb] = struct{}{}
+	}
+
+	var loadBalancersList []vpcv1.LoadBalancer
+	f := func(start string) (bool, string, error) {
+		listLoadBalancersOptions := &vpcv1.ListLoadBalancersOptions{}
+		if start != "" {
+			listLoadBalancersOptions.Start = &start
+		}
+
+		loadBalancers, _, err := powerVSClient.ListLoadBalancers(listLoadBalancersOptions)
+		if err != nil {
+			return false, "", err
+		}
+		if loadBalancers != nil {
+			loadBalancersList = append(loadBalancersList, loadBalancers.LoadBalancers...)
+			if loadBalancers.Next != nil && *loadBalancers.Next.Href != "" {
+				return false, *loadBalancers.Next.Href, nil
+			}
+		}
+		return true, "", nil
+	}
+
+	if err := utils.PagingHelper(f); err != nil {
+		return nil, fmt.Errorf("error listing loadbalancer %v", err)
+	}
+
+	if loadBalancersList == nil {
+		return nil, errors.New("no loadbalancer is retrieved")
+	}
+
+	// construct LoadBalancer name with LoadBalancer ID map
+	lbMap := make(map[string]loadBalanacerOptions)
+	for _, lb := range loadBalancersList {
+		if _, ok := loadBalancerNamesMap[*lb.Name]; ok {
+			lbMap[*lb.Name] = loadBalanacerOptions{
+				id:    *lb.ID,
+				pools: lb.Pools,
+				state: *lb.ProvisioningStatus,
+			}
+		}
+	}
+	if len(lbMap) != len(loadBalancerNames) {
+		klog.V(3).Infof("%v loadbalancers are found in cloud", lbMap)
+		return nil, fmt.Errorf("not able to find all %s loadbalancer in cloud", loadBalancerNames)
+	}
+	return lbMap, nil
+}
+
+func createLoadBalancerPoolMember(powerVSClient client.Client, lbMap map[string]loadBalanacerOptions, internalIP string) error {
+	// update LoadBalancer pool for each LoadBalancer
+	for lbName, lbOptions := range lbMap {
+		if lbOptions.state != loadBalancerActiveState {
+			errStr := fmt.Errorf("cannot update load balancer %s, load balancer is not in %s state", lbName, loadBalancerActiveState)
+			klog.Errorf(errStr.Error())
+			return errStr
+		}
+		if len(lbOptions.pools) == 0 {
+			return fmt.Errorf("no pools exist for the load balancer %s", lbName)
+		}
+
+		// Update each LoadBalancer pool
+		for _, pool := range lbOptions.pools {
+			// TODO: (question): will bootstrap-node pool exist or will it be cleaned up by installer?
+			if *pool.Name == "bootstrap-node" {
+				continue
+			}
+			klog.Infof("Updating LoadBalancer pool member %s for LoadBalancer %s with IP %s", *pool.Name, lbName, internalIP)
+			listOptions := &vpcv1.ListLoadBalancerPoolMembersOptions{}
+			listOptions.SetLoadBalancerID(lbOptions.id)
+			listOptions.SetPoolID(*pool.ID)
+			listLoadBalancerPoolMembers, _, err := powerVSClient.ListLoadBalancerPoolMembers(listOptions)
+			if err != nil {
+				return fmt.Errorf("failed to list %s LoadBalancer pool error: %v", *pool.Name, err)
+			}
+			var targetPort int64
+			var alreadyRegistered bool
+			for _, member := range listLoadBalancerPoolMembers.Members {
+				if target, ok := member.Target.(*vpcv1.LoadBalancerPoolMemberTarget); ok {
+					targetPort = *member.Port
+					if *target.Address == internalIP {
+						alreadyRegistered = true
+						klog.Infof("Target with IP %s already configured for pool %s", internalIP, *pool.Name)
+						continue
+					}
+				}
+			}
+			if !alreadyRegistered {
+				// make sure that LoadBalancer is in active state
+				loadBalancer, _, err := powerVSClient.GetLoadBalancer(&vpcv1.GetLoadBalancerOptions{
+					ID: &lbOptions.id,
+				})
+				if err != nil {
+					return fmt.Errorf("error getting loadbalancer details with id: %s error: %v", lbOptions.id, err)
+				}
+				if *loadBalancer.ProvisioningStatus != loadBalancerActiveState {
+					klog.Infof("Not able to update pool for loadbalancer %s, load balancer is not in active state", lbName)
+					return &machinecontroller.RequeueAfterError{RequeueAfter: requeueAfterSeconds * time.Second}
+				}
+
+				options := &vpcv1.CreateLoadBalancerPoolMemberOptions{}
+				options.SetPort(targetPort)
+				options.SetLoadBalancerID(*loadBalancer.ID)
+				options.SetPoolID(*pool.ID)
+				options.SetTarget(&vpcv1.LoadBalancerPoolMemberTargetPrototype{
+					Address: &internalIP,
+				})
+				response, _, err := powerVSClient.CreateLoadBalancerPoolMember(options)
+				if err != nil {
+					return fmt.Errorf("error creating LoadBalacner pool member %v", err)
+				}
+				klog.V(3).Infof("Create LoadBalancer pool response, LB %s pool %s response %s", lbName, *pool.Name, response)
+			}
+		}
+	}
+	return nil
+}
+
+func (r *Reconciler) removeFromApplicationLoadBalancers(internalIP string) error {
+	if len(r.providerSpec.LoadBalancers) == 0 {
+		klog.V(4).Infof("%s: Instances have no load balancers configured. Skipping", r.machine.Name)
+		return nil
+	}
+	var applicationLoadBalancerNames []string
+	for _, loadBalancerRef := range r.providerSpec.LoadBalancers {
+		switch loadBalancerRef.Type {
+		case machinev1.ApplicationLoadBalancerType:
+			applicationLoadBalancerNames = append(applicationLoadBalancerNames, loadBalancerRef.Name)
+		}
+	}
+	if len(applicationLoadBalancerNames) == 0 {
+		klog.V(3).Infof("%s: Instance has no application load balancers configured. Skipping", r.machine.Name)
+		return nil
+	}
+	return deregisterNetworkLoadBalancers(r.powerVSClient, applicationLoadBalancerNames, internalIP)
+}
+
+func deregisterNetworkLoadBalancers(powerVSClient client.Client, loadBalancerNames []string, internalIP string) error {
+	lbMap, err := getLoadBalancers(powerVSClient, loadBalancerNames)
+	if err != nil {
+		return fmt.Errorf("failed to get loadbalancers details from cloud %v", err)
+	}
+	return deleteLoadBalancerPoolMember(powerVSClient, lbMap, internalIP)
+}
+
+func deleteLoadBalancerPoolMember(powerVSClient client.Client, lbMap map[string]loadBalanacerOptions, internalIP string) error {
+	// update LoadBalancer pool for each LoadBalancer
+	for lbName, lbOptions := range lbMap {
+		if lbOptions.state != loadBalancerActiveState {
+			errStr := fmt.Errorf("cannot update load balancer %s, load balancer is not in %s state", lbName, loadBalancerActiveState)
+			klog.Errorf(errStr.Error())
+			return errStr
+		}
+		if len(lbOptions.pools) == 0 {
+			return fmt.Errorf("no pools exist for the load balancer %s", lbName)
+		}
+
+		// Update each LoadBalancer pool to remove the IP
+		for _, pool := range lbOptions.pools {
+			klog.Infof("Deleting IP %s from LoadBalancer pool member %s for LoadBalancer %s", internalIP, *pool.Name, lbName)
+			listOptions := &vpcv1.ListLoadBalancerPoolMembersOptions{}
+			listOptions.SetLoadBalancerID(lbOptions.id)
+			listOptions.SetPoolID(*pool.ID)
+			listLoadBalancerPoolMembers, _, err := powerVSClient.ListLoadBalancerPoolMembers(listOptions)
+			if err != nil {
+				return fmt.Errorf("failed to list %s LoadBalancer pool error: %v", *pool.Name, err)
+			}
+			for _, member := range listLoadBalancerPoolMembers.Members {
+				if target, ok := member.Target.(*vpcv1.LoadBalancerPoolMemberTarget); ok {
+					if *target.Address == internalIP {
+						deleteOptions := &vpcv1.DeleteLoadBalancerPoolMemberOptions{}
+						deleteOptions.SetLoadBalancerID(lbOptions.id)
+						deleteOptions.SetPoolID(*pool.ID)
+						deleteOptions.SetID(*member.ID)
+						if _, err := powerVSClient.DeleteLoadBalancerPoolMember(deleteOptions); err != nil {
+							return fmt.Errorf("error deleting LoadBalacner pool member %v", err)
+						}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (r *Reconciler) getMachineInternalIP() string {
+	for _, address := range r.machine.Status.Addresses {
+		if address.Type == corev1.NodeInternalIP {
+			return address.Address
+		}
+	}
+	return ""
 }

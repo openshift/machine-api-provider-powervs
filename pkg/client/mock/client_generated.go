@@ -9,6 +9,8 @@ import (
 
 	models "github.com/IBM-Cloud/bluemix-go/models"
 	models0 "github.com/IBM-Cloud/power-go-client/power/models"
+	core "github.com/IBM/go-sdk-core/v5/core"
+	vpcv1 "github.com/IBM/vpc-go-sdk/vpcv1"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -50,6 +52,22 @@ func (mr *MockClientMockRecorder) CreateInstance(createParams interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInstance", reflect.TypeOf((*MockClient)(nil).CreateInstance), createParams)
 }
 
+// CreateLoadBalancerPoolMember mocks base method.
+func (m *MockClient) CreateLoadBalancerPoolMember(arg0 *vpcv1.CreateLoadBalancerPoolMemberOptions) (*vpcv1.LoadBalancerPoolMember, *core.DetailedResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateLoadBalancerPoolMember", arg0)
+	ret0, _ := ret[0].(*vpcv1.LoadBalancerPoolMember)
+	ret1, _ := ret[1].(*core.DetailedResponse)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// CreateLoadBalancerPoolMember indicates an expected call of CreateLoadBalancerPoolMember.
+func (mr *MockClientMockRecorder) CreateLoadBalancerPoolMember(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLoadBalancerPoolMember", reflect.TypeOf((*MockClient)(nil).CreateLoadBalancerPoolMember), arg0)
+}
+
 // DeleteInstance mocks base method.
 func (m *MockClient) DeleteInstance(id string) error {
 	m.ctrl.T.Helper()
@@ -62,6 +80,21 @@ func (m *MockClient) DeleteInstance(id string) error {
 func (mr *MockClientMockRecorder) DeleteInstance(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInstance", reflect.TypeOf((*MockClient)(nil).DeleteInstance), id)
+}
+
+// DeleteLoadBalancerPoolMember mocks base method.
+func (m *MockClient) DeleteLoadBalancerPoolMember(options *vpcv1.DeleteLoadBalancerPoolMemberOptions) (*core.DetailedResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteLoadBalancerPoolMember", options)
+	ret0, _ := ret[0].(*core.DetailedResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteLoadBalancerPoolMember indicates an expected call of DeleteLoadBalancerPoolMember.
+func (mr *MockClientMockRecorder) DeleteLoadBalancerPoolMember(options interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteLoadBalancerPoolMember", reflect.TypeOf((*MockClient)(nil).DeleteLoadBalancerPoolMember), options)
 }
 
 // GetCloudServiceInstanceByName mocks base method.
@@ -184,6 +217,22 @@ func (mr *MockClientMockRecorder) GetInstances() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInstances", reflect.TypeOf((*MockClient)(nil).GetInstances))
 }
 
+// GetLoadBalancer mocks base method.
+func (m *MockClient) GetLoadBalancer(arg0 *vpcv1.GetLoadBalancerOptions) (*vpcv1.LoadBalancer, *core.DetailedResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLoadBalancer", arg0)
+	ret0, _ := ret[0].(*vpcv1.LoadBalancer)
+	ret1, _ := ret[1].(*core.DetailedResponse)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetLoadBalancer indicates an expected call of GetLoadBalancer.
+func (mr *MockClientMockRecorder) GetLoadBalancer(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLoadBalancer", reflect.TypeOf((*MockClient)(nil).GetLoadBalancer), arg0)
+}
+
 // GetNetworks mocks base method.
 func (m *MockClient) GetNetworks() (*models0.Networks, error) {
 	m.ctrl.T.Helper()
@@ -225,4 +274,36 @@ func (m *MockClient) GetZone() string {
 func (mr *MockClientMockRecorder) GetZone() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetZone", reflect.TypeOf((*MockClient)(nil).GetZone))
+}
+
+// ListLoadBalancerPoolMembers mocks base method.
+func (m *MockClient) ListLoadBalancerPoolMembers(arg0 *vpcv1.ListLoadBalancerPoolMembersOptions) (*vpcv1.LoadBalancerPoolMemberCollection, *core.DetailedResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListLoadBalancerPoolMembers", arg0)
+	ret0, _ := ret[0].(*vpcv1.LoadBalancerPoolMemberCollection)
+	ret1, _ := ret[1].(*core.DetailedResponse)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListLoadBalancerPoolMembers indicates an expected call of ListLoadBalancerPoolMembers.
+func (mr *MockClientMockRecorder) ListLoadBalancerPoolMembers(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListLoadBalancerPoolMembers", reflect.TypeOf((*MockClient)(nil).ListLoadBalancerPoolMembers), arg0)
+}
+
+// ListLoadBalancers mocks base method.
+func (m *MockClient) ListLoadBalancers(arg0 *vpcv1.ListLoadBalancersOptions) (*vpcv1.LoadBalancerCollection, *core.DetailedResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListLoadBalancers", arg0)
+	ret0, _ := ret[0].(*vpcv1.LoadBalancerCollection)
+	ret1, _ := ret[1].(*core.DetailedResponse)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ListLoadBalancers indicates an expected call of ListLoadBalancers.
+func (mr *MockClientMockRecorder) ListLoadBalancers(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListLoadBalancers", reflect.TypeOf((*MockClient)(nil).ListLoadBalancers), arg0)
 }

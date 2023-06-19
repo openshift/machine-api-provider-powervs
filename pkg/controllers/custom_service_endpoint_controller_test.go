@@ -297,9 +297,9 @@ func stubInvalidCustomServiceEndpoints() *configv1.Infrastructure {
 func expectedInfraObject() *configv1.Infrastructure {
 	return &configv1.Infrastructure{
 		Status: configv1.InfrastructureStatus{
+			CPUPartitioning:        configv1.CPUPartitioningNone,
 			ControlPlaneTopology:   "HighlyAvailable",
 			InfrastructureTopology: "HighlyAvailable",
-			CPUPartitioning:        configv1.CPUPartitioningNone,
 			PlatformStatus: &configv1.PlatformStatus{
 				PowerVS: &configv1.PowerVSPlatformStatus{
 					ServiceEndpoints: []configv1.PowerVSServiceEndpoint{

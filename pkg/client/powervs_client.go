@@ -22,6 +22,7 @@ import (
 	"github.com/IBM-Cloud/power-go-client/ibmpisession"
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
+	"github.com/IBM/vpc-go-sdk/vpcv1"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
@@ -191,6 +192,23 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	c.NetworkClient = instance.NewIBMPINetworkClient(ctx, c.session, cloudInstanceID)
 	c.ImageClient = instance.NewIBMPIImageClient(ctx, c.session, cloudInstanceID)
 	c.DHCPClient = instance.NewIBMPIDhcpClient(ctx, c.session, cloudInstanceID)
+
+	vpcRegion, err := utils.VPCRegionForPowerVSRegion(c.region)
+	if err != nil {
+		return nil, err
+	}
+
+	vpcClient, err := vpcv1.NewVpcV1(&vpcv1.VpcV1Options{
+		ServiceName:   "vpcs",
+		Authenticator: authenticator,
+		// TODO: support custom service endpoints
+		URL: fmt.Sprintf("https://%s.iaas.cloud.ibm.com/v1", vpcRegion),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	c.VPCClient = vpcClient
 	return c, err
 }
 
@@ -233,6 +251,7 @@ type powerVSClient struct {
 	NetworkClient  *instance.IBMPINetworkClient
 	ImageClient    *instance.IBMPIImageClient
 	DHCPClient     *instance.IBMPIDhcpClient
+	VPCClient      *vpcv1.VpcV1
 }
 
 func (p *powerVSClient) GetImages() (*models.Images, error) {
@@ -320,6 +339,26 @@ func (p *powerVSClient) GetZone() string {
 
 func (p *powerVSClient) GetRegion() string {
 	return p.region
+}
+
+func (p *powerVSClient) ListLoadBalancers(listLoadBalancersOptions *vpcv1.ListLoadBalancersOptions) (*vpcv1.LoadBalancerCollection, *core.DetailedResponse, error) {
+	return p.VPCClient.ListLoadBalancers(listLoadBalancersOptions)
+}
+
+func (p *powerVSClient) GetLoadBalancer(getLoadBalancerOptions *vpcv1.GetLoadBalancerOptions) (*vpcv1.LoadBalancer, *core.DetailedResponse, error) {
+	return p.VPCClient.GetLoadBalancer(getLoadBalancerOptions)
+}
+
+func (p *powerVSClient) ListLoadBalancerPoolMembers(listLoadBalancerPoolMembersOptions *vpcv1.ListLoadBalancerPoolMembersOptions) (*vpcv1.LoadBalancerPoolMemberCollection, *core.DetailedResponse, error) {
+	return p.VPCClient.ListLoadBalancerPoolMembers(listLoadBalancerPoolMembersOptions)
+}
+
+func (p *powerVSClient) CreateLoadBalancerPoolMember(createLoadBalancerPoolMemberOptions *vpcv1.CreateLoadBalancerPoolMemberOptions) (*vpcv1.LoadBalancerPoolMember, *core.DetailedResponse, error) {
+	return p.VPCClient.CreateLoadBalancerPoolMember(createLoadBalancerPoolMemberOptions)
+}
+
+func (p *powerVSClient) DeleteLoadBalancerPoolMember(deleteLoadBalancerPoolMemberOptions *vpcv1.DeleteLoadBalancerPoolMemberOptions) (*core.DetailedResponse, error) {
+	return p.VPCClient.DeleteLoadBalancerPoolMember(deleteLoadBalancerPoolMemberOptions)
 }
 
 func authenticateAPIKey(sess *bxsession.Session) error {
