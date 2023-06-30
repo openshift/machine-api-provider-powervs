@@ -6,9 +6,9 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/rand"
 
-	bluemixmodels "github.com/IBM-Cloud/bluemix-go/models"
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
+	"github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
 	"github.com/golang/mock/gomock"
 
 	"k8s.io/client-go/kubernetes/scheme"
@@ -152,7 +152,7 @@ func TestGetServiceInstanceID(t *testing.T) {
 		name                           string
 		instanceName                   string
 		serviceInstance                machinev1.PowerVSResource
-		getCloudServiceInstancesValues []bluemixmodels.ServiceInstanceV2
+		getCloudServiceInstancesValues *resourcecontrollerv2.ResourceInstance
 		getCloudServiceInstancesError  error
 		expectedError                  string
 	}{
@@ -171,52 +171,10 @@ func TestGetServiceInstanceID(t *testing.T) {
 				Name: core.StringPtr(instanceName),
 				ID:   core.StringPtr(instanceID),
 			},
-			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
-				{
-					ServiceInstance: bluemixmodels.ServiceInstance{
-						MetadataType: &bluemixmodels.MetadataType{
-							Guid: instanceID,
-						},
-						Name: instanceName,
-					},
-				},
-			},
-		},
-		{
-			name:         "With not existing service instance",
-			instanceName: inValidInstance,
-			serviceInstance: machinev1.PowerVSResource{
-				Type: machinev1.PowerVSResourceTypeName,
-				Name: core.StringPtr(inValidInstance),
-			},
-			expectedError: "does exist any cloud service instance with name testInValidInstanceName",
-		},
-		{
-			name:         "With two service instance with same name ",
-			instanceName: instanceName,
-			serviceInstance: machinev1.PowerVSResource{
-				Type: machinev1.PowerVSResourceTypeName,
+			getCloudServiceInstancesValues: &resourcecontrollerv2.ResourceInstance{
+				GUID: core.StringPtr(instanceID),
 				Name: core.StringPtr(instanceName),
 			},
-			getCloudServiceInstancesValues: []bluemixmodels.ServiceInstanceV2{
-				{
-					ServiceInstance: bluemixmodels.ServiceInstance{
-						Name: instanceName,
-						MetadataType: &bluemixmodels.MetadataType{
-							Guid: instanceGUID,
-						},
-					},
-				},
-				{
-					ServiceInstance: bluemixmodels.ServiceInstance{
-						Name: instanceName,
-						MetadataType: &bluemixmodels.MetadataType{
-							Guid: "TestGUIDOne",
-						},
-					},
-				},
-			},
-			expectedError: "there exist more than one service instance ID with with same name testInstanceName, Try setting serviceInstance.ID",
 		},
 		{
 			name:         "With zero service instances",
@@ -225,7 +183,8 @@ func TestGetServiceInstanceID(t *testing.T) {
 				Type: machinev1.PowerVSResourceTypeName,
 				Name: core.StringPtr(instanceName),
 			},
-			expectedError: "does exist any cloud service instance with name testInstanceName",
+			getCloudServiceInstancesError: fmt.Errorf("does exist any cloud service instance with name %s", instanceName),
+			expectedError:                 "does exist any cloud service instance with name testInstanceName",
 		},
 		{
 			name:         "With failed to get service instances",

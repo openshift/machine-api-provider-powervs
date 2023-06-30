@@ -191,25 +191,12 @@ func getServiceInstanceID(serviceInstanceResource machinev1.PowerVSResource, cli
 		if serviceInstanceResource.Name == nil {
 			return nil, fmt.Errorf("serviceInstanceResource reference is specified as Name but it is nil")
 		}
-		serviceInstances, err := client.GetCloudServiceInstanceByName(*serviceInstanceResource.Name)
+		serviceInstance, err := client.GetCloudServiceInstanceByName(*serviceInstanceResource.Name)
 		if err != nil {
 			klog.Errorf("failed to get serviceInstances, err: %v", err)
 			return nil, err
 		}
-		// log useful error message
-		switch len(serviceInstances) {
-		case 0:
-			errStr := fmt.Errorf("does exist any cloud service instance with name %s", *serviceInstanceResource.Name)
-			klog.Errorf(errStr.Error())
-			return nil, errStr
-		case 1:
-			klog.Infof("serviceInstance %s found with ID: %s", *serviceInstanceResource.Name, serviceInstances[0].Guid)
-			return &serviceInstances[0].Guid, nil
-		default:
-			errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", *serviceInstanceResource.Name)
-			klog.Errorf(errStr.Error())
-			return nil, errStr
-		}
+		return serviceInstance.GUID, nil
 	default:
 		return nil, fmt.Errorf("failed to find an ServiceInstanceID, Unexpected serviceInstanceResource type: %s supports only %s and %s", serviceInstanceResource.Type, machinev1.PowerVSResourceTypeID, machinev1.PowerVSResourceTypeName)
 	}

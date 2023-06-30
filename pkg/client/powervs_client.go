@@ -9,31 +9,31 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/pkg/errors"
+
+	corev1 "k8s.io/api/core/v1"
+	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/pointer"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/IBM-Cloud/bluemix-go"
-	"github.com/IBM-Cloud/bluemix-go/api/resource/resourcev2/controllerv2"
 	"github.com/IBM-Cloud/bluemix-go/authentication"
 	"github.com/IBM-Cloud/bluemix-go/http"
-	bluemixmodels "github.com/IBM-Cloud/bluemix-go/models"
 	"github.com/IBM-Cloud/bluemix-go/rest"
 	bxsession "github.com/IBM-Cloud/bluemix-go/session"
 	"github.com/IBM-Cloud/power-go-client/clients/instance"
 	"github.com/IBM-Cloud/power-go-client/ibmpisession"
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
+	"github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
 	"github.com/IBM/vpc-go-sdk/vpcv1"
-
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/pkg/errors"
-	utils "github.com/ppc64le-cloud/powervs-utils"
-
-	corev1 "k8s.io/api/core/v1"
-	apimachineryerrors "k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	powerUtils "github.com/ppc64le-cloud/powervs-utils"
 
 	configv1 "github.com/openshift/api/config/v1"
 	machineapiapierrors "github.com/openshift/machine-api-operator/pkg/controller/machine"
+	utils "github.com/openshift/machine-api-provider-powervs/pkg/utils"
 )
 
 const (
@@ -52,14 +52,19 @@ const (
 	//InstanceStateNameBuild is indicates the build state of Power VS instance
 	InstanceStateNameBuild = "BUILD"
 
-	//PowerServiceType is the power-iaas service type of IBM Cloud
-	PowerServiceType = "power-iaas"
-
 	// globalInfrastuctureName default name for infrastructure object
 	globalInfrastuctureName = "cluster"
 
 	//powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
 	powerIaaSCustomEndpointName = "pi"
+
+	//powerVSResourceID is Power VS power-iaas service id, can be retrieved using ibmcloud cli
+	// ibmcloud catalog service power-iaas
+	powerVSResourceID = "abd259f0-9990-11e8-acc8-b9f54a8f1661"
+
+	//powerVSResourcePlanID is Power VS power-iaas plan id, can be retrieved using ibmcloud cli
+	// ibmcloud catalog service power-iaas
+	powerVSResourcePlanID = "f165dd34-3a40-423b-9d95-e90a23f724dd"
 )
 
 var _ Client = &powerVSClient{}
@@ -144,32 +149,45 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 		return c, err
 	}
 
-	c.User, err = fetchUserDetails(s, 2)
+	// Create the authenticator
+	authenticator := &core.IamAuthenticator{
+		ApiKey: apikey,
+	}
+
+	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
+		Authenticator: authenticator,
+	})
 	if err != nil {
 		return c, err
 	}
+	if rcv2 == nil {
+		return c, fmt.Errorf("unable to get resource controller")
+	}
+	c.ResourceClient = rcv2
 
-	ctrlv2, err := controllerv2.New(s)
+	resourceInstanceList, _, err := c.ResourceClient.ListResourceInstances(&resourcecontrollerv2.ListResourceInstancesOptions{GUID: &cloudInstanceID})
 	if err != nil {
-		return c, err
+		return c, errors.Wrapf(err, "failed to get service instance details with id %s", cloudInstanceID)
 	}
 
-	c.ResourceClient = ctrlv2.ResourceServiceInstanceV2()
-
-	resource, err := c.ResourceClient.GetInstance(cloudInstanceID)
-	if err != nil {
-		return nil, err
+	if resourceInstanceList == nil {
+		return c, fmt.Errorf("failed to get service instance details with id %s service instance returned is nil", cloudInstanceID)
 	}
-	r, err := utils.GetRegion(resource.RegionID)
+
+	if *resourceInstanceList.RowsCount != 1 {
+		return c, fmt.Errorf("failed to get service instance details, expecting one service instance with id %s but got %d", cloudInstanceID, *resourceInstanceList.RowsCount)
+	}
+
+	r, err := powerUtils.GetRegion(*resourceInstanceList.Resources[0].RegionID)
 	if err != nil {
 		return nil, err
 	}
 	c.region = r
-	c.zone = resource.RegionID
+	c.zone = *resourceInstanceList.Resources[0].RegionID
 
-	// Create the authenticator
-	authenticator := &core.IamAuthenticator{
-		ApiKey: apikey,
+	c.User, err = fetchUserDetails(s, 2)
+	if err != nil {
+		return c, err
 	}
 
 	// Create the session options struct
@@ -193,7 +211,7 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	c.ImageClient = instance.NewIBMPIImageClient(ctx, c.session, cloudInstanceID)
 	c.DHCPClient = instance.NewIBMPIDhcpClient(ctx, c.session, cloudInstanceID)
 
-	vpcRegion, err := utils.VPCRegionForPowerVSRegion(c.region)
+	vpcRegion, err := powerUtils.VPCRegionForPowerVSRegion(c.region)
 	if err != nil {
 		return nil, err
 	}
@@ -222,20 +240,20 @@ func NewMinimalPowerVSClient(ctrlRuntimeClient client.Client) (Client, error) {
 		klog.Errorf("failed to read the API key from the secret: %v", err)
 		return nil, err
 	}
-
-	s, err := bxsession.New(&bluemix.Config{BluemixAPIKey: apiKey})
+	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
+		Authenticator: &core.IamAuthenticator{
+			ApiKey: apiKey,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
-	c := &powerVSClient{
-		Session: s,
+	if rcv2 == nil {
+		return nil, fmt.Errorf("unable to get resource controller")
 	}
-	ctrlv2, err := controllerv2.New(s)
-	if err != nil {
-		return c, err
-	}
-	c.ResourceClient = ctrlv2.ResourceServiceInstanceV2()
-	return c, nil
+	return &powerVSClient{
+		ResourceClient: rcv2,
+	}, nil
 }
 
 type powerVSClient struct {
@@ -245,7 +263,7 @@ type powerVSClient struct {
 
 	*bxsession.Session
 	User           *User
-	ResourceClient controllerv2.ResourceServiceInstanceRepository
+	ResourceClient *resourcecontrollerv2.ResourceControllerV2
 	session        *ibmpisession.IBMPISession
 	InstanceClient *instance.IBMPIInstanceClient
 	NetworkClient  *instance.IBMPINetworkClient
@@ -292,37 +310,86 @@ func (p *powerVSClient) GetInstances() (*models.PVMInstances, error) {
 	return p.InstanceClient.GetAll()
 }
 
-func (p *powerVSClient) GetCloudServiceInstances() ([]bluemixmodels.ServiceInstanceV2, error) {
-	var instances []bluemixmodels.ServiceInstanceV2
-	svcs, err := p.ResourceClient.ListInstances(controllerv2.ServiceInstanceQuery{
-		Type: "service_instance",
-	})
-	if err != nil {
-		return svcs, fmt.Errorf("failed to list the service instances: %v", err)
-	}
-	for _, svc := range svcs {
-		if svc.Crn.ServiceName == PowerServiceType {
-			instances = append(instances, svc)
+func (p *powerVSClient) GetCloudServiceInstances() ([]resourcecontrollerv2.ResourceInstance, error) {
+	var serviceInstancesList []resourcecontrollerv2.ResourceInstance
+	f := func(start string) (bool, string, error) {
+		listServiceInstanceOptions := &resourcecontrollerv2.ListResourceInstancesOptions{
+			ResourceID:     pointer.String(powerVSResourceID),
+			ResourcePlanID: pointer.String(powerVSResourcePlanID),
 		}
+		if start != "" {
+			listServiceInstanceOptions.Start = &start
+		}
+
+		serviceInstances, _, err := p.ResourceClient.ListResourceInstances(listServiceInstanceOptions)
+		if err != nil {
+			return false, "", err
+		}
+		if serviceInstances != nil {
+			serviceInstancesList = append(serviceInstancesList, serviceInstances.Resources...)
+			nextURL, err := serviceInstances.GetNextStart()
+			if err != nil {
+				return false, "", err
+			}
+			return false, *nextURL, nil
+		}
+		return true, "", nil
 	}
-	return instances, nil
+
+	if err := utils.PagingHelper(f); err != nil {
+		return nil, fmt.Errorf("error listing loadbalancer %v", err)
+	}
+
+	if serviceInstancesList == nil {
+		return nil, errors.New("no service instance is retrieved")
+	}
+	return serviceInstancesList, nil
 }
 
-func (p *powerVSClient) GetCloudServiceInstanceByName(name string) ([]bluemixmodels.ServiceInstanceV2, error) {
-	var instances []bluemixmodels.ServiceInstanceV2
-	svcs, err := p.ResourceClient.ListInstances(controllerv2.ServiceInstanceQuery{
-		Type: "service_instance",
-		Name: name,
-	})
-	if err != nil {
-		return svcs, fmt.Errorf("failed to list the service instances: %v", err)
-	}
-	for _, svc := range svcs {
-		if svc.Crn.ServiceName == PowerServiceType {
-			instances = append(instances, svc)
+func (p *powerVSClient) GetCloudServiceInstanceByName(name string) (*resourcecontrollerv2.ResourceInstance, error) {
+	var serviceInstancesList []resourcecontrollerv2.ResourceInstance
+	f := func(start string) (bool, string, error) {
+		listServiceInstanceOptions := &resourcecontrollerv2.ListResourceInstancesOptions{
+			Name:           &name,
+			ResourceID:     pointer.String(powerVSResourceID),
+			ResourcePlanID: pointer.String(powerVSResourcePlanID),
 		}
+		if start != "" {
+			listServiceInstanceOptions.Start = &start
+		}
+
+		serviceInstances, _, err := p.ResourceClient.ListResourceInstances(listServiceInstanceOptions)
+		if err != nil {
+			return false, "", err
+		}
+		if serviceInstances != nil {
+			serviceInstancesList = append(serviceInstancesList, serviceInstances.Resources...)
+			nextURL, err := serviceInstances.GetNextStart()
+			if err != nil {
+				return false, "", err
+			}
+			return false, *nextURL, nil
+		}
+		return true, "", nil
 	}
-	return instances, nil
+
+	if err := utils.PagingHelper(f); err != nil {
+		return nil, fmt.Errorf("error listing service instances %v", err)
+	}
+	// log useful error message
+	switch len(serviceInstancesList) {
+	case 0:
+		errStr := fmt.Errorf("does exist any cloud service instance with name %s", name)
+		klog.Errorf(errStr.Error())
+		return nil, fmt.Errorf("does exist any cloud service instance with name %s", name)
+	case 1:
+		klog.Infof("serviceInstance %s found with ID: %s", name, serviceInstancesList[0].GUID)
+		return &serviceInstancesList[0], nil
+	default:
+		errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", name)
+		klog.Errorf(errStr.Error())
+		return nil, errStr
+	}
 }
 
 func (p *powerVSClient) GetDHCPServers() (models.DHCPServers, error) {
