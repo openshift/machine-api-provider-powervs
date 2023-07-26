@@ -207,7 +207,6 @@ func (r *Reconciler) exists() (bool, error) {
 			klog.Infof("%s: Possible eventual-consistency discrepancy; returning an error to requeue", r.machine.Name)
 			return false, &machinecontroller.RequeueAfterError{RequeueAfter: requeueAfterSeconds * time.Second}
 		}
-
 		klog.Infof("%s: Instance does not exist", r.machine.Name)
 		return false, nil
 	}
@@ -314,6 +313,7 @@ func (r *Reconciler) requeueIfInstanceBuilding(instance *models.PVMInstance) err
 	// we get a public IP populated more quickly.
 	if instance.Status != nil && *instance.Status == client.InstanceStateNameBuild {
 		klog.Infof("%s: Instance state still building, returning an error to requeue", r.machine.Name)
+		r.machineScope.setProviderStatus(instance, conditionBuild())
 		return &machinecontroller.RequeueAfterError{RequeueAfter: requeueAfterSeconds * time.Second}
 	}
 

@@ -51,6 +51,8 @@ const (
 	InstanceStateNameActive = "ACTIVE"
 	//InstanceStateNameBuild is indicates the build state of Power VS instance
 	InstanceStateNameBuild = "BUILD"
+	//InstanceBuildReason indicates that instance is in building state
+	InstanceBuildReason = "InstanceBuildState"
 
 	// globalInfrastuctureName default name for infrastructure object
 	globalInfrastuctureName = "cluster"
