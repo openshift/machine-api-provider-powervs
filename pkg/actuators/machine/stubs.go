@@ -55,7 +55,7 @@ func stubPowerVSCredentialsSecret(name string) *corev1.Secret {
 			Namespace: defaultNamespace,
 		},
 		Data: map[string][]byte{
-			"ibmcloud_api_key": []byte("Kl9k1elFgPb_QgEDF0d5iNHMOFa--YX6JWLpi0XkWn"),
+			"ibmcloud_api_key": []byte("api_key"),
 		},
 	}
 }
@@ -123,6 +123,14 @@ func stubGetInstance() *models.PVMInstance {
 	return &models.PVMInstance{
 		PvmInstanceID: &dummyInstanceID,
 		Status:        &status,
+		ServerName:    core.StringPtr("instance"),
+	}
+}
+
+func stubInstanceWithBuildState() *models.PVMInstance {
+	return &models.PVMInstance{
+		PvmInstanceID: pointer.String("instance-id"),
+		Status:        pointer.String("BUILD"),
 		ServerName:    core.StringPtr("instance"),
 	}
 }

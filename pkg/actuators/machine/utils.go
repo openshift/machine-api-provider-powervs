@@ -27,6 +27,7 @@ import (
 	machinev1 "github.com/openshift/api/machine/v1"
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
+	"github.com/openshift/machine-api-provider-powervs/pkg/client"
 )
 
 const (
@@ -93,6 +94,15 @@ func conditionFailed() metav1.Condition {
 		Type:   string(machinev1beta1.MachineCreation),
 		Status: metav1.ConditionFalse,
 		Reason: machinev1beta1.MachineCreationFailedConditionReason,
+	}
+}
+
+func conditionBuild() metav1.Condition {
+	return metav1.Condition{
+		Type:    string(machinev1beta1.MachineCreation),
+		Status:  client.InstanceStateNameBuild,
+		Reason:  client.InstanceBuildReason,
+		Message: "Machine is in build state",
 	}
 }
 

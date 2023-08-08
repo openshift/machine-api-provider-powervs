@@ -3,7 +3,6 @@ package machine
 import (
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -26,6 +25,8 @@ import (
 	machinecontroller "github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client"
 	"github.com/openshift/machine-api-provider-powervs/pkg/client/mock"
+
+	. "github.com/onsi/gomega"
 )
 
 func init() {
@@ -171,121 +172,280 @@ func TestSetMachineCloudProviderSpecifics(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	// mock aws API calls
-	mockCtrl := gomock.NewController(t)
-	mockPowerVSClient := mock.NewMockClient(mockCtrl)
-	mockPowerVSClient.EXPECT().GetInstanceByName(gomock.Any()).Return(stubGetInstance(), nil)
-	mockPowerVSClient.EXPECT().CreateInstance(gomock.Any()).Return(stubGetInstances(), nil)
-	mockPowerVSClient.EXPECT().GetInstance(gomock.Any()).Return(stubGetInstance(), nil)
-	mockPowerVSClient.EXPECT().DeleteInstance(gomock.Any()).Return(nil).AnyTimes()
-	mockPowerVSClient.EXPECT().GetImages().Return(stubGetImages(imageNamePrefix, 3), nil)
-	mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworks(networkNamePrefix, 3), nil)
-	mockPowerVSClient.EXPECT().GetRegion().Return(testRegion).AnyTimes()
-	mockPowerVSClient.EXPECT().GetZone().Return(testZone).AnyTimes()
-
-	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
-	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
-	testCases := []struct {
-		testcase                 string
-		providerConfig           *machinev1.PowerVSMachineProviderConfig
-		userDataSecret           *corev1.Secret
-		powerVSCredentialsSecret *corev1.Secret
-		expectedError            error
-	}{
-		{
-			testcase:                 "Create succeed",
-			providerConfig:           stubProviderConfig(credSecretName),
-			userDataSecret:           stubUserDataSecret(userSecretName),
-			powerVSCredentialsSecret: stubPowerVSCredentialsSecret(credSecretName),
-			expectedError:            nil,
-		},
-	}
-	for _, tc := range testCases {
-		// create fake resources
-		t.Logf("testCase: %v", tc.testcase)
-
+	defaultMachineFunc := func() *machinev1beta1.Machine {
 		machine, err := stubMachine()
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("unable to build stub machine: %v", err)
 		}
-		encodedProviderConfig, err := RawExtensionFromProviderSpec(tc.providerConfig)
-		if err != nil {
-			t.Fatalf("Unexpected error")
-		}
-		providerStatus, err := RawExtensionFromProviderStatus(stubProviderStatus(powerVSProviderID))
-		if err != nil {
-			t.Fatalf("Failed to set providerStatus")
-		}
-		machine.Spec.ProviderSpec = machinev1beta1.ProviderSpec{Value: encodedProviderConfig}
-		machine.Status.ProviderStatus = providerStatus
+		return machine
+	}
 
-		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, tc.powerVSCredentialsSecret, tc.userDataSecret)
+	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
+	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
+	powerVSCredentialsSecret := stubPowerVSCredentialsSecret(credSecretName)
+	userDataSecret := stubUserDataSecret(userSecretName)
 
-		machineScope, err := newMachineScope(machineScopeParams{
-			client:  fakeClient,
-			machine: machine,
-			powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
-				debug bool) (client.Client, error) {
-				return mockPowerVSClient, nil
+	testCases := []struct {
+		testcase          string
+		machineFunc       func() *machinev1beta1.Machine
+		providerConfig    *machinev1.PowerVSMachineProviderConfig
+		providerStatus    machinev1.PowerVSMachineProviderStatus
+		powerVSClientFunc func(*gomock.Controller) client.Client
+		providerID        string
+		expectedCondition metav1.Condition
+		expectError       bool
+	}{
+		{
+			testcase: "with invalid machine object",
+			machineFunc: func() *machinev1beta1.Machine {
+				machine, err := stubMachine()
+				if err != nil {
+					t.Fatalf("unable to build stub machine: %v", err)
+				}
+				delete(machine.Labels, machinev1beta1.MachineClusterIDLabel)
+				return machine
 			},
-			powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
-				return nil, nil
+			providerConfig: stubProviderConfig(credSecretName),
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				return mockPowerVSClient
 			},
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+			expectError: true,
+		},
+		{
+			testcase:       "with create machine success",
+			machineFunc:    defaultMachineFunc,
+			providerConfig: stubProviderConfig(credSecretName),
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstanceByName(gomock.Any()).Return(stubInstanceWithBuildState(), nil)
+				mockPowerVSClient.EXPECT().GetInstance(gomock.Any()).Return(stubInstanceWithBuildState(), nil)
+				mockPowerVSClient.EXPECT().CreateInstance(gomock.Any()).Return(stubGetInstances(), nil)
+				mockPowerVSClient.EXPECT().GetImages().Return(stubGetImages(imageNamePrefix, 3), nil)
+				mockPowerVSClient.EXPECT().GetNetworks().Return(stubGetNetworks(networkNamePrefix, 3), nil)
+				return mockPowerVSClient
+			},
+			providerID:        *stubInstanceWithBuildState().PvmInstanceID,
+			expectedCondition: conditionBuild(),
+			expectError:       true,
+		},
+	}
 
-		reconciler := newReconciler(machineScope)
+	for _, tc := range testCases {
+		t.Run(tc.testcase, func(t *testing.T) {
+			g := NewWithT(t)
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		// test create
-		err = reconciler.create()
-		log.Printf("Error is %v", err)
-		if tc.expectedError != nil {
-			if err == nil {
-				t.Error("reconciler was expected to return error")
-			}
-			if err != nil && err.Error() != tc.expectedError.Error() {
-				t.Errorf("Expected: %v, got %v", tc.expectedError, err)
-			}
-		} else {
+			providerConfig, err := RawExtensionFromProviderSpec(tc.providerConfig)
 			if err != nil {
-				t.Errorf("reconciler was not expected to return error: %v", err)
+				t.Fatalf("Unexpected error")
 			}
-		}
+
+			providerStatus, err := RawExtensionFromProviderStatus(&tc.providerStatus)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			machine := tc.machineFunc()
+			machine.Spec.ProviderSpec = machinev1beta1.ProviderSpec{Value: providerConfig}
+			machine.Status.ProviderStatus = providerStatus
+
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(machine, powerVSCredentialsSecret, userDataSecret).Build()
+			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
+
+			machineScope, err := newMachineScope(machineScopeParams{
+				client:  fakeClient,
+				machine: machine,
+				powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
+					debug bool) (client.Client, error) {
+					return mockPowerVSClient, nil
+				},
+				powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+					return nil, nil
+				},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			reconciler := newReconciler(machineScope)
+
+			err = reconciler.create()
+			if tc.expectError {
+				if err == nil {
+					t.Fatal("create machine expected to return an error")
+				}
+				if reconciler.providerStatus != nil && reconciler.providerStatus.InstanceID != nil {
+					if *reconciler.providerStatus.InstanceID != tc.providerID {
+						t.Error("reconciler did not set proper instance id")
+					}
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error while creating machine: %v", err)
+				}
+			}
+			if tc.expectedCondition.Type != "" {
+				g.Expect(reconciler.providerStatus.Conditions).Should(HaveEach(
+					SatisfyAll(
+						HaveField("Type", tc.expectedCondition.Type),
+						HaveField("Status", tc.expectedCondition.Status),
+						HaveField("Reason", tc.expectedCondition.Reason),
+						HaveField("Message", tc.expectedCondition.Message),
+					)))
+			}
+		})
 	}
 }
 
 func TestExists(t *testing.T) {
-	fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme)
-	mockCtrl := gomock.NewController(t)
-	mockPowerVSClient := mock.NewMockClient(mockCtrl)
-
-	mockPowerVSClient.EXPECT().GetInstanceByName(gomock.Any()).Return(stubGetInstance(), nil)
+	instanceID := "powerVSInstance"
 
 	machine, err := stubMachine()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("unable to build stub machine: %v", err)
 	}
 
-	machineScope, err := newMachineScope(machineScopeParams{
-		client:  fakeClient,
-		machine: machine,
-		powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
-			debug bool) (client.Client, error) {
-			return mockPowerVSClient, nil
+	userSecretName := fmt.Sprintf("%s-%s", userDataSecretName, rand.String(nameLength))
+	credSecretName := fmt.Sprintf("%s-%s", credentialsSecretName, rand.String(nameLength))
+	powerVSCredentialsSecret := stubPowerVSCredentialsSecret(credSecretName)
+	userDataSecret := stubUserDataSecret(userSecretName)
+
+	testCases := []struct {
+		testcase          string
+		providerStatus    machinev1.PowerVSMachineProviderStatus
+		powerVSClientFunc func(*gomock.Controller) client.Client
+		exists            bool
+		expectError       bool
+	}{
+		{
+			testcase:       "with get instance by name",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), nil)
+				return mockPowerVSClient
+			},
+			exists: true,
 		},
-		powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
-			return nil, nil
+		{
+			testcase:       "with error getting instances by name",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), fmt.Errorf("intentional error"))
+				return mockPowerVSClient
+			},
+			expectError: true,
 		},
-	})
-	if err != nil {
-		t.Fatalf("failed to create new machine scope error: %v", err)
+		{
+			testcase:       "with get instance returning known error",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), fmt.Errorf("instance Not Found"))
+				return mockPowerVSClient
+			},
+			expectError: true,
+		},
+		{
+			testcase:       "with get instance returning no instances",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(nil, nil)
+				return mockPowerVSClient
+			},
+		},
+		{
+			testcase: "get instances by id",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{
+				InstanceID: &instanceID,
+			},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstance(gomock.Any()).Return(stubGetInstance(), nil).Times(1)
+				return mockPowerVSClient
+			},
+			exists: true,
+		},
+		{
+			testcase: "with get instances by id returning error",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{
+				InstanceID: &instanceID,
+			},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+				mockPowerVSClient.EXPECT().GetInstance(gomock.Any()).Return(nil, fmt.Errorf("intentional error")).Times(1)
+				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(stubGetInstance(), nil)
+				return mockPowerVSClient
+			},
+			exists: true,
+		},
+		{
+			testcase: "with both get instance by id and name returning error",
+			providerStatus: machinev1.PowerVSMachineProviderStatus{
+				InstanceID: &instanceID,
+			},
+			powerVSClientFunc: func(ctrl *gomock.Controller) client.Client {
+				mockPowerVSClient := mock.NewMockClient(ctrl)
+
+				mockPowerVSClient.EXPECT().GetInstance(gomock.Any()).Return(nil,
+					errors.New("intentional error ")).Times(1).Times(1)
+				mockPowerVSClient.EXPECT().GetInstanceByName(machine.GetName()).Return(nil,
+					errors.New("intentional error ")).Times(1)
+
+				return mockPowerVSClient
+			},
+			expectError: true,
+		},
 	}
-	reconciler := newReconciler(machineScope)
-	exists, err := reconciler.exists()
-	if err != nil || exists != true {
-		t.Errorf("reconciler was not expected to return error: %v", err)
+
+	for _, tc := range testCases {
+		t.Run(tc.testcase, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			powerVSStatusRaw, err := RawExtensionFromProviderStatus(&tc.providerStatus)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			machineCopy := machine.DeepCopy()
+			machineCopy.Status.ProviderStatus = powerVSStatusRaw
+
+			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
+
+			machineScope, err := newMachineScope(machineScopeParams{
+				client:  fakeClient,
+				machine: machineCopy,
+				powerVSClientBuilder: func(client runtimeclient.Client, secretName, namespace, cloudInstanceID string,
+					debug bool) (client.Client, error) {
+					return mockPowerVSClient, nil
+				},
+				powerVSMinimalClient: func(client runtimeclient.Client) (client.Client, error) {
+					return nil, nil
+				},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			reconciler := newReconciler(machineScope)
+
+			exists, err := reconciler.exists()
+			if tc.expectError {
+				if err == nil {
+					t.Fatal("checking machine exists expected to return an error")
+				}
+			} else {
+				if err != nil || tc.exists != exists {
+					t.Errorf("Unexpected error while checking machine exists: %v", err)
+				}
+			}
+		})
 	}
 }
 
