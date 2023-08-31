@@ -32,7 +32,7 @@ MUTABLE_TAG ?= latest
 IMAGE        = origin-powervs-machine-controllers
 BUILD_IMAGE ?= registry.ci.openshift.org/openshift/release:rhel-8-release-golang-1.20-openshift-4.14
 
-NO_DOCKER ?= 0
+NO_DOCKER ?= 1
 
 # race tests need CGO_ENABLED, everything else should have it disabled
 CGO_ENABLED = 0
