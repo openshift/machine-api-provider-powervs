@@ -106,7 +106,7 @@ func TestGetMachineInstances(t *testing.T) {
 			machineCopy := machine.DeepCopy()
 			machineCopy.Status.ProviderStatus = powerVAStatusRaw
 
-			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(machine, powerVSCredentialsSecret, userDataSecret).Build()
 			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
 
 			machineScope, err := newMachineScope(machineScopeParams{
@@ -416,7 +416,7 @@ func TestExists(t *testing.T) {
 			machineCopy := machine.DeepCopy()
 			machineCopy.Status.ProviderStatus = powerVSStatusRaw
 
-			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(machine, powerVSCredentialsSecret, userDataSecret).Build()
 			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
 
 			machineScope, err := newMachineScope(machineScopeParams{
@@ -450,7 +450,7 @@ func TestExists(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme)
+	fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 	mockCtrl := gomock.NewController(t)
 	mockPowerVSClient := mock.NewMockClient(mockCtrl)
 
@@ -797,8 +797,7 @@ func TestSetMachineAddresses(t *testing.T) {
 			defer ctrl.Finish()
 
 			machineCopy := machine.DeepCopy()
-
-			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(machine, powerVSCredentialsSecret, userDataSecret).Build()
 			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
 
 			machineScope, err := newMachineScope(machineScopeParams{
@@ -1187,7 +1186,7 @@ func TestUpdateLoadBalancers(t *testing.T) {
 
 			machine := tc.machineFunc()
 
-			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(machine, powerVSCredentialsSecret, userDataSecret).Build()
 			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
 
 			machineScope, err := newMachineScope(machineScopeParams{
@@ -1524,7 +1523,7 @@ func TestRemoveFromApplicationLoadBalancer(t *testing.T) {
 
 			machine := tc.machineFunc()
 
-			fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, machine, powerVSCredentialsSecret, userDataSecret)
+			fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(machine, powerVSCredentialsSecret, userDataSecret).Build()
 			mockPowerVSClient := tc.powerVSClientFunc(ctrl)
 
 			machineScope, err := newMachineScope(machineScopeParams{

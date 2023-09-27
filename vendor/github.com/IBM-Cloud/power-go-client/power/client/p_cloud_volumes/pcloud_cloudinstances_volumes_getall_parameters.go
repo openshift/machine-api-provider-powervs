@@ -53,10 +53,12 @@ func NewPcloudCloudinstancesVolumesGetallParamsWithHTTPClient(client *http.Clien
 	}
 }
 
-/* PcloudCloudinstancesVolumesGetallParams contains all the parameters to send to the API endpoint
-   for the pcloud cloudinstances volumes getall operation.
+/*
+PcloudCloudinstancesVolumesGetallParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the pcloud cloudinstances volumes getall operation.
+
+	Typically these are written to a http.Request.
 */
 type PcloudCloudinstancesVolumesGetallParams struct {
 
@@ -65,6 +67,12 @@ type PcloudCloudinstancesVolumesGetallParams struct {
 	   A pvmInstance (id or name), limits a volumes list response to only volumes that have affinity to the pvmInstance
 	*/
 	Affinity *string
+
+	/* Auxiliary.
+
+	   true or false, limits a volume list to auxiliary or non auxiliary volumes
+	*/
+	Auxiliary *bool
 
 	/* CloudInstanceID.
 
@@ -142,6 +150,17 @@ func (o *PcloudCloudinstancesVolumesGetallParams) SetAffinity(affinity *string) 
 	o.Affinity = affinity
 }
 
+// WithAuxiliary adds the auxiliary to the pcloud cloudinstances volumes getall params
+func (o *PcloudCloudinstancesVolumesGetallParams) WithAuxiliary(auxiliary *bool) *PcloudCloudinstancesVolumesGetallParams {
+	o.SetAuxiliary(auxiliary)
+	return o
+}
+
+// SetAuxiliary adds the auxiliary to the pcloud cloudinstances volumes getall params
+func (o *PcloudCloudinstancesVolumesGetallParams) SetAuxiliary(auxiliary *bool) {
+	o.Auxiliary = auxiliary
+}
+
 // WithCloudInstanceID adds the cloudInstanceID to the pcloud cloudinstances volumes getall params
 func (o *PcloudCloudinstancesVolumesGetallParams) WithCloudInstanceID(cloudInstanceID string) *PcloudCloudinstancesVolumesGetallParams {
 	o.SetCloudInstanceID(cloudInstanceID)
@@ -184,6 +203,23 @@ func (o *PcloudCloudinstancesVolumesGetallParams) WriteToRequest(r runtime.Clien
 		if qAffinity != "" {
 
 			if err := r.SetQueryParam("affinity", qAffinity); err != nil {
+				return err
+			}
+		}
+	}
+
+	if o.Auxiliary != nil {
+
+		// query param auxiliary
+		var qrAuxiliary bool
+
+		if o.Auxiliary != nil {
+			qrAuxiliary = *o.Auxiliary
+		}
+		qAuxiliary := swag.FormatBool(qrAuxiliary)
+		if qAuxiliary != "" {
+
+			if err := r.SetQueryParam("auxiliary", qAuxiliary); err != nil {
 				return err
 			}
 		}

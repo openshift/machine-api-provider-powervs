@@ -93,7 +93,6 @@ func New(configs ...*bluemix.Config) (*Session, error) {
 	if c.Debug {
 		trace.Logger = trace.NewLogger("true")
 	}
-
 	return sess, nil
 }
 
