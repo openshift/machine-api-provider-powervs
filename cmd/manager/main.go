@@ -19,17 +19,6 @@ import (
 	"os"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/tools/cache"
-	"k8s.io/klog/v2"
-	"k8s.io/klog/v2/klogr"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
 	configv1 "github.com/openshift/api/config/v1"
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
 	"github.com/openshift/machine-api-operator/pkg/controller/machine"
@@ -40,6 +29,16 @@ import (
 	"github.com/openshift/machine-api-provider-powervs/pkg/controllers"
 	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 	"github.com/openshift/machine-api-provider-powervs/pkg/version"
+	corev1 "k8s.io/api/core/v1"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/klog/v2"
+	"k8s.io/klog/v2/klogr"
+	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlcache "sigs.k8s.io/controller-runtime/pkg/cache"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 // The default durations for the leader electrion operations.
@@ -47,6 +46,7 @@ var (
 	leaseDuration = 120 * time.Second
 	renewDealine  = 110 * time.Second
 	retryPeriod   = 20 * time.Second
+	syncPeriod    = 10 * time.Minute
 )
 
 func main() {
@@ -111,33 +111,33 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Get a config to talk to the apiserver
-	cfg, err := config.GetConfig()
-	if err != nil {
-		klog.Fatalf("Error getting configuration: %v", err)
+	var watchNamespaces map[string]ctrlcache.Config
+	if *watchNamespace != "" {
+		watchNamespaces = map[string]ctrlcache.Config{
+			*watchNamespace: {},
+		}
 	}
 
-	// Setup a Manager
-	syncPeriod := 10 * time.Minute
-	opts := manager.Options{
+	ctrlOptions := ctrl.Options{
+		Cache: ctrlcache.Options{
+			SyncPeriod:        &syncPeriod,
+			DefaultNamespaces: watchNamespaces,
+		},
 		LeaderElection:          *leaderElect,
 		LeaderElectionNamespace: *leaderElectResourceNamespace,
 		LeaderElectionID:        "machine-api-provider-powervs-leader",
 		LeaseDuration:           leaderElectLeaseDuration,
-		HealthProbeBindAddress:  *healthAddr,
-		SyncPeriod:              &syncPeriod,
-		MetricsBindAddress:      *metricsAddress,
-		// Slow the default retry and renew election rate to reduce etcd writes at idle: BZ 1858400
-		RetryPeriod:   &retryPeriod,
-		RenewDeadline: &renewDealine,
+		RenewDeadline:           &renewDealine,
+		RetryPeriod:             &retryPeriod,
+		Metrics: server.Options{
+			BindAddress: *metricsAddress,
+		},
+		HealthProbeBindAddress: *healthAddr,
 	}
 
-	if *watchNamespace != "" {
-		opts.Namespace = *watchNamespace
-		klog.Infof("Watching machine-api objects only in namespace %q for reconciliation.", opts.Namespace)
-	}
+	restConfig := ctrl.GetConfigOrDie()
 
-	mgr, err := manager.New(cfg, opts)
+	mgr, err := ctrl.NewManager(restConfig, ctrlOptions)
 	if err != nil {
 		klog.Fatalf("Error creating manager: %v", err)
 	}

@@ -52,10 +52,12 @@ func NewPcloudSharedprocessorpoolsGetParamsWithHTTPClient(client *http.Client) *
 	}
 }
 
-/* PcloudSharedprocessorpoolsGetParams contains all the parameters to send to the API endpoint
-   for the pcloud sharedprocessorpools get operation.
+/*
+PcloudSharedprocessorpoolsGetParams contains all the parameters to send to the API endpoint
 
-   Typically these are written to a http.Request.
+	for the pcloud sharedprocessorpools get operation.
+
+	Typically these are written to a http.Request.
 */
 type PcloudSharedprocessorpoolsGetParams struct {
 
@@ -67,7 +69,7 @@ type PcloudSharedprocessorpoolsGetParams struct {
 
 	/* SharedProcessorPoolID.
 
-	   Shared Processor Pool ID
+	   Shared Processor Pool ID or Name
 	*/
 	SharedProcessorPoolID string
 

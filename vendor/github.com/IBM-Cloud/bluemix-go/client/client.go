@@ -296,16 +296,18 @@ func cleanPath(p string) string {
 }
 
 const (
-	userAgentHeader       = "User-Agent"
-	authorizationHeader   = "Authorization"
-	uaaAccessTokenHeader  = "X-Auth-Uaa-Token"
-	userAccessTokenHeader = "X-Auth-User-Token"
-	iamRefreshTokenHeader = "X-Auth-Refresh-Token"
-	crRefreshTokenHeader  = "RefreshToken"
+	userAgentHeader         = "User-Agent"
+	originalUserAgentHeader = "X-Original-User-Agent"
+	authorizationHeader     = "Authorization"
+	uaaAccessTokenHeader    = "X-Auth-Uaa-Token"
+	userAccessTokenHeader   = "X-Auth-User-Token"
+	iamRefreshTokenHeader   = "X-Auth-Refresh-Token"
+	crRefreshTokenHeader    = "RefreshToken"
 )
 
 func getDefaultAuthHeaders(serviceName bluemix.ServiceName, c *bluemix.Config) gohttp.Header {
 	h := gohttp.Header{}
+	h.Set(originalUserAgentHeader, c.UserAgent)
 	switch serviceName {
 	case bluemix.MccpService, bluemix.AccountService:
 		h.Set(userAgentHeader, http.UserAgent())
@@ -324,10 +326,12 @@ func getDefaultAuthHeaders(serviceName bluemix.ServiceName, c *bluemix.Config) g
 		h.Set(authorizationHeader, c.IAMAccessToken)
 		h.Set(iamRefreshTokenHeader, c.IAMRefreshToken)
 	case bluemix.ContainerRegistryService:
+		h.Set(userAgentHeader, http.UserAgent())
 		h.Set(authorizationHeader, c.IAMAccessToken)
 		h.Set(crRefreshTokenHeader, c.IAMRefreshToken)
 	case bluemix.IAMPAPService, bluemix.AccountServicev1, bluemix.ResourceCatalogrService, bluemix.ResourceControllerService, bluemix.ResourceControllerServicev2, bluemix.ResourceManagementService, bluemix.ResourceManagementServicev2, bluemix.IAMService, bluemix.IAMUUMService, bluemix.IAMUUMServicev2, bluemix.IAMPAPServicev2, bluemix.CseService:
 		h.Set(authorizationHeader, c.IAMAccessToken)
+		h.Set(userAgentHeader, http.UserAgent())
 	case bluemix.UserManagement:
 		h.Set(userAgentHeader, http.UserAgent())
 		h.Set(authorizationHeader, c.IAMAccessToken)
@@ -345,6 +349,7 @@ func getDefaultAuthHeaders(serviceName bluemix.ServiceName, c *bluemix.Config) g
 		h.Set(userAgentHeader, http.UserAgent())
 		h.Set(authorizationHeader, c.IAMAccessToken)
 	case bluemix.HPCService:
+		h.Set(userAgentHeader, http.UserAgent())
 		h.Set(authorizationHeader, c.IAMAccessToken)
 	case bluemix.FunctionsService:
 		h.Set(userAgentHeader, http.UserAgent())
