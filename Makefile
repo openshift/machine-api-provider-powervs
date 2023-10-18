@@ -30,11 +30,13 @@ REPO_PATH   ?= github.com/openshift/machine-api-provider-powervs
 LD_FLAGS    ?= -X $(REPO_PATH)/pkg/version.Raw=$(VERSION) -extldflags "-static"
 MUTABLE_TAG ?= latest
 IMAGE        = origin-powervs-machine-controllers
+BUILD_IMAGE ?= registry.ci.openshift.org/openshift/release:golang-1.16
 
-.PHONY: all
-all: generate build images check
+NO_DOCKER ?= 1
 
-NO_DOCKER ?= 0
+# race tests need CGO_ENABLED, everything else should have it disabled
+CGO_ENABLED = 0
+unit : CGO_ENABLED = 1
 
 ifeq ($(shell command -v podman > /dev/null 2>&1 ; echo $$? ), 0)
 	ENGINE=podman
@@ -50,12 +52,15 @@ ifeq ($(USE_DOCKER), 1)
 endif
 
 ifeq ($(NO_DOCKER), 1)
-  DOCKER_CMD =
+  DOCKER_CMD = CGO_ENABLED=$(CGO_ENABLED)
   IMAGE_BUILD_CMD = imagebuilder
 else
-  DOCKER_CMD := $(ENGINE) run --rm -v "$(PWD)":/go/src/github.com/openshift/machine-api-provider-powervs:Z -w /go/src/github.com/openshift/machine-api-provider-powervs openshift/origin-release:golang-1.16
+  DOCKER_CMD := $(ENGINE) run --rm -e CGO_ENABLED=$(CGO_ENABLED) -v "$(PWD)":/go/src/github.com/openshift/machine-api-provider-powervs -w /go/src/github.com/openshift/machine-api-provider-powervs $(BUILD_IMAGE)
   IMAGE_BUILD_CMD = $(ENGINE) build
 endif
+
+.PHONY: all
+all: generate build images check
 
 .PHONY: vendor
 vendor:
@@ -79,7 +84,7 @@ bin:
 
 .PHONY: build
 build: ## build binaries
-	$(DOCKER_CMD) CGO_ENABLED=0 go build $(GOGCFLAGS) -o "bin/machine-controller-manager" \
+	$(DOCKER_CMD) go build $(GOGCFLAGS) -o "bin/machine-controller-manager" \
                -ldflags "$(LD_FLAGS)" "$(REPO_PATH)/cmd/manager"
 
 .PHONY: images
