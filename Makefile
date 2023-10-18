@@ -32,7 +32,7 @@ MUTABLE_TAG ?= latest
 IMAGE        = origin-powervs-machine-controllers
 BUILD_IMAGE ?= registry.ci.openshift.org/openshift/release:rhel-8-release-golang-1.19-openshift-4.12
 
-NO_DOCKER ?= 0
+NO_DOCKER ?= 1
 
 # race tests need CGO_ENABLED, everything else should have it disabled
 CGO_ENABLED = 0
@@ -55,7 +55,7 @@ ifeq ($(NO_DOCKER), 1)
   DOCKER_CMD = CGO_ENABLED=$(CGO_ENABLED)
   IMAGE_BUILD_CMD = imagebuilder
 else
-  DOCKER_CMD := $(ENGINE) run --rm -e CGO_ENABLED=$(CGO_ENABLED) -v "$(PWD)":/go/src/github.com/openshift/machine-api-provider-powervs:Z -w /go/src/github.com/openshift/machine-api-provider-powervs $(BUILD_IMAGE)
+  DOCKER_CMD := $(ENGINE) run --rm -e CGO_ENABLED=$(CGO_ENABLED) -v "$(PWD)":/go/src/github.com/openshift/machine-api-provider-powervs -w /go/src/github.com/openshift/machine-api-provider-powervs $(BUILD_IMAGE)
   IMAGE_BUILD_CMD = $(ENGINE) build
 endif
 
