@@ -333,6 +333,9 @@ func (p *powerVSClient) GetCloudServiceInstances() ([]resourcecontrollerv2.Resou
 			if err != nil {
 				return false, "", err
 			}
+			if nextURL == nil {
+				return true, "", nil
+			}
 			return false, *nextURL, nil
 		}
 		return true, "", nil
@@ -369,6 +372,9 @@ func (p *powerVSClient) GetCloudServiceInstanceByName(name string) (*resourcecon
 			nextURL, err := serviceInstances.GetNextStart()
 			if err != nil {
 				return false, "", err
+			}
+			if nextURL == nil {
+				return true, "", nil
 			}
 			return false, *nextURL, nil
 		}
