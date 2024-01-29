@@ -620,7 +620,7 @@ func createLoadBalancerPoolMember(powerVSClient client.Client, lbMap map[string]
 				if err != nil {
 					return fmt.Errorf("error creating LoadBalacner pool member %v", err)
 				}
-				klog.V(3).Infof("Create LoadBalancer pool response, LB %s pool %s response %s", lbName, *pool.Name, response)
+				klog.V(3).Infof("Create LoadBalancer pool response, LB %s pool %s response %v", lbName, *pool.Name, response)
 			}
 		}
 	}
