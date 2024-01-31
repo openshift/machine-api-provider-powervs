@@ -391,7 +391,7 @@ func (p *powerVSClient) GetCloudServiceInstanceByName(name string) (*resourcecon
 		klog.Errorf(errStr.Error())
 		return nil, fmt.Errorf("does exist any cloud service instance with name %s", name)
 	case 1:
-		klog.Infof("serviceInstance %s found with ID: %s", name, serviceInstancesList[0].GUID)
+		klog.Infof("serviceInstance %s found with ID: %v", name, serviceInstancesList[0].GUID)
 		return &serviceInstancesList[0], nil
 	default:
 		errStr := fmt.Errorf("there exist more than one service instance ID with with same name %s, Try setting serviceInstance.ID", name)

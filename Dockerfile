@@ -1,4 +1,4 @@
-FROM registry.ci.openshift.org/openshift/release:rhel-8-release-golang-1.19-openshift-4.12 AS builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.21-openshift-4.16 AS builder
 WORKDIR /go/src/github.com/openshift/machine-api-provider-powervs
 COPY . .
 # VERSION env gets set in the openshift/release image and refers to the golang version, which interfers with our own
