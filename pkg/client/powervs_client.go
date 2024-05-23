@@ -526,8 +526,11 @@ func resolveEndpoints(ctrlRuntimeClient client.Client) (map[string]string, error
 }
 
 func setCustomEndpoints(customEndpointsMap map[string]string, keys []string) error {
-	//TODO(Doubt): Is it required to validate the endpoints again before setting it or blindly trust installer
 	for _, key := range keys {
+		if _, ok := endPointKeyToEnvNameMap[key]; !ok {
+			klog.Infof("setCustomEndpoints ignoring %s", key)
+			continue
+		}
 		if val, ok := customEndpointsMap[key]; ok {
 			if err := setEnvironmentVariables(endPointKeyToEnvNameMap[key], val); err != nil {
 				return err

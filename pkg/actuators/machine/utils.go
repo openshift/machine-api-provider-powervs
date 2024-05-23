@@ -165,13 +165,14 @@ func ProviderSpecFromRawExtension(rawExtension *runtime.RawExtension) (*machinev
 	if rawExtension == nil {
 		return &machinev1.PowerVSMachineProviderConfig{}, nil
 	}
+	klog.V(3).Infof("ProviderSpecFromRawExtension: rawExtension = %+v", string(rawExtension.Raw))
 
 	spec := new(machinev1.PowerVSMachineProviderConfig)
 	if err := json.Unmarshal(rawExtension.Raw, &spec); err != nil {
 		return nil, fmt.Errorf("error unmarshalling providerSpec: %v", err)
 	}
 
-	klog.V(5).Infof("Got provider Spec from raw extension: %+v", spec)
+	klog.V(3).Infof("Got provider Spec from raw extension: %+v", spec)
 	return spec, nil
 }
 
@@ -180,12 +181,13 @@ func ProviderStatusFromRawExtension(rawExtension *runtime.RawExtension) (*machin
 	if rawExtension == nil {
 		return &machinev1.PowerVSMachineProviderStatus{}, nil
 	}
+	klog.V(3).Infof("ProviderStatusFromRawExtension: rawExtension = %+v", string(rawExtension.Raw))
 
 	providerStatus := new(machinev1.PowerVSMachineProviderStatus)
 	if err := json.Unmarshal(rawExtension.Raw, providerStatus); err != nil {
 		return nil, fmt.Errorf("error unmarshalling providerStatus: %v", err)
 	}
 
-	klog.V(5).Infof("Got provider Status from raw extension: %+v", providerStatus)
+	klog.V(3).Infof("Got provider Status from raw extension: %+v", providerStatus)
 	return providerStatus, nil
 }
