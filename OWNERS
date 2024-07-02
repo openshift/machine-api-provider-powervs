@@ -1,9 +1,11 @@
 reviewers:
 - mkumatag
 - Karthik-K-N
+- multiarch-reviewers
 approvers:
 - mkumatag
 - Karthik-K-N
 - JoelSpeed
+- multiarch-approvers
 
 component: "Multi-Arch / IBM P and Z"

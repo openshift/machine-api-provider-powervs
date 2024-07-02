@@ -1,0 +1,23 @@
+aliases:
+  multiarch-approvers:
+  - jaypoulz
+  - Prashanth684
+  - tvardema
+  - aleskandro
+  - jeffdyoung
+  - andymcc
+  - SaravanaStorageNetwork
+  - r4f4
+  multiarch-reviewers:
+  - jaypoulz
+  - Prashanth684
+  - tvardema
+  - aleskandro
+  - jeffdyoung
+  - andymcc
+  - SaravanaStorageNetwork
+  - r4f4
+  - alkleinrh
+  - manojnkumar
+  - hamzy
+  - Shilpa-Gokul
