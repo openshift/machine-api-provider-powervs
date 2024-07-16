@@ -32,6 +32,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/tools/cache"
+	k8sflag "k8s.io/component-base/cli/flag"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -101,6 +102,9 @@ func main() {
 	if *options.Debug {
 		fmt.Println("WARNING!!! debug has been enabled and it should be used only for development")
 	}
+
+	featureGateArgs := map[string]bool{}
+	flag.Var(k8sflag.NewMapStringBool(&featureGateArgs), "feature-gates", "A set of key=value pairs that describe feature gates for alpha/experimen")
 
 	klog.InitFlags(nil)
 	flag.Set("logtostderr", "true")
