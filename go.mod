@@ -31,6 +31,7 @@ require (
 require (
 	github.com/IBM/platform-services-go-sdk v0.40.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	k8s.io/component-base v0.29.0
 )
 
 require (
@@ -134,7 +135,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.29.0 // indirect
 	k8s.io/cli-runtime v0.29.0 // indirect
-	k8s.io/component-base v0.29.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
 	k8s.io/kubectl v0.29.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
