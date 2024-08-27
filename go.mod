@@ -33,6 +33,8 @@ require (
 require (
 	github.com/IBM/platform-services-go-sdk v0.40.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/openshift/library-go v0.0.0-20240822162747-42bcbbc4ccc6
+	k8s.io/apiserver v0.30.1
 	k8s.io/component-base v0.30.1
 )
 
@@ -103,7 +105,6 @@ require (
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/openshift/client-go v0.0.0-20240528061634-b054aa794d87 // indirect
-	github.com/openshift/library-go v0.0.0-20240723172506-8bb8fe6cc56d // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
