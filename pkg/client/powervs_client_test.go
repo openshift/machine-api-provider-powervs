@@ -62,7 +62,7 @@ func TestResolveEndpoints(t *testing.T) {
 	testEnv := &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "config", "crds"),
-			filepath.Join("..", "..", "vendor", "github.com", "openshift", "api", "config", "v1"),
+			filepath.Join("..", "..", "vendor", "github.com", "openshift", "api", "config", "v1", "zz_generated.crd-manifests", "0000_10_config-operator_01_infrastructures-CustomNoUpgrade.crd.yaml"),
 		},
 	}
 	configv1.AddToScheme(scheme.Scheme)
