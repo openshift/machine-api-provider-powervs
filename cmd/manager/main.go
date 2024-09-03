@@ -17,10 +17,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	configv1 "github.com/openshift/api/config/v1"
+	apifeatures "github.com/openshift/api/features"
 	machinev1beta1 "github.com/openshift/api/machine/v1beta1"
+	"github.com/openshift/library-go/pkg/features"
 	"github.com/openshift/machine-api-operator/pkg/controller/machine"
 	"github.com/openshift/machine-api-operator/pkg/metrics"
 	machineactuator "github.com/openshift/machine-api-provider-powervs/pkg/actuators/machine"
@@ -30,9 +33,10 @@ import (
 	"github.com/openshift/machine-api-provider-powervs/pkg/options"
 	"github.com/openshift/machine-api-provider-powervs/pkg/version"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apiserver/pkg/util/feature"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/tools/cache"
-	k8sflag "k8s.io/component-base/cli/flag"
+	"k8s.io/component-base/featuregate"
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -103,8 +107,15 @@ func main() {
 		fmt.Println("WARNING!!! debug has been enabled and it should be used only for development")
 	}
 
-	featureGateArgs := map[string]bool{}
-	flag.Var(k8sflag.NewMapStringBool(&featureGateArgs), "feature-gates", "A set of key=value pairs that describe feature gates for alpha/experimen")
+	// Sets up feature gates
+	defaultMutableGate := feature.DefaultMutableFeatureGate
+	gateOpts, err := features.NewFeatureGateOptions(defaultMutableGate, apifeatures.SelfManaged, apifeatures.FeatureGateMachineAPIMigration)
+	if err != nil {
+		klog.Fatalf("Error setting up feature gates: %v", err)
+	}
+
+	// Add the --feature-gates flag
+	gateOpts.AddFlagsToGoFlagSet(nil)
 
 	klog.InitFlags(nil)
 	flag.Set("logtostderr", "true")
@@ -141,6 +152,18 @@ func main() {
 
 	restConfig := ctrl.GetConfigOrDie()
 
+	// Sets feature gates from flags
+	klog.Infof("Initializing feature gates: %s", strings.Join(defaultMutableGate.KnownFeatures(), ", "))
+	warnings, err := gateOpts.ApplyTo(defaultMutableGate)
+	if err != nil {
+		klog.Fatalf("Error setting feature gates from flags: %v", err)
+	}
+	if len(warnings) > 0 {
+		klog.Infof("Warnings setting feature gates from flags: %v", warnings)
+	}
+
+	klog.Infof("FeatureGateMachineAPIMigration initialised: %t", defaultMutableGate.Enabled(featuregate.Feature(apifeatures.FeatureGateMachineAPIMigration)))
+
 	mgr, err := ctrl.NewManager(restConfig, ctrlOptions)
 	if err != nil {
 		klog.Fatalf("Error creating manager: %v", err)
@@ -169,7 +192,7 @@ func main() {
 		DHCPIPCacheStore:     cacheStore,
 	})
 
-	if err := machine.AddWithActuator(mgr, machineActuator); err != nil {
+	if err := machine.AddWithActuator(mgr, machineActuator, defaultMutableGate); err != nil {
 		klog.Fatalf("Error adding actuator: %v", err)
 	}
 
