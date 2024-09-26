@@ -6,6 +6,7 @@ package iaas_service_broker
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,24 @@ func (o *ServiceBrokerHealthReader) ReadResponse(response runtime.ClientResponse
 		return result, nil
 	case 400:
 		result := NewServiceBrokerHealthBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBrokerHealthUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBrokerHealthForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceBrokerHealthNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -85,11 +104,13 @@ func (o *ServiceBrokerHealthOK) Code() int {
 }
 
 func (o *ServiceBrokerHealthOK) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerHealthOK) String() string {
-	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerHealthOK) GetPayload() *models.Health {
@@ -153,11 +174,13 @@ func (o *ServiceBrokerHealthBadRequest) Code() int {
 }
 
 func (o *ServiceBrokerHealthBadRequest) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerHealthBadRequest) String() string {
-	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerHealthBadRequest) GetPayload() *models.Error {
@@ -165,6 +188,216 @@ func (o *ServiceBrokerHealthBadRequest) GetPayload() *models.Error {
 }
 
 func (o *ServiceBrokerHealthBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerHealthUnauthorized creates a ServiceBrokerHealthUnauthorized with default headers values
+func NewServiceBrokerHealthUnauthorized() *ServiceBrokerHealthUnauthorized {
+	return &ServiceBrokerHealthUnauthorized{}
+}
+
+/*
+ServiceBrokerHealthUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBrokerHealthUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker health unauthorized response has a 2xx status code
+func (o *ServiceBrokerHealthUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker health unauthorized response has a 3xx status code
+func (o *ServiceBrokerHealthUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker health unauthorized response has a 4xx status code
+func (o *ServiceBrokerHealthUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker health unauthorized response has a 5xx status code
+func (o *ServiceBrokerHealthUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker health unauthorized response a status code equal to that given
+func (o *ServiceBrokerHealthUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service broker health unauthorized response
+func (o *ServiceBrokerHealthUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBrokerHealthUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerHealthUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerHealthUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerHealthUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerHealthForbidden creates a ServiceBrokerHealthForbidden with default headers values
+func NewServiceBrokerHealthForbidden() *ServiceBrokerHealthForbidden {
+	return &ServiceBrokerHealthForbidden{}
+}
+
+/*
+ServiceBrokerHealthForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBrokerHealthForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker health forbidden response has a 2xx status code
+func (o *ServiceBrokerHealthForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker health forbidden response has a 3xx status code
+func (o *ServiceBrokerHealthForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker health forbidden response has a 4xx status code
+func (o *ServiceBrokerHealthForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker health forbidden response has a 5xx status code
+func (o *ServiceBrokerHealthForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker health forbidden response a status code equal to that given
+func (o *ServiceBrokerHealthForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service broker health forbidden response
+func (o *ServiceBrokerHealthForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBrokerHealthForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerHealthForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerHealthForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerHealthForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerHealthNotFound creates a ServiceBrokerHealthNotFound with default headers values
+func NewServiceBrokerHealthNotFound() *ServiceBrokerHealthNotFound {
+	return &ServiceBrokerHealthNotFound{}
+}
+
+/*
+ServiceBrokerHealthNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceBrokerHealthNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker health not found response has a 2xx status code
+func (o *ServiceBrokerHealthNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker health not found response has a 3xx status code
+func (o *ServiceBrokerHealthNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker health not found response has a 4xx status code
+func (o *ServiceBrokerHealthNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker health not found response has a 5xx status code
+func (o *ServiceBrokerHealthNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker health not found response a status code equal to that given
+func (o *ServiceBrokerHealthNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service broker health not found response
+func (o *ServiceBrokerHealthNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceBrokerHealthNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerHealthNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/health][%d] serviceBrokerHealthNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerHealthNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerHealthNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

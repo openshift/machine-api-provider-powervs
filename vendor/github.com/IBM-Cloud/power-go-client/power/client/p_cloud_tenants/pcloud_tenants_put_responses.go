@@ -6,6 +6,7 @@ package p_cloud_tenants
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -37,6 +38,18 @@ func (o *PcloudTenantsPutReader) ReadResponse(response runtime.ClientResponse, c
 		return nil, result
 	case 401:
 		result := NewPcloudTenantsPutUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewPcloudTenantsPutForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudTenantsPutNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -103,11 +116,13 @@ func (o *PcloudTenantsPutOK) Code() int {
 }
 
 func (o *PcloudTenantsPutOK) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutOK %s", 200, payload)
 }
 
 func (o *PcloudTenantsPutOK) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutOK %s", 200, payload)
 }
 
 func (o *PcloudTenantsPutOK) GetPayload() *models.Tenant {
@@ -171,11 +186,13 @@ func (o *PcloudTenantsPutBadRequest) Code() int {
 }
 
 func (o *PcloudTenantsPutBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutBadRequest %s", 400, payload)
 }
 
 func (o *PcloudTenantsPutBadRequest) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutBadRequest %s", 400, payload)
 }
 
 func (o *PcloudTenantsPutBadRequest) GetPayload() *models.Error {
@@ -239,11 +256,13 @@ func (o *PcloudTenantsPutUnauthorized) Code() int {
 }
 
 func (o *PcloudTenantsPutUnauthorized) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudTenantsPutUnauthorized) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudTenantsPutUnauthorized) GetPayload() *models.Error {
@@ -251,6 +270,146 @@ func (o *PcloudTenantsPutUnauthorized) GetPayload() *models.Error {
 }
 
 func (o *PcloudTenantsPutUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudTenantsPutForbidden creates a PcloudTenantsPutForbidden with default headers values
+func NewPcloudTenantsPutForbidden() *PcloudTenantsPutForbidden {
+	return &PcloudTenantsPutForbidden{}
+}
+
+/*
+PcloudTenantsPutForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type PcloudTenantsPutForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud tenants put forbidden response has a 2xx status code
+func (o *PcloudTenantsPutForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud tenants put forbidden response has a 3xx status code
+func (o *PcloudTenantsPutForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud tenants put forbidden response has a 4xx status code
+func (o *PcloudTenantsPutForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud tenants put forbidden response has a 5xx status code
+func (o *PcloudTenantsPutForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud tenants put forbidden response a status code equal to that given
+func (o *PcloudTenantsPutForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the pcloud tenants put forbidden response
+func (o *PcloudTenantsPutForbidden) Code() int {
+	return 403
+}
+
+func (o *PcloudTenantsPutForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutForbidden %s", 403, payload)
+}
+
+func (o *PcloudTenantsPutForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutForbidden %s", 403, payload)
+}
+
+func (o *PcloudTenantsPutForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudTenantsPutForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudTenantsPutNotFound creates a PcloudTenantsPutNotFound with default headers values
+func NewPcloudTenantsPutNotFound() *PcloudTenantsPutNotFound {
+	return &PcloudTenantsPutNotFound{}
+}
+
+/*
+PcloudTenantsPutNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudTenantsPutNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud tenants put not found response has a 2xx status code
+func (o *PcloudTenantsPutNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud tenants put not found response has a 3xx status code
+func (o *PcloudTenantsPutNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud tenants put not found response has a 4xx status code
+func (o *PcloudTenantsPutNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud tenants put not found response has a 5xx status code
+func (o *PcloudTenantsPutNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud tenants put not found response a status code equal to that given
+func (o *PcloudTenantsPutNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud tenants put not found response
+func (o *PcloudTenantsPutNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudTenantsPutNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutNotFound %s", 404, payload)
+}
+
+func (o *PcloudTenantsPutNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutNotFound %s", 404, payload)
+}
+
+func (o *PcloudTenantsPutNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudTenantsPutNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -307,11 +466,13 @@ func (o *PcloudTenantsPutUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudTenantsPutUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudTenantsPutUnprocessableEntity) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudTenantsPutUnprocessableEntity) GetPayload() *models.Error {
@@ -375,11 +536,13 @@ func (o *PcloudTenantsPutInternalServerError) Code() int {
 }
 
 func (o *PcloudTenantsPutInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudTenantsPutInternalServerError) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/tenants/{tenant_id}][%d] pcloudTenantsPutInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudTenantsPutInternalServerError) GetPayload() *models.Error {

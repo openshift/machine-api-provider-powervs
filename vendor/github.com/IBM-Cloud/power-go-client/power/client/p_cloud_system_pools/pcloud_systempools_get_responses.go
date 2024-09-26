@@ -6,6 +6,7 @@ package p_cloud_system_pools
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -29,6 +30,12 @@ func (o *PcloudSystempoolsGetReader) ReadResponse(response runtime.ClientRespons
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewPcloudSystempoolsGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 401:
 		result := NewPcloudSystempoolsGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -37,6 +44,12 @@ func (o *PcloudSystempoolsGetReader) ReadResponse(response runtime.ClientRespons
 		return nil, result
 	case 403:
 		result := NewPcloudSystempoolsGetForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudSystempoolsGetNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -97,11 +110,13 @@ func (o *PcloudSystempoolsGetOK) Code() int {
 }
 
 func (o *PcloudSystempoolsGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetOK %s", 200, payload)
 }
 
 func (o *PcloudSystempoolsGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetOK %s", 200, payload)
 }
 
 func (o *PcloudSystempoolsGetOK) GetPayload() models.SystemPools {
@@ -112,6 +127,76 @@ func (o *PcloudSystempoolsGetOK) readResponse(response runtime.ClientResponse, c
 
 	// response payload
 	if err := consumer.Consume(response.Body(), &o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudSystempoolsGetBadRequest creates a PcloudSystempoolsGetBadRequest with default headers values
+func NewPcloudSystempoolsGetBadRequest() *PcloudSystempoolsGetBadRequest {
+	return &PcloudSystempoolsGetBadRequest{}
+}
+
+/*
+PcloudSystempoolsGetBadRequest describes a response with status code 400, with default header values.
+
+Bad Request
+*/
+type PcloudSystempoolsGetBadRequest struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud systempools get bad request response has a 2xx status code
+func (o *PcloudSystempoolsGetBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud systempools get bad request response has a 3xx status code
+func (o *PcloudSystempoolsGetBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud systempools get bad request response has a 4xx status code
+func (o *PcloudSystempoolsGetBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud systempools get bad request response has a 5xx status code
+func (o *PcloudSystempoolsGetBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud systempools get bad request response a status code equal to that given
+func (o *PcloudSystempoolsGetBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the pcloud systempools get bad request response
+func (o *PcloudSystempoolsGetBadRequest) Code() int {
+	return 400
+}
+
+func (o *PcloudSystempoolsGetBadRequest) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetBadRequest %s", 400, payload)
+}
+
+func (o *PcloudSystempoolsGetBadRequest) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetBadRequest %s", 400, payload)
+}
+
+func (o *PcloudSystempoolsGetBadRequest) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudSystempoolsGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
 		return err
 	}
 
@@ -163,11 +248,13 @@ func (o *PcloudSystempoolsGetUnauthorized) Code() int {
 }
 
 func (o *PcloudSystempoolsGetUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudSystempoolsGetUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudSystempoolsGetUnauthorized) GetPayload() *models.Error {
@@ -231,11 +318,13 @@ func (o *PcloudSystempoolsGetForbidden) Code() int {
 }
 
 func (o *PcloudSystempoolsGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudSystempoolsGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudSystempoolsGetForbidden) GetPayload() *models.Error {
@@ -243,6 +332,76 @@ func (o *PcloudSystempoolsGetForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudSystempoolsGetForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudSystempoolsGetNotFound creates a PcloudSystempoolsGetNotFound with default headers values
+func NewPcloudSystempoolsGetNotFound() *PcloudSystempoolsGetNotFound {
+	return &PcloudSystempoolsGetNotFound{}
+}
+
+/*
+PcloudSystempoolsGetNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudSystempoolsGetNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud systempools get not found response has a 2xx status code
+func (o *PcloudSystempoolsGetNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud systempools get not found response has a 3xx status code
+func (o *PcloudSystempoolsGetNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud systempools get not found response has a 4xx status code
+func (o *PcloudSystempoolsGetNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud systempools get not found response has a 5xx status code
+func (o *PcloudSystempoolsGetNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud systempools get not found response a status code equal to that given
+func (o *PcloudSystempoolsGetNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud systempools get not found response
+func (o *PcloudSystempoolsGetNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudSystempoolsGetNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetNotFound %s", 404, payload)
+}
+
+func (o *PcloudSystempoolsGetNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetNotFound %s", 404, payload)
+}
+
+func (o *PcloudSystempoolsGetNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudSystempoolsGetNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -299,11 +458,13 @@ func (o *PcloudSystempoolsGetInternalServerError) Code() int {
 }
 
 func (o *PcloudSystempoolsGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudSystempoolsGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/system-pools][%d] pcloudSystempoolsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudSystempoolsGetInternalServerError) GetPayload() *models.Error {

@@ -6,6 +6,7 @@ package p_cloud_s_a_p
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -37,6 +38,18 @@ func (o *PcloudSapGetallReader) ReadResponse(response runtime.ClientResponse, co
 		return nil, result
 	case 401:
 		result := NewPcloudSapGetallUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewPcloudSapGetallForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudSapGetallNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -97,11 +110,13 @@ func (o *PcloudSapGetallOK) Code() int {
 }
 
 func (o *PcloudSapGetallOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallOK %s", 200, payload)
 }
 
 func (o *PcloudSapGetallOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallOK %s", 200, payload)
 }
 
 func (o *PcloudSapGetallOK) GetPayload() *models.SAPProfiles {
@@ -165,11 +180,13 @@ func (o *PcloudSapGetallBadRequest) Code() int {
 }
 
 func (o *PcloudSapGetallBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudSapGetallBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudSapGetallBadRequest) GetPayload() *models.Error {
@@ -233,11 +250,13 @@ func (o *PcloudSapGetallUnauthorized) Code() int {
 }
 
 func (o *PcloudSapGetallUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudSapGetallUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudSapGetallUnauthorized) GetPayload() *models.Error {
@@ -245,6 +264,146 @@ func (o *PcloudSapGetallUnauthorized) GetPayload() *models.Error {
 }
 
 func (o *PcloudSapGetallUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudSapGetallForbidden creates a PcloudSapGetallForbidden with default headers values
+func NewPcloudSapGetallForbidden() *PcloudSapGetallForbidden {
+	return &PcloudSapGetallForbidden{}
+}
+
+/*
+PcloudSapGetallForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type PcloudSapGetallForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud sap getall forbidden response has a 2xx status code
+func (o *PcloudSapGetallForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud sap getall forbidden response has a 3xx status code
+func (o *PcloudSapGetallForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud sap getall forbidden response has a 4xx status code
+func (o *PcloudSapGetallForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud sap getall forbidden response has a 5xx status code
+func (o *PcloudSapGetallForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud sap getall forbidden response a status code equal to that given
+func (o *PcloudSapGetallForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the pcloud sap getall forbidden response
+func (o *PcloudSapGetallForbidden) Code() int {
+	return 403
+}
+
+func (o *PcloudSapGetallForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallForbidden %s", 403, payload)
+}
+
+func (o *PcloudSapGetallForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallForbidden %s", 403, payload)
+}
+
+func (o *PcloudSapGetallForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudSapGetallForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudSapGetallNotFound creates a PcloudSapGetallNotFound with default headers values
+func NewPcloudSapGetallNotFound() *PcloudSapGetallNotFound {
+	return &PcloudSapGetallNotFound{}
+}
+
+/*
+PcloudSapGetallNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudSapGetallNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud sap getall not found response has a 2xx status code
+func (o *PcloudSapGetallNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud sap getall not found response has a 3xx status code
+func (o *PcloudSapGetallNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud sap getall not found response has a 4xx status code
+func (o *PcloudSapGetallNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud sap getall not found response has a 5xx status code
+func (o *PcloudSapGetallNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud sap getall not found response a status code equal to that given
+func (o *PcloudSapGetallNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud sap getall not found response
+func (o *PcloudSapGetallNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudSapGetallNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudSapGetallNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudSapGetallNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudSapGetallNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -301,11 +460,13 @@ func (o *PcloudSapGetallInternalServerError) Code() int {
 }
 
 func (o *PcloudSapGetallInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudSapGetallInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/sap][%d] pcloudSapGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudSapGetallInternalServerError) GetPayload() *models.Error {

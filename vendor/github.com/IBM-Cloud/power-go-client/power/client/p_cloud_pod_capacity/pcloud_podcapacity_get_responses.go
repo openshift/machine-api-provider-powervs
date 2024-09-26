@@ -6,6 +6,7 @@ package p_cloud_pod_capacity
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -29,6 +30,12 @@ func (o *PcloudPodcapacityGetReader) ReadResponse(response runtime.ClientRespons
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewPcloudPodcapacityGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 401:
 		result := NewPcloudPodcapacityGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -37,6 +44,12 @@ func (o *PcloudPodcapacityGetReader) ReadResponse(response runtime.ClientRespons
 		return nil, result
 	case 403:
 		result := NewPcloudPodcapacityGetForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudPodcapacityGetNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -97,11 +110,13 @@ func (o *PcloudPodcapacityGetOK) Code() int {
 }
 
 func (o *PcloudPodcapacityGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetOK %s", 200, payload)
 }
 
 func (o *PcloudPodcapacityGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetOK %s", 200, payload)
 }
 
 func (o *PcloudPodcapacityGetOK) GetPayload() *models.PodCapacity {
@@ -111,6 +126,76 @@ func (o *PcloudPodcapacityGetOK) GetPayload() *models.PodCapacity {
 func (o *PcloudPodcapacityGetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.PodCapacity)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudPodcapacityGetBadRequest creates a PcloudPodcapacityGetBadRequest with default headers values
+func NewPcloudPodcapacityGetBadRequest() *PcloudPodcapacityGetBadRequest {
+	return &PcloudPodcapacityGetBadRequest{}
+}
+
+/*
+PcloudPodcapacityGetBadRequest describes a response with status code 400, with default header values.
+
+Bad Request
+*/
+type PcloudPodcapacityGetBadRequest struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud podcapacity get bad request response has a 2xx status code
+func (o *PcloudPodcapacityGetBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud podcapacity get bad request response has a 3xx status code
+func (o *PcloudPodcapacityGetBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud podcapacity get bad request response has a 4xx status code
+func (o *PcloudPodcapacityGetBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud podcapacity get bad request response has a 5xx status code
+func (o *PcloudPodcapacityGetBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud podcapacity get bad request response a status code equal to that given
+func (o *PcloudPodcapacityGetBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the pcloud podcapacity get bad request response
+func (o *PcloudPodcapacityGetBadRequest) Code() int {
+	return 400
+}
+
+func (o *PcloudPodcapacityGetBadRequest) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetBadRequest %s", 400, payload)
+}
+
+func (o *PcloudPodcapacityGetBadRequest) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetBadRequest %s", 400, payload)
+}
+
+func (o *PcloudPodcapacityGetBadRequest) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudPodcapacityGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -165,11 +250,13 @@ func (o *PcloudPodcapacityGetUnauthorized) Code() int {
 }
 
 func (o *PcloudPodcapacityGetUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudPodcapacityGetUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudPodcapacityGetUnauthorized) GetPayload() *models.Error {
@@ -233,11 +320,13 @@ func (o *PcloudPodcapacityGetForbidden) Code() int {
 }
 
 func (o *PcloudPodcapacityGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudPodcapacityGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudPodcapacityGetForbidden) GetPayload() *models.Error {
@@ -245,6 +334,76 @@ func (o *PcloudPodcapacityGetForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudPodcapacityGetForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudPodcapacityGetNotFound creates a PcloudPodcapacityGetNotFound with default headers values
+func NewPcloudPodcapacityGetNotFound() *PcloudPodcapacityGetNotFound {
+	return &PcloudPodcapacityGetNotFound{}
+}
+
+/*
+PcloudPodcapacityGetNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudPodcapacityGetNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud podcapacity get not found response has a 2xx status code
+func (o *PcloudPodcapacityGetNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud podcapacity get not found response has a 3xx status code
+func (o *PcloudPodcapacityGetNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud podcapacity get not found response has a 4xx status code
+func (o *PcloudPodcapacityGetNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud podcapacity get not found response has a 5xx status code
+func (o *PcloudPodcapacityGetNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud podcapacity get not found response a status code equal to that given
+func (o *PcloudPodcapacityGetNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud podcapacity get not found response
+func (o *PcloudPodcapacityGetNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudPodcapacityGetNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetNotFound %s", 404, payload)
+}
+
+func (o *PcloudPodcapacityGetNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetNotFound %s", 404, payload)
+}
+
+func (o *PcloudPodcapacityGetNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudPodcapacityGetNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -301,11 +460,13 @@ func (o *PcloudPodcapacityGetInternalServerError) Code() int {
 }
 
 func (o *PcloudPodcapacityGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudPodcapacityGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/pod-capacity][%d] pcloudPodcapacityGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudPodcapacityGetInternalServerError) GetPayload() *models.Error {

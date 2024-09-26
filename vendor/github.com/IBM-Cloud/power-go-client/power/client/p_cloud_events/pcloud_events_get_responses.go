@@ -6,6 +6,7 @@ package p_cloud_events
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,12 @@ func (o *PcloudEventsGetReader) ReadResponse(response runtime.ClientResponse, co
 		return result, nil
 	case 400:
 		result := NewPcloudEventsGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewPcloudEventsGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -103,11 +110,13 @@ func (o *PcloudEventsGetOK) Code() int {
 }
 
 func (o *PcloudEventsGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetOK %s", 200, payload)
 }
 
 func (o *PcloudEventsGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetOK %s", 200, payload)
 }
 
 func (o *PcloudEventsGetOK) GetPayload() *models.Event {
@@ -171,11 +180,13 @@ func (o *PcloudEventsGetBadRequest) Code() int {
 }
 
 func (o *PcloudEventsGetBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudEventsGetBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudEventsGetBadRequest) GetPayload() *models.Error {
@@ -183,6 +194,76 @@ func (o *PcloudEventsGetBadRequest) GetPayload() *models.Error {
 }
 
 func (o *PcloudEventsGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudEventsGetUnauthorized creates a PcloudEventsGetUnauthorized with default headers values
+func NewPcloudEventsGetUnauthorized() *PcloudEventsGetUnauthorized {
+	return &PcloudEventsGetUnauthorized{}
+}
+
+/*
+PcloudEventsGetUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type PcloudEventsGetUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud events get unauthorized response has a 2xx status code
+func (o *PcloudEventsGetUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud events get unauthorized response has a 3xx status code
+func (o *PcloudEventsGetUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud events get unauthorized response has a 4xx status code
+func (o *PcloudEventsGetUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud events get unauthorized response has a 5xx status code
+func (o *PcloudEventsGetUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud events get unauthorized response a status code equal to that given
+func (o *PcloudEventsGetUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the pcloud events get unauthorized response
+func (o *PcloudEventsGetUnauthorized) Code() int {
+	return 401
+}
+
+func (o *PcloudEventsGetUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudEventsGetUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudEventsGetUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudEventsGetUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -239,11 +320,13 @@ func (o *PcloudEventsGetForbidden) Code() int {
 }
 
 func (o *PcloudEventsGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudEventsGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudEventsGetForbidden) GetPayload() *models.Error {
@@ -307,11 +390,13 @@ func (o *PcloudEventsGetNotFound) Code() int {
 }
 
 func (o *PcloudEventsGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudEventsGetNotFound) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudEventsGetNotFound) GetPayload() *models.Error {
@@ -375,11 +460,13 @@ func (o *PcloudEventsGetInternalServerError) Code() int {
 }
 
 func (o *PcloudEventsGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudEventsGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/events/{event_id}][%d] pcloudEventsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudEventsGetInternalServerError) GetPayload() *models.Error {

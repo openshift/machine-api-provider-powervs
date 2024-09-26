@@ -3,11 +3,10 @@ package client
 import (
 	"context"
 	"fmt"
-	gohttp "net/http"
+	"net/http"
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
@@ -18,11 +17,6 @@ import (
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/IBM-Cloud/bluemix-go"
-	"github.com/IBM-Cloud/bluemix-go/authentication"
-	"github.com/IBM-Cloud/bluemix-go/http"
-	"github.com/IBM-Cloud/bluemix-go/rest"
-	bxsession "github.com/IBM-Cloud/bluemix-go/session"
 	"github.com/IBM-Cloud/power-go-client/clients/instance"
 	"github.com/IBM-Cloud/power-go-client/ibmpisession"
 	"github.com/IBM-Cloud/power-go-client/power/models"
@@ -33,13 +27,10 @@ import (
 
 	configv1 "github.com/openshift/api/config/v1"
 	machineapiapierrors "github.com/openshift/machine-api-operator/pkg/controller/machine"
-	utils "github.com/openshift/machine-api-provider-powervs/pkg/utils"
+	"github.com/openshift/machine-api-provider-powervs/pkg/utils"
 )
 
 const (
-	//TIMEOUT is default timeout used by Power VS client for operations like DeleteInstance
-	TIMEOUT = time.Hour
-
 	//DefaultCredentialNamespace is the default namespace used to create a client object
 	DefaultCredentialNamespace = "openshift-machine-api"
 	//DefaultCredentialSecret is the credential secret name used by node update controller to fetch API key
@@ -47,9 +38,9 @@ const (
 
 	//InstanceStateNameShutoff is indicates the shutoff state of Power VS instance
 	InstanceStateNameShutoff = "SHUTOFF"
-	//InstanceStateNameActive is indicates the active state of Power VS instance
+	//InstanceStateNameActive indicates the active state of Power VS instance
 	InstanceStateNameActive = "ACTIVE"
-	//InstanceStateNameBuild is indicates the build state of Power VS instance
+	//InstanceStateNameBuild indicates the build state of Power VS instance
 	InstanceStateNameBuild = "BUILD"
 	//InstanceBuildReason indicates that instance is in building state
 	InstanceBuildReason = "InstanceBuildState"
@@ -83,6 +74,19 @@ var (
 	}
 )
 
+type powerVSClient struct {
+	region string
+	zone   string
+
+	ResourceClient *resourcecontrollerv2.ResourceControllerV2
+	session        *ibmpisession.IBMPISession
+	InstanceClient *instance.IBMPIInstanceClient
+	NetworkClient  *instance.IBMPINetworkClient
+	ImageClient    *instance.IBMPIImageClient
+	DHCPClient     *instance.IBMPIDhcpClient
+	VPCClient      *vpcv1.VpcV1
+}
+
 // FormatProviderID formats and returns the provided instanceID
 func FormatProviderID(region, zone, serviceInstanceID, vmInstanceID string) string {
 	// ProviderID format: ibmpowervs://<region>/<zone>/<service_instance_id>/<powervs_machine_id>
@@ -95,16 +99,6 @@ type PowerVSClientBuilderFuncType func(client client.Client, secretName, namespa
 
 // MinimalPowerVSClientBuilderFuncType is function type for building the Power VS client
 type MinimalPowerVSClientBuilderFuncType func(client client.Client) (Client, error)
-
-func apiKeyFromSecret(secret *corev1.Secret) (apiKey string, err error) {
-	switch {
-	case len(secret.Data["ibmcloud_api_key"]) > 0:
-		apiKey = string(secret.Data["ibmcloud_api_key"])
-	default:
-		return "", fmt.Errorf("invalid secret for powervs credentials")
-	}
-	return
-}
 
 // GetAPIKey will return the api key read from given secretName in a given namespace
 func GetAPIKey(ctrlRuntimeClient client.Client, secretName, namespace string) (apikey string, err error) {
@@ -132,23 +126,9 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 		return nil, err
 	}
 
+	//TODO: Use clients to override endpoints
 	if err := getAndSetServiceEndpoints(ctrlRuntimeClient); err != nil {
 		return nil, err
-	}
-
-	s, err := bxsession.New(&bluemix.Config{BluemixAPIKey: apikey})
-	if err != nil {
-		return nil, err
-	}
-
-	c := &powerVSClient{
-		cloudInstanceID: cloudInstanceID,
-		Session:         s,
-	}
-
-	err = authenticateAPIKey(s)
-	if err != nil {
-		return c, err
 	}
 
 	// Create the authenticator
@@ -156,47 +136,46 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 		ApiKey: apikey,
 	}
 
+	// Create ResourceController client
 	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
 		Authenticator: authenticator,
 	})
 	if err != nil {
-		return c, err
+		return nil, errors.Wrapf(err, "failed to create resource controller v2")
 	}
-	if rcv2 == nil {
-		return c, fmt.Errorf("unable to get resource controller")
-	}
-	c.ResourceClient = rcv2
 
-	resourceInstanceList, _, err := c.ResourceClient.ListResourceInstances(&resourcecontrollerv2.ListResourceInstancesOptions{GUID: &cloudInstanceID})
+	c := &powerVSClient{
+		ResourceClient: rcv2,
+	}
+
+	// Fetch region and zone associated with cloudInstanceID
+	resourceInstance, _, err := c.ResourceClient.GetResourceInstance(&resourcecontrollerv2.GetResourceInstanceOptions{
+		ID: &cloudInstanceID,
+	})
 	if err != nil {
-		return c, errors.Wrapf(err, "failed to get service instance details with id %s", cloudInstanceID)
+		return nil, errors.Wrapf(err, "failed to get service instance details with id %s", cloudInstanceID)
+	}
+	if resourceInstance == nil {
+		return nil, fmt.Errorf("failed to get service instance details with id %s service instance returned is nil", cloudInstanceID)
 	}
 
-	if resourceInstanceList == nil {
-		return c, fmt.Errorf("failed to get service instance details with id %s service instance returned is nil", cloudInstanceID)
-	}
-
-	if *resourceInstanceList.RowsCount != 1 {
-		return c, fmt.Errorf("failed to get service instance details, expecting one service instance with id %s but got %d", cloudInstanceID, *resourceInstanceList.RowsCount)
-	}
-
-	r, err := powerUtils.GetRegion(*resourceInstanceList.Resources[0].RegionID)
+	instanceRegion, err := powerUtils.GetRegion(*resourceInstance.RegionID)
 	if err != nil {
 		return nil, err
 	}
-	c.region = r
-	c.zone = *resourceInstanceList.Resources[0].RegionID
+	c.region = instanceRegion
+	c.zone = *resourceInstance.RegionID
 
-	c.User, err = fetchUserDetails(s, 2)
+	//Fetch User account details
+	accountID, err := getAccount(authenticator)
 	if err != nil {
-		return c, err
+		return nil, err
 	}
 
 	// Create the session options struct
 	options := &ibmpisession.IBMPIOptions{
 		Authenticator: authenticator,
-		UserAccount:   c.User.Account,
-		Region:        c.region,
+		UserAccount:   accountID,
 		Zone:          c.zone,
 		Debug:         debug,
 	}
@@ -204,9 +183,10 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	// Construct the session service instance
 	c.session, err = ibmpisession.NewIBMPISession(options)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to create IBM PI session")
 	}
 
+	// Create various Power VS clients
 	ctx := context.Background()
 	c.InstanceClient = instance.NewIBMPIInstanceClient(ctx, c.session, cloudInstanceID)
 	c.NetworkClient = instance.NewIBMPINetworkClient(ctx, c.session, cloudInstanceID)
@@ -218,16 +198,16 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 		return nil, err
 	}
 
+	// Create VPC client
 	vpcClient, err := vpcv1.NewVpcV1(&vpcv1.VpcV1Options{
-		ServiceName:   "vpcs",
 		Authenticator: authenticator,
 		// TODO: support custom service endpoints
 		URL: fmt.Sprintf("https://%s.iaas.cloud.ibm.com/v1", vpcRegion),
 	})
-	if err != nil {
-		return nil, err
-	}
 
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to create vpc client")
+	}
 	c.VPCClient = vpcClient
 	return c, err
 }
@@ -250,28 +230,10 @@ func NewMinimalPowerVSClient(ctrlRuntimeClient client.Client) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if rcv2 == nil {
-		return nil, fmt.Errorf("unable to get resource controller")
-	}
+
 	return &powerVSClient{
 		ResourceClient: rcv2,
 	}, nil
-}
-
-type powerVSClient struct {
-	region          string
-	zone            string
-	cloudInstanceID string
-
-	*bxsession.Session
-	User           *User
-	ResourceClient *resourcecontrollerv2.ResourceControllerV2
-	session        *ibmpisession.IBMPISession
-	InstanceClient *instance.IBMPIInstanceClient
-	NetworkClient  *instance.IBMPINetworkClient
-	ImageClient    *instance.IBMPIImageClient
-	DHCPClient     *instance.IBMPIDhcpClient
-	VPCClient      *vpcv1.VpcV1
 }
 
 func (p *powerVSClient) GetImages() (*models.Images, error) {
@@ -436,63 +398,40 @@ func (p *powerVSClient) DeleteLoadBalancerPoolMember(deleteLoadBalancerPoolMembe
 	return p.VPCClient.DeleteLoadBalancerPoolMember(deleteLoadBalancerPoolMemberOptions)
 }
 
-func authenticateAPIKey(sess *bxsession.Session) error {
-	config := sess.Config
-	tokenRefresher, err := authentication.NewIAMAuthRepository(config, &rest.Client{
-		DefaultHeader: gohttp.Header{
-			"User-Agent": []string{http.UserAgent()},
-		},
-	})
+func apiKeyFromSecret(secret *corev1.Secret) (apiKey string, err error) {
+	switch {
+	case len(secret.Data["ibmcloud_api_key"]) > 0:
+		apiKey = string(secret.Data["ibmcloud_api_key"])
+	default:
+		return "", fmt.Errorf("invalid secret for powervs credentials")
+	}
+	return
+}
+
+// getAccount is function parses the account number from the token and returns it.
+func getAccount(auth core.Authenticator) (string, error) {
+	// fake request to get a barer token from the request header
+	ctx := context.TODO()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://example.com", http.NoBody)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return tokenRefresher.AuthenticateAPIKey(config.BluemixAPIKey)
-}
-
-// User is used to hold the user details
-type User struct {
-	ID         string
-	Email      string
-	Account    string
-	cloudName  string `default:"bluemix"`
-	cloudType  string `default:"public"`
-	generation int    `default:"2"`
-}
-
-func fetchUserDetails(sess *bxsession.Session, generation int) (*User, error) {
-	config := sess.Config
-	user := User{}
-	var bluemixToken string
-
-	if strings.HasPrefix(config.IAMAccessToken, "Bearer") {
-		bluemixToken = config.IAMAccessToken[7:len(config.IAMAccessToken)]
-	} else {
-		bluemixToken = config.IAMAccessToken
+	err = auth.Authenticate(req)
+	if err != nil {
+		return "", err
 	}
-
-	token, err := jwt.Parse(bluemixToken, func(token *jwt.Token) (interface{}, error) {
+	bearerToken := req.Header.Get("Authorization")
+	if strings.HasPrefix(bearerToken, "Bearer") {
+		bearerToken = bearerToken[7:]
+	}
+	token, err := jwt.Parse(bearerToken, func(_ *jwt.Token) (interface{}, error) {
 		return "", nil
 	})
 	if err != nil && !strings.Contains(err.Error(), "key is of invalid type") {
-		return &user, err
+		return "", err
 	}
 
-	claims := token.Claims.(jwt.MapClaims)
-	if email, ok := claims["email"]; ok {
-		user.Email = email.(string)
-	}
-	user.ID = claims["id"].(string)
-	user.Account = claims["account"].(map[string]interface{})["bss"].(string)
-	iss := claims["iss"].(string)
-	if strings.Contains(iss, "https://iam.cloud.ibm.com") {
-		user.cloudName = "bluemix"
-	} else {
-		user.cloudName = "staging"
-	}
-	user.cloudType = "public"
-
-	user.generation = generation
-	return &user, nil
+	return token.Claims.(jwt.MapClaims)["account"].(map[string]interface{})["bss"].(string), nil
 }
 
 func resolveEndpoints(ctrlRuntimeClient client.Client) (map[string]string, error) {

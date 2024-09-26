@@ -6,6 +6,7 @@ package p_cloud_volume_groups
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,12 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetReader) ReadResponse(respon
 		return result, nil
 	case 400:
 		result := NewPcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewPcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +116,13 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetOK) Code() int {
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetOK %s", 200, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetOK %s", 200, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetOK) GetPayload() *models.VolumeGroupRemoteCopyRelationships {
@@ -177,11 +186,13 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest) Code() int {
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest) GetPayload() *models.Error {
@@ -189,6 +200,76 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest) GetPayload() *m
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized creates a PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized with default headers values
+func NewPcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized() *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized {
+	return &PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized{}
+}
+
+/*
+PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud volumegroups remote copy relationships get unauthorized response has a 2xx status code
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud volumegroups remote copy relationships get unauthorized response has a 3xx status code
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud volumegroups remote copy relationships get unauthorized response has a 4xx status code
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud volumegroups remote copy relationships get unauthorized response has a 5xx status code
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud volumegroups remote copy relationships get unauthorized response a status code equal to that given
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the pcloud volumegroups remote copy relationships get unauthorized response
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) Code() int {
+	return 401
+}
+
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -245,11 +326,13 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetForbidden) Code() int {
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetForbidden) GetPayload() *models.Error {
@@ -313,11 +396,13 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetNotFound) Code() int {
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetNotFound) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetNotFound) GetPayload() *models.Error {
@@ -381,11 +466,13 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests) Code() int
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests  %+v", 429, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests %s", 429, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests  %+v", 429, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests %s", 429, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetTooManyRequests) GetPayload() *models.Error {
@@ -449,11 +536,13 @@ func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError) Code()
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/remote-copy-relationships][%d] pcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVolumegroupsRemoteCopyRelationshipsGetInternalServerError) GetPayload() *models.Error {

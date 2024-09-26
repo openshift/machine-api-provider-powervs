@@ -6,6 +6,7 @@ package p_cloud_shared_processor_pools
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudSharedprocessorpoolsPostReader) ReadResponse(response runtime.Cli
 		return nil, result
 	case 403:
 		result := NewPcloudSharedprocessorpoolsPostForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudSharedprocessorpoolsPostNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -115,11 +122,13 @@ func (o *PcloudSharedprocessorpoolsPostAccepted) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostAccepted) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostAccepted) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostAccepted) GetPayload() *models.SharedProcessorPool {
@@ -183,11 +192,13 @@ func (o *PcloudSharedprocessorpoolsPostBadRequest) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostBadRequest) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostBadRequest) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostBadRequest) GetPayload() *models.Error {
@@ -251,11 +262,13 @@ func (o *PcloudSharedprocessorpoolsPostUnauthorized) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostUnauthorized) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostUnauthorized) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostUnauthorized) GetPayload() *models.Error {
@@ -319,11 +332,13 @@ func (o *PcloudSharedprocessorpoolsPostForbidden) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostForbidden) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostForbidden %s", 403, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostForbidden) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostForbidden %s", 403, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostForbidden) GetPayload() *models.Error {
@@ -331,6 +346,76 @@ func (o *PcloudSharedprocessorpoolsPostForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudSharedprocessorpoolsPostForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudSharedprocessorpoolsPostNotFound creates a PcloudSharedprocessorpoolsPostNotFound with default headers values
+func NewPcloudSharedprocessorpoolsPostNotFound() *PcloudSharedprocessorpoolsPostNotFound {
+	return &PcloudSharedprocessorpoolsPostNotFound{}
+}
+
+/*
+PcloudSharedprocessorpoolsPostNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudSharedprocessorpoolsPostNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud sharedprocessorpools post not found response has a 2xx status code
+func (o *PcloudSharedprocessorpoolsPostNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud sharedprocessorpools post not found response has a 3xx status code
+func (o *PcloudSharedprocessorpoolsPostNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud sharedprocessorpools post not found response has a 4xx status code
+func (o *PcloudSharedprocessorpoolsPostNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud sharedprocessorpools post not found response has a 5xx status code
+func (o *PcloudSharedprocessorpoolsPostNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud sharedprocessorpools post not found response a status code equal to that given
+func (o *PcloudSharedprocessorpoolsPostNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud sharedprocessorpools post not found response
+func (o *PcloudSharedprocessorpoolsPostNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudSharedprocessorpoolsPostNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostNotFound %s", 404, payload)
+}
+
+func (o *PcloudSharedprocessorpoolsPostNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostNotFound %s", 404, payload)
+}
+
+func (o *PcloudSharedprocessorpoolsPostNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudSharedprocessorpoolsPostNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -387,11 +472,13 @@ func (o *PcloudSharedprocessorpoolsPostConflict) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostConflict) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostConflict %s", 409, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostConflict) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostConflict %s", 409, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostConflict) GetPayload() *models.Error {
@@ -455,11 +542,13 @@ func (o *PcloudSharedprocessorpoolsPostUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostUnprocessableEntity) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostUnprocessableEntity) GetPayload() *models.Error {
@@ -523,11 +612,13 @@ func (o *PcloudSharedprocessorpoolsPostInternalServerError) Code() int {
 }
 
 func (o *PcloudSharedprocessorpoolsPostInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostInternalServerError) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/shared-processor-pools][%d] pcloudSharedprocessorpoolsPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudSharedprocessorpoolsPostInternalServerError) GetPayload() *models.Error {

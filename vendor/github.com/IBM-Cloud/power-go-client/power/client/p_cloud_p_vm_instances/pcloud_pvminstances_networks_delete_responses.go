@@ -6,6 +6,7 @@ package p_cloud_p_vm_instances
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -37,6 +38,12 @@ func (o *PcloudPvminstancesNetworksDeleteReader) ReadResponse(response runtime.C
 		return nil, result
 	case 401:
 		result := NewPcloudPvminstancesNetworksDeleteUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewPcloudPvminstancesNetworksDeleteForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +116,13 @@ func (o *PcloudPvminstancesNetworksDeleteOK) Code() int {
 }
 
 func (o *PcloudPvminstancesNetworksDeleteOK) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteOK %s", 200, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteOK) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteOK %s", 200, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteOK) GetPayload() models.Object {
@@ -175,11 +184,13 @@ func (o *PcloudPvminstancesNetworksDeleteBadRequest) Code() int {
 }
 
 func (o *PcloudPvminstancesNetworksDeleteBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteBadRequest %s", 400, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteBadRequest) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteBadRequest %s", 400, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteBadRequest) GetPayload() *models.Error {
@@ -243,11 +254,13 @@ func (o *PcloudPvminstancesNetworksDeleteUnauthorized) Code() int {
 }
 
 func (o *PcloudPvminstancesNetworksDeleteUnauthorized) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteUnauthorized) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteUnauthorized) GetPayload() *models.Error {
@@ -255,6 +268,76 @@ func (o *PcloudPvminstancesNetworksDeleteUnauthorized) GetPayload() *models.Erro
 }
 
 func (o *PcloudPvminstancesNetworksDeleteUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudPvminstancesNetworksDeleteForbidden creates a PcloudPvminstancesNetworksDeleteForbidden with default headers values
+func NewPcloudPvminstancesNetworksDeleteForbidden() *PcloudPvminstancesNetworksDeleteForbidden {
+	return &PcloudPvminstancesNetworksDeleteForbidden{}
+}
+
+/*
+PcloudPvminstancesNetworksDeleteForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type PcloudPvminstancesNetworksDeleteForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud pvminstances networks delete forbidden response has a 2xx status code
+func (o *PcloudPvminstancesNetworksDeleteForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud pvminstances networks delete forbidden response has a 3xx status code
+func (o *PcloudPvminstancesNetworksDeleteForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud pvminstances networks delete forbidden response has a 4xx status code
+func (o *PcloudPvminstancesNetworksDeleteForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud pvminstances networks delete forbidden response has a 5xx status code
+func (o *PcloudPvminstancesNetworksDeleteForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud pvminstances networks delete forbidden response a status code equal to that given
+func (o *PcloudPvminstancesNetworksDeleteForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the pcloud pvminstances networks delete forbidden response
+func (o *PcloudPvminstancesNetworksDeleteForbidden) Code() int {
+	return 403
+}
+
+func (o *PcloudPvminstancesNetworksDeleteForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteForbidden %s", 403, payload)
+}
+
+func (o *PcloudPvminstancesNetworksDeleteForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteForbidden %s", 403, payload)
+}
+
+func (o *PcloudPvminstancesNetworksDeleteForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudPvminstancesNetworksDeleteForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -311,11 +394,13 @@ func (o *PcloudPvminstancesNetworksDeleteNotFound) Code() int {
 }
 
 func (o *PcloudPvminstancesNetworksDeleteNotFound) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteNotFound %s", 404, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteNotFound) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteNotFound %s", 404, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteNotFound) GetPayload() *models.Error {
@@ -379,11 +464,13 @@ func (o *PcloudPvminstancesNetworksDeleteGone) Code() int {
 }
 
 func (o *PcloudPvminstancesNetworksDeleteGone) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteGone  %+v", 410, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteGone %s", 410, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteGone) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteGone  %+v", 410, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteGone %s", 410, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteGone) GetPayload() *models.Error {
@@ -447,11 +534,13 @@ func (o *PcloudPvminstancesNetworksDeleteInternalServerError) Code() int {
 }
 
 func (o *PcloudPvminstancesNetworksDeleteInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteInternalServerError) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/pvm-instances/{pvm_instance_id}/networks/{network_id}][%d] pcloudPvminstancesNetworksDeleteInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudPvminstancesNetworksDeleteInternalServerError) GetPayload() *models.Error {

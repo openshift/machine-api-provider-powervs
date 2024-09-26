@@ -6,6 +6,7 @@ package p_cloud_volumes
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudCloudinstancesVolumesPostReader) ReadResponse(response runtime.Cl
 		return nil, result
 	case 403:
 		result := NewPcloudCloudinstancesVolumesPostForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudCloudinstancesVolumesPostNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -115,11 +122,13 @@ func (o *PcloudCloudinstancesVolumesPostAccepted) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostAccepted) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostAccepted) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostAccepted) GetPayload() *models.Volume {
@@ -183,11 +192,13 @@ func (o *PcloudCloudinstancesVolumesPostBadRequest) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostBadRequest) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostBadRequest) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostBadRequest) GetPayload() *models.Error {
@@ -251,11 +262,13 @@ func (o *PcloudCloudinstancesVolumesPostUnauthorized) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostUnauthorized) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostUnauthorized) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostUnauthorized) GetPayload() *models.Error {
@@ -319,11 +332,13 @@ func (o *PcloudCloudinstancesVolumesPostForbidden) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostForbidden) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostForbidden %s", 403, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostForbidden) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostForbidden %s", 403, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostForbidden) GetPayload() *models.Error {
@@ -331,6 +346,76 @@ func (o *PcloudCloudinstancesVolumesPostForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudCloudinstancesVolumesPostForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudCloudinstancesVolumesPostNotFound creates a PcloudCloudinstancesVolumesPostNotFound with default headers values
+func NewPcloudCloudinstancesVolumesPostNotFound() *PcloudCloudinstancesVolumesPostNotFound {
+	return &PcloudCloudinstancesVolumesPostNotFound{}
+}
+
+/*
+PcloudCloudinstancesVolumesPostNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudCloudinstancesVolumesPostNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud cloudinstances volumes post not found response has a 2xx status code
+func (o *PcloudCloudinstancesVolumesPostNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud cloudinstances volumes post not found response has a 3xx status code
+func (o *PcloudCloudinstancesVolumesPostNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud cloudinstances volumes post not found response has a 4xx status code
+func (o *PcloudCloudinstancesVolumesPostNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud cloudinstances volumes post not found response has a 5xx status code
+func (o *PcloudCloudinstancesVolumesPostNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud cloudinstances volumes post not found response a status code equal to that given
+func (o *PcloudCloudinstancesVolumesPostNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud cloudinstances volumes post not found response
+func (o *PcloudCloudinstancesVolumesPostNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudCloudinstancesVolumesPostNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostNotFound %s", 404, payload)
+}
+
+func (o *PcloudCloudinstancesVolumesPostNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostNotFound %s", 404, payload)
+}
+
+func (o *PcloudCloudinstancesVolumesPostNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudCloudinstancesVolumesPostNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -387,11 +472,13 @@ func (o *PcloudCloudinstancesVolumesPostConflict) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostConflict) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostConflict %s", 409, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostConflict) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostConflict %s", 409, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostConflict) GetPayload() *models.Error {
@@ -455,11 +542,13 @@ func (o *PcloudCloudinstancesVolumesPostUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostUnprocessableEntity) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostUnprocessableEntity) GetPayload() *models.Error {
@@ -523,11 +612,13 @@ func (o *PcloudCloudinstancesVolumesPostInternalServerError) Code() int {
 }
 
 func (o *PcloudCloudinstancesVolumesPostInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostInternalServerError) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volumes][%d] pcloudCloudinstancesVolumesPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudCloudinstancesVolumesPostInternalServerError) GetPayload() *models.Error {

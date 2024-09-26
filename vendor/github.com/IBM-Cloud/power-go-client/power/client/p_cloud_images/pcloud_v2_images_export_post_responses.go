@@ -6,6 +6,7 @@ package p_cloud_images
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -37,6 +38,12 @@ func (o *PcloudV2ImagesExportPostReader) ReadResponse(response runtime.ClientRes
 		return nil, result
 	case 401:
 		result := NewPcloudV2ImagesExportPostUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewPcloudV2ImagesExportPostForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -115,11 +122,13 @@ func (o *PcloudV2ImagesExportPostAccepted) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostAccepted) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudV2ImagesExportPostAccepted) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudV2ImagesExportPostAccepted) GetPayload() *models.JobReference {
@@ -183,11 +192,13 @@ func (o *PcloudV2ImagesExportPostBadRequest) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostBadRequest) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudV2ImagesExportPostBadRequest) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudV2ImagesExportPostBadRequest) GetPayload() *models.Error {
@@ -251,11 +262,13 @@ func (o *PcloudV2ImagesExportPostUnauthorized) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostUnauthorized) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudV2ImagesExportPostUnauthorized) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudV2ImagesExportPostUnauthorized) GetPayload() *models.Error {
@@ -263,6 +276,76 @@ func (o *PcloudV2ImagesExportPostUnauthorized) GetPayload() *models.Error {
 }
 
 func (o *PcloudV2ImagesExportPostUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudV2ImagesExportPostForbidden creates a PcloudV2ImagesExportPostForbidden with default headers values
+func NewPcloudV2ImagesExportPostForbidden() *PcloudV2ImagesExportPostForbidden {
+	return &PcloudV2ImagesExportPostForbidden{}
+}
+
+/*
+PcloudV2ImagesExportPostForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type PcloudV2ImagesExportPostForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud v2 images export post forbidden response has a 2xx status code
+func (o *PcloudV2ImagesExportPostForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud v2 images export post forbidden response has a 3xx status code
+func (o *PcloudV2ImagesExportPostForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud v2 images export post forbidden response has a 4xx status code
+func (o *PcloudV2ImagesExportPostForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud v2 images export post forbidden response has a 5xx status code
+func (o *PcloudV2ImagesExportPostForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud v2 images export post forbidden response a status code equal to that given
+func (o *PcloudV2ImagesExportPostForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the pcloud v2 images export post forbidden response
+func (o *PcloudV2ImagesExportPostForbidden) Code() int {
+	return 403
+}
+
+func (o *PcloudV2ImagesExportPostForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostForbidden %s", 403, payload)
+}
+
+func (o *PcloudV2ImagesExportPostForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostForbidden %s", 403, payload)
+}
+
+func (o *PcloudV2ImagesExportPostForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudV2ImagesExportPostForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -282,7 +365,7 @@ func NewPcloudV2ImagesExportPostNotFound() *PcloudV2ImagesExportPostNotFound {
 /*
 PcloudV2ImagesExportPostNotFound describes a response with status code 404, with default header values.
 
-image id not found
+Not Found
 */
 type PcloudV2ImagesExportPostNotFound struct {
 	Payload *models.Error
@@ -319,11 +402,13 @@ func (o *PcloudV2ImagesExportPostNotFound) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostNotFound) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostNotFound %s", 404, payload)
 }
 
 func (o *PcloudV2ImagesExportPostNotFound) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostNotFound %s", 404, payload)
 }
 
 func (o *PcloudV2ImagesExportPostNotFound) GetPayload() *models.Error {
@@ -387,11 +472,13 @@ func (o *PcloudV2ImagesExportPostConflict) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostConflict) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostConflict %s", 409, payload)
 }
 
 func (o *PcloudV2ImagesExportPostConflict) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostConflict %s", 409, payload)
 }
 
 func (o *PcloudV2ImagesExportPostConflict) GetPayload() *models.Error {
@@ -455,11 +542,13 @@ func (o *PcloudV2ImagesExportPostUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudV2ImagesExportPostUnprocessableEntity) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudV2ImagesExportPostUnprocessableEntity) GetPayload() *models.Error {
@@ -523,11 +612,13 @@ func (o *PcloudV2ImagesExportPostInternalServerError) Code() int {
 }
 
 func (o *PcloudV2ImagesExportPostInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudV2ImagesExportPostInternalServerError) String() string {
-	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v2/cloud-instances/{cloud_instance_id}/images/{image_id}/export][%d] pcloudV2ImagesExportPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudV2ImagesExportPostInternalServerError) GetPayload() *models.Error {

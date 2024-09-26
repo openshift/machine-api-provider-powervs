@@ -6,6 +6,7 @@ package p_cloud_cloud_connections
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallReader) ReadResponse(re
 		return nil, result
 	case 403:
 		result := NewPcloudCloudconnectionsVirtualprivatecloudsGetallForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudCloudconnectionsVirtualprivatecloudsGetallNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -121,11 +128,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallOK) Code() int {
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallOK %s", 200, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallOK %s", 200, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallOK) GetPayload() *models.CloudConnectionVirtualPrivateClouds {
@@ -189,11 +198,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest) Code() int 
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallBadRequest) GetPayload() *models.Error {
@@ -257,11 +268,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized) Code() in
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallUnauthorized) GetPayload() *models.Error {
@@ -325,11 +338,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallForbidden) Code() int {
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallForbidden) GetPayload() *models.Error {
@@ -337,6 +352,76 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallForbidden) GetPayload()
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudCloudconnectionsVirtualprivatecloudsGetallNotFound creates a PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound with default headers values
+func NewPcloudCloudconnectionsVirtualprivatecloudsGetallNotFound() *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound {
+	return &PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound{}
+}
+
+/*
+PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud cloudconnections virtualprivateclouds getall not found response has a 2xx status code
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud cloudconnections virtualprivateclouds getall not found response has a 3xx status code
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud cloudconnections virtualprivateclouds getall not found response has a 4xx status code
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud cloudconnections virtualprivateclouds getall not found response has a 5xx status code
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud cloudconnections virtualprivateclouds getall not found response a status code equal to that given
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud cloudconnections virtualprivateclouds getall not found response
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -393,11 +478,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout) Code() 
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout  %+v", 408, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout %s", 408, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout  %+v", 408, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout %s", 408, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallRequestTimeout) GetPayload() *models.Error {
@@ -461,11 +548,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError) Co
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallInternalServerError) GetPayload() *models.Error {
@@ -529,11 +618,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable) Cod
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable  %+v", 503, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable %s", 503, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable  %+v", 503, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable %s", 503, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallServiceUnavailable) GetPayload() *models.Error {
@@ -597,11 +688,13 @@ func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout) Code() 
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout  %+v", 504, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout %s", 504, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout  %+v", 504, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cloud-connections-virtual-private-clouds][%d] pcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout %s", 504, payload)
 }
 
 func (o *PcloudCloudconnectionsVirtualprivatecloudsGetallGatewayTimeout) GetPayload() *models.Error {

@@ -6,6 +6,7 @@ package service_bindings
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,24 @@ func (o *ServiceBindingBindingReader) ReadResponse(response runtime.ClientRespon
 		return result, nil
 	case 400:
 		result := NewServiceBindingBindingBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBindingBindingUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBindingBindingForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceBindingBindingNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +128,13 @@ func (o *ServiceBindingBindingOK) Code() int {
 }
 
 func (o *ServiceBindingBindingOK) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingOK %s", 200, payload)
 }
 
 func (o *ServiceBindingBindingOK) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingOK %s", 200, payload)
 }
 
 func (o *ServiceBindingBindingOK) GetPayload() *models.ServiceBinding {
@@ -177,11 +198,13 @@ func (o *ServiceBindingBindingCreated) Code() int {
 }
 
 func (o *ServiceBindingBindingCreated) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingCreated %s", 201, payload)
 }
 
 func (o *ServiceBindingBindingCreated) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingCreated %s", 201, payload)
 }
 
 func (o *ServiceBindingBindingCreated) GetPayload() *models.ServiceBinding {
@@ -245,11 +268,13 @@ func (o *ServiceBindingBindingAccepted) Code() int {
 }
 
 func (o *ServiceBindingBindingAccepted) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingAccepted %s", 202, payload)
 }
 
 func (o *ServiceBindingBindingAccepted) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingAccepted %s", 202, payload)
 }
 
 func (o *ServiceBindingBindingAccepted) GetPayload() *models.AsyncOperation {
@@ -313,11 +338,13 @@ func (o *ServiceBindingBindingBadRequest) Code() int {
 }
 
 func (o *ServiceBindingBindingBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBindingBindingBadRequest) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBindingBindingBadRequest) GetPayload() *models.Error {
@@ -325,6 +352,216 @@ func (o *ServiceBindingBindingBadRequest) GetPayload() *models.Error {
 }
 
 func (o *ServiceBindingBindingBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBindingBindingUnauthorized creates a ServiceBindingBindingUnauthorized with default headers values
+func NewServiceBindingBindingUnauthorized() *ServiceBindingBindingUnauthorized {
+	return &ServiceBindingBindingUnauthorized{}
+}
+
+/*
+ServiceBindingBindingUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBindingBindingUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service binding binding unauthorized response has a 2xx status code
+func (o *ServiceBindingBindingUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service binding binding unauthorized response has a 3xx status code
+func (o *ServiceBindingBindingUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service binding binding unauthorized response has a 4xx status code
+func (o *ServiceBindingBindingUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service binding binding unauthorized response has a 5xx status code
+func (o *ServiceBindingBindingUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service binding binding unauthorized response a status code equal to that given
+func (o *ServiceBindingBindingUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service binding binding unauthorized response
+func (o *ServiceBindingBindingUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBindingBindingUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBindingBindingUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBindingBindingUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBindingBindingUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBindingBindingForbidden creates a ServiceBindingBindingForbidden with default headers values
+func NewServiceBindingBindingForbidden() *ServiceBindingBindingForbidden {
+	return &ServiceBindingBindingForbidden{}
+}
+
+/*
+ServiceBindingBindingForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBindingBindingForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service binding binding forbidden response has a 2xx status code
+func (o *ServiceBindingBindingForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service binding binding forbidden response has a 3xx status code
+func (o *ServiceBindingBindingForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service binding binding forbidden response has a 4xx status code
+func (o *ServiceBindingBindingForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service binding binding forbidden response has a 5xx status code
+func (o *ServiceBindingBindingForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service binding binding forbidden response a status code equal to that given
+func (o *ServiceBindingBindingForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service binding binding forbidden response
+func (o *ServiceBindingBindingForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBindingBindingForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingForbidden %s", 403, payload)
+}
+
+func (o *ServiceBindingBindingForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingForbidden %s", 403, payload)
+}
+
+func (o *ServiceBindingBindingForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBindingBindingForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBindingBindingNotFound creates a ServiceBindingBindingNotFound with default headers values
+func NewServiceBindingBindingNotFound() *ServiceBindingBindingNotFound {
+	return &ServiceBindingBindingNotFound{}
+}
+
+/*
+ServiceBindingBindingNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceBindingBindingNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service binding binding not found response has a 2xx status code
+func (o *ServiceBindingBindingNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service binding binding not found response has a 3xx status code
+func (o *ServiceBindingBindingNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service binding binding not found response has a 4xx status code
+func (o *ServiceBindingBindingNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service binding binding not found response has a 5xx status code
+func (o *ServiceBindingBindingNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service binding binding not found response a status code equal to that given
+func (o *ServiceBindingBindingNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service binding binding not found response
+func (o *ServiceBindingBindingNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceBindingBindingNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingNotFound %s", 404, payload)
+}
+
+func (o *ServiceBindingBindingNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingNotFound %s", 404, payload)
+}
+
+func (o *ServiceBindingBindingNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBindingBindingNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -381,11 +618,13 @@ func (o *ServiceBindingBindingConflict) Code() int {
 }
 
 func (o *ServiceBindingBindingConflict) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingConflict %s", 409, payload)
 }
 
 func (o *ServiceBindingBindingConflict) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingConflict %s", 409, payload)
 }
 
 func (o *ServiceBindingBindingConflict) GetPayload() *models.Error {
@@ -449,11 +688,13 @@ func (o *ServiceBindingBindingUnprocessableEntity) Code() int {
 }
 
 func (o *ServiceBindingBindingUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceBindingBindingUnprocessableEntity) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingBindingUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceBindingBindingUnprocessableEntity) GetPayload() *models.Error {

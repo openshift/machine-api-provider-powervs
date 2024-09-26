@@ -6,6 +6,7 @@ package p_cloud_volume_groups
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,12 @@ func (o *PcloudVolumegroupsStorageDetailsGetReader) ReadResponse(response runtim
 		return result, nil
 	case 400:
 		result := NewPcloudVolumegroupsStorageDetailsGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewPcloudVolumegroupsStorageDetailsGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +116,13 @@ func (o *PcloudVolumegroupsStorageDetailsGetOK) Code() int {
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetOK %s", 200, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetOK %s", 200, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetOK) GetPayload() *models.VolumeGroupStorageDetails {
@@ -177,11 +186,13 @@ func (o *PcloudVolumegroupsStorageDetailsGetBadRequest) Code() int {
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetBadRequest) GetPayload() *models.Error {
@@ -189,6 +200,76 @@ func (o *PcloudVolumegroupsStorageDetailsGetBadRequest) GetPayload() *models.Err
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudVolumegroupsStorageDetailsGetUnauthorized creates a PcloudVolumegroupsStorageDetailsGetUnauthorized with default headers values
+func NewPcloudVolumegroupsStorageDetailsGetUnauthorized() *PcloudVolumegroupsStorageDetailsGetUnauthorized {
+	return &PcloudVolumegroupsStorageDetailsGetUnauthorized{}
+}
+
+/*
+PcloudVolumegroupsStorageDetailsGetUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type PcloudVolumegroupsStorageDetailsGetUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud volumegroups storage details get unauthorized response has a 2xx status code
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud volumegroups storage details get unauthorized response has a 3xx status code
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud volumegroups storage details get unauthorized response has a 4xx status code
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud volumegroups storage details get unauthorized response has a 5xx status code
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud volumegroups storage details get unauthorized response a status code equal to that given
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the pcloud volumegroups storage details get unauthorized response
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) Code() int {
+	return 401
+}
+
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudVolumegroupsStorageDetailsGetUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -245,11 +326,13 @@ func (o *PcloudVolumegroupsStorageDetailsGetForbidden) Code() int {
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetForbidden) GetPayload() *models.Error {
@@ -313,11 +396,13 @@ func (o *PcloudVolumegroupsStorageDetailsGetNotFound) Code() int {
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetNotFound) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetNotFound) GetPayload() *models.Error {
@@ -381,11 +466,13 @@ func (o *PcloudVolumegroupsStorageDetailsGetTooManyRequests) Code() int {
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetTooManyRequests) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetTooManyRequests  %+v", 429, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetTooManyRequests %s", 429, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetTooManyRequests) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetTooManyRequests  %+v", 429, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetTooManyRequests %s", 429, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetTooManyRequests) GetPayload() *models.Error {
@@ -449,11 +536,13 @@ func (o *PcloudVolumegroupsStorageDetailsGetInternalServerError) Code() int {
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/storage-details][%d] pcloudVolumegroupsStorageDetailsGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVolumegroupsStorageDetailsGetInternalServerError) GetPayload() *models.Error {

@@ -6,6 +6,7 @@ package open_stacks
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -37,6 +38,24 @@ func (o *ServiceBrokerOpenstacksPostReader) ReadResponse(response runtime.Client
 		return result, nil
 	case 400:
 		result := NewServiceBrokerOpenstacksPostBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBrokerOpenstacksPostUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBrokerOpenstacksPostForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceBrokerOpenstacksPostNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +128,13 @@ func (o *ServiceBrokerOpenstacksPostOK) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksPostOK) Error() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostOK) String() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostOK) GetPayload() *models.OpenStack {
@@ -177,11 +198,13 @@ func (o *ServiceBrokerOpenstacksPostCreated) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksPostCreated) Error() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostCreated %s", 201, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostCreated) String() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostCreated %s", 201, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostCreated) GetPayload() *models.OpenStack {
@@ -245,11 +268,13 @@ func (o *ServiceBrokerOpenstacksPostBadRequest) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksPostBadRequest) Error() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostBadRequest) String() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostBadRequest) GetPayload() *models.Error {
@@ -257,6 +282,216 @@ func (o *ServiceBrokerOpenstacksPostBadRequest) GetPayload() *models.Error {
 }
 
 func (o *ServiceBrokerOpenstacksPostBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerOpenstacksPostUnauthorized creates a ServiceBrokerOpenstacksPostUnauthorized with default headers values
+func NewServiceBrokerOpenstacksPostUnauthorized() *ServiceBrokerOpenstacksPostUnauthorized {
+	return &ServiceBrokerOpenstacksPostUnauthorized{}
+}
+
+/*
+ServiceBrokerOpenstacksPostUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBrokerOpenstacksPostUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker openstacks post unauthorized response has a 2xx status code
+func (o *ServiceBrokerOpenstacksPostUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker openstacks post unauthorized response has a 3xx status code
+func (o *ServiceBrokerOpenstacksPostUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker openstacks post unauthorized response has a 4xx status code
+func (o *ServiceBrokerOpenstacksPostUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker openstacks post unauthorized response has a 5xx status code
+func (o *ServiceBrokerOpenstacksPostUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker openstacks post unauthorized response a status code equal to that given
+func (o *ServiceBrokerOpenstacksPostUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service broker openstacks post unauthorized response
+func (o *ServiceBrokerOpenstacksPostUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBrokerOpenstacksPostUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerOpenstacksPostUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerOpenstacksPostUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerOpenstacksPostUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerOpenstacksPostForbidden creates a ServiceBrokerOpenstacksPostForbidden with default headers values
+func NewServiceBrokerOpenstacksPostForbidden() *ServiceBrokerOpenstacksPostForbidden {
+	return &ServiceBrokerOpenstacksPostForbidden{}
+}
+
+/*
+ServiceBrokerOpenstacksPostForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBrokerOpenstacksPostForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker openstacks post forbidden response has a 2xx status code
+func (o *ServiceBrokerOpenstacksPostForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker openstacks post forbidden response has a 3xx status code
+func (o *ServiceBrokerOpenstacksPostForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker openstacks post forbidden response has a 4xx status code
+func (o *ServiceBrokerOpenstacksPostForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker openstacks post forbidden response has a 5xx status code
+func (o *ServiceBrokerOpenstacksPostForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker openstacks post forbidden response a status code equal to that given
+func (o *ServiceBrokerOpenstacksPostForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service broker openstacks post forbidden response
+func (o *ServiceBrokerOpenstacksPostForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBrokerOpenstacksPostForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerOpenstacksPostForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerOpenstacksPostForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerOpenstacksPostForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerOpenstacksPostNotFound creates a ServiceBrokerOpenstacksPostNotFound with default headers values
+func NewServiceBrokerOpenstacksPostNotFound() *ServiceBrokerOpenstacksPostNotFound {
+	return &ServiceBrokerOpenstacksPostNotFound{}
+}
+
+/*
+ServiceBrokerOpenstacksPostNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceBrokerOpenstacksPostNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker openstacks post not found response has a 2xx status code
+func (o *ServiceBrokerOpenstacksPostNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker openstacks post not found response has a 3xx status code
+func (o *ServiceBrokerOpenstacksPostNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker openstacks post not found response has a 4xx status code
+func (o *ServiceBrokerOpenstacksPostNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker openstacks post not found response has a 5xx status code
+func (o *ServiceBrokerOpenstacksPostNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker openstacks post not found response a status code equal to that given
+func (o *ServiceBrokerOpenstacksPostNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service broker openstacks post not found response
+func (o *ServiceBrokerOpenstacksPostNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceBrokerOpenstacksPostNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerOpenstacksPostNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerOpenstacksPostNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerOpenstacksPostNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -313,11 +548,13 @@ func (o *ServiceBrokerOpenstacksPostConflict) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksPostConflict) Error() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostConflict %s", 409, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostConflict) String() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostConflict %s", 409, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostConflict) GetPayload() *models.Error {
@@ -381,11 +618,13 @@ func (o *ServiceBrokerOpenstacksPostUnprocessableEntity) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksPostUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostUnprocessableEntity) String() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostUnprocessableEntity) GetPayload() *models.Error {
@@ -449,11 +688,13 @@ func (o *ServiceBrokerOpenstacksPostInternalServerError) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksPostInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostInternalServerError) String() string {
-	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /broker/v1/openstacks][%d] serviceBrokerOpenstacksPostInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerOpenstacksPostInternalServerError) GetPayload() *models.Error {

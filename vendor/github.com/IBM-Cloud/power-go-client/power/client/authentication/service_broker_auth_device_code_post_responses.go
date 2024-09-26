@@ -6,6 +6,7 @@ package authentication
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -29,8 +30,26 @@ func (o *ServiceBrokerAuthDeviceCodePostReader) ReadResponse(response runtime.Cl
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewServiceBrokerAuthDeviceCodePostBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBrokerAuthDeviceCodePostUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 403:
 		result := NewServiceBrokerAuthDeviceCodePostForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceBrokerAuthDeviceCodePostNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -91,11 +110,13 @@ func (o *ServiceBrokerAuthDeviceCodePostOK) Code() int {
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostOK) Error() string {
-	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostOK) String() string {
-	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostOK) GetPayload() *models.DeviceCode {
@@ -114,6 +135,146 @@ func (o *ServiceBrokerAuthDeviceCodePostOK) readResponse(response runtime.Client
 	return nil
 }
 
+// NewServiceBrokerAuthDeviceCodePostBadRequest creates a ServiceBrokerAuthDeviceCodePostBadRequest with default headers values
+func NewServiceBrokerAuthDeviceCodePostBadRequest() *ServiceBrokerAuthDeviceCodePostBadRequest {
+	return &ServiceBrokerAuthDeviceCodePostBadRequest{}
+}
+
+/*
+ServiceBrokerAuthDeviceCodePostBadRequest describes a response with status code 400, with default header values.
+
+Bad Request
+*/
+type ServiceBrokerAuthDeviceCodePostBadRequest struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker auth device code post bad request response has a 2xx status code
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker auth device code post bad request response has a 3xx status code
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker auth device code post bad request response has a 4xx status code
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker auth device code post bad request response has a 5xx status code
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker auth device code post bad request response a status code equal to that given
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the service broker auth device code post bad request response
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) Code() int {
+	return 400
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostBadRequest %s", 400, payload)
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostBadRequest %s", 400, payload)
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerAuthDeviceCodePostUnauthorized creates a ServiceBrokerAuthDeviceCodePostUnauthorized with default headers values
+func NewServiceBrokerAuthDeviceCodePostUnauthorized() *ServiceBrokerAuthDeviceCodePostUnauthorized {
+	return &ServiceBrokerAuthDeviceCodePostUnauthorized{}
+}
+
+/*
+ServiceBrokerAuthDeviceCodePostUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBrokerAuthDeviceCodePostUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker auth device code post unauthorized response has a 2xx status code
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker auth device code post unauthorized response has a 3xx status code
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker auth device code post unauthorized response has a 4xx status code
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker auth device code post unauthorized response has a 5xx status code
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker auth device code post unauthorized response a status code equal to that given
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service broker auth device code post unauthorized response
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
 // NewServiceBrokerAuthDeviceCodePostForbidden creates a ServiceBrokerAuthDeviceCodePostForbidden with default headers values
 func NewServiceBrokerAuthDeviceCodePostForbidden() *ServiceBrokerAuthDeviceCodePostForbidden {
 	return &ServiceBrokerAuthDeviceCodePostForbidden{}
@@ -122,7 +283,7 @@ func NewServiceBrokerAuthDeviceCodePostForbidden() *ServiceBrokerAuthDeviceCodeP
 /*
 ServiceBrokerAuthDeviceCodePostForbidden describes a response with status code 403, with default header values.
 
-Quota exceeded
+Forbidden
 */
 type ServiceBrokerAuthDeviceCodePostForbidden struct {
 	Payload *models.Error
@@ -159,11 +320,13 @@ func (o *ServiceBrokerAuthDeviceCodePostForbidden) Code() int {
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostForbidden) Error() string {
-	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostForbidden %s", 403, payload)
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostForbidden) String() string {
-	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostForbidden %s", 403, payload)
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostForbidden) GetPayload() *models.Error {
@@ -171,6 +334,76 @@ func (o *ServiceBrokerAuthDeviceCodePostForbidden) GetPayload() *models.Error {
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerAuthDeviceCodePostNotFound creates a ServiceBrokerAuthDeviceCodePostNotFound with default headers values
+func NewServiceBrokerAuthDeviceCodePostNotFound() *ServiceBrokerAuthDeviceCodePostNotFound {
+	return &ServiceBrokerAuthDeviceCodePostNotFound{}
+}
+
+/*
+ServiceBrokerAuthDeviceCodePostNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceBrokerAuthDeviceCodePostNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker auth device code post not found response has a 2xx status code
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker auth device code post not found response has a 3xx status code
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker auth device code post not found response has a 4xx status code
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker auth device code post not found response has a 5xx status code
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker auth device code post not found response a status code equal to that given
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service broker auth device code post not found response
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerAuthDeviceCodePostNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -227,11 +460,13 @@ func (o *ServiceBrokerAuthDeviceCodePostInternalServerError) Code() int {
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostInternalServerError) String() string {
-	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /auth/v1/device/code][%d] serviceBrokerAuthDeviceCodePostInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerAuthDeviceCodePostInternalServerError) GetPayload() *models.Error {
