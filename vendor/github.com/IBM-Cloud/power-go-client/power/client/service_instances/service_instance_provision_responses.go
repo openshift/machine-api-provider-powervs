@@ -6,6 +6,7 @@ package service_instances
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,24 @@ func (o *ServiceInstanceProvisionReader) ReadResponse(response runtime.ClientRes
 		return result, nil
 	case 400:
 		result := NewServiceInstanceProvisionBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceInstanceProvisionUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceInstanceProvisionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceInstanceProvisionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +128,13 @@ func (o *ServiceInstanceProvisionOK) Code() int {
 }
 
 func (o *ServiceInstanceProvisionOK) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionOK %s", 200, payload)
 }
 
 func (o *ServiceInstanceProvisionOK) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionOK %s", 200, payload)
 }
 
 func (o *ServiceInstanceProvisionOK) GetPayload() *models.ServiceInstanceProvision {
@@ -177,11 +198,13 @@ func (o *ServiceInstanceProvisionCreated) Code() int {
 }
 
 func (o *ServiceInstanceProvisionCreated) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionCreated %s", 201, payload)
 }
 
 func (o *ServiceInstanceProvisionCreated) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionCreated  %+v", 201, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionCreated %s", 201, payload)
 }
 
 func (o *ServiceInstanceProvisionCreated) GetPayload() *models.ServiceInstanceProvision {
@@ -245,11 +268,13 @@ func (o *ServiceInstanceProvisionAccepted) Code() int {
 }
 
 func (o *ServiceInstanceProvisionAccepted) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionAccepted %s", 202, payload)
 }
 
 func (o *ServiceInstanceProvisionAccepted) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionAccepted %s", 202, payload)
 }
 
 func (o *ServiceInstanceProvisionAccepted) GetPayload() *models.ServiceInstanceAsyncOperation {
@@ -313,11 +338,13 @@ func (o *ServiceInstanceProvisionBadRequest) Code() int {
 }
 
 func (o *ServiceInstanceProvisionBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionBadRequest %s", 400, payload)
 }
 
 func (o *ServiceInstanceProvisionBadRequest) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionBadRequest %s", 400, payload)
 }
 
 func (o *ServiceInstanceProvisionBadRequest) GetPayload() *models.Error {
@@ -325,6 +352,216 @@ func (o *ServiceInstanceProvisionBadRequest) GetPayload() *models.Error {
 }
 
 func (o *ServiceInstanceProvisionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceInstanceProvisionUnauthorized creates a ServiceInstanceProvisionUnauthorized with default headers values
+func NewServiceInstanceProvisionUnauthorized() *ServiceInstanceProvisionUnauthorized {
+	return &ServiceInstanceProvisionUnauthorized{}
+}
+
+/*
+ServiceInstanceProvisionUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceInstanceProvisionUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service instance provision unauthorized response has a 2xx status code
+func (o *ServiceInstanceProvisionUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service instance provision unauthorized response has a 3xx status code
+func (o *ServiceInstanceProvisionUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service instance provision unauthorized response has a 4xx status code
+func (o *ServiceInstanceProvisionUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service instance provision unauthorized response has a 5xx status code
+func (o *ServiceInstanceProvisionUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service instance provision unauthorized response a status code equal to that given
+func (o *ServiceInstanceProvisionUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service instance provision unauthorized response
+func (o *ServiceInstanceProvisionUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceInstanceProvisionUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceInstanceProvisionUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceInstanceProvisionUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceInstanceProvisionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceInstanceProvisionForbidden creates a ServiceInstanceProvisionForbidden with default headers values
+func NewServiceInstanceProvisionForbidden() *ServiceInstanceProvisionForbidden {
+	return &ServiceInstanceProvisionForbidden{}
+}
+
+/*
+ServiceInstanceProvisionForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceInstanceProvisionForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service instance provision forbidden response has a 2xx status code
+func (o *ServiceInstanceProvisionForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service instance provision forbidden response has a 3xx status code
+func (o *ServiceInstanceProvisionForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service instance provision forbidden response has a 4xx status code
+func (o *ServiceInstanceProvisionForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service instance provision forbidden response has a 5xx status code
+func (o *ServiceInstanceProvisionForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service instance provision forbidden response a status code equal to that given
+func (o *ServiceInstanceProvisionForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service instance provision forbidden response
+func (o *ServiceInstanceProvisionForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceInstanceProvisionForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionForbidden %s", 403, payload)
+}
+
+func (o *ServiceInstanceProvisionForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionForbidden %s", 403, payload)
+}
+
+func (o *ServiceInstanceProvisionForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceInstanceProvisionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceInstanceProvisionNotFound creates a ServiceInstanceProvisionNotFound with default headers values
+func NewServiceInstanceProvisionNotFound() *ServiceInstanceProvisionNotFound {
+	return &ServiceInstanceProvisionNotFound{}
+}
+
+/*
+ServiceInstanceProvisionNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceInstanceProvisionNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service instance provision not found response has a 2xx status code
+func (o *ServiceInstanceProvisionNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service instance provision not found response has a 3xx status code
+func (o *ServiceInstanceProvisionNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service instance provision not found response has a 4xx status code
+func (o *ServiceInstanceProvisionNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service instance provision not found response has a 5xx status code
+func (o *ServiceInstanceProvisionNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service instance provision not found response a status code equal to that given
+func (o *ServiceInstanceProvisionNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service instance provision not found response
+func (o *ServiceInstanceProvisionNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceInstanceProvisionNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionNotFound %s", 404, payload)
+}
+
+func (o *ServiceInstanceProvisionNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionNotFound %s", 404, payload)
+}
+
+func (o *ServiceInstanceProvisionNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceInstanceProvisionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -381,11 +618,13 @@ func (o *ServiceInstanceProvisionConflict) Code() int {
 }
 
 func (o *ServiceInstanceProvisionConflict) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionConflict %s", 409, payload)
 }
 
 func (o *ServiceInstanceProvisionConflict) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionConflict %s", 409, payload)
 }
 
 func (o *ServiceInstanceProvisionConflict) GetPayload() *models.Error {
@@ -449,11 +688,13 @@ func (o *ServiceInstanceProvisionUnprocessableEntity) Code() int {
 }
 
 func (o *ServiceInstanceProvisionUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceInstanceProvisionUnprocessableEntity) String() string {
-	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /v2/service_instances/{instance_id}][%d] serviceInstanceProvisionUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceInstanceProvisionUnprocessableEntity) GetPayload() *models.Error {

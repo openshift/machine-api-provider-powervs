@@ -6,6 +6,7 @@ package p_cloud_service_d_h_c_p
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,12 @@ func (o *PcloudDhcpGetReader) ReadResponse(response runtime.ClientResponse, cons
 		return result, nil
 	case 400:
 		result := NewPcloudDhcpGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewPcloudDhcpGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -103,11 +110,13 @@ func (o *PcloudDhcpGetOK) Code() int {
 }
 
 func (o *PcloudDhcpGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetOK %s", 200, payload)
 }
 
 func (o *PcloudDhcpGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetOK %s", 200, payload)
 }
 
 func (o *PcloudDhcpGetOK) GetPayload() *models.DHCPServerDetail {
@@ -171,11 +180,13 @@ func (o *PcloudDhcpGetBadRequest) Code() int {
 }
 
 func (o *PcloudDhcpGetBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudDhcpGetBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetBadRequest %s", 400, payload)
 }
 
 func (o *PcloudDhcpGetBadRequest) GetPayload() *models.Error {
@@ -183,6 +194,76 @@ func (o *PcloudDhcpGetBadRequest) GetPayload() *models.Error {
 }
 
 func (o *PcloudDhcpGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudDhcpGetUnauthorized creates a PcloudDhcpGetUnauthorized with default headers values
+func NewPcloudDhcpGetUnauthorized() *PcloudDhcpGetUnauthorized {
+	return &PcloudDhcpGetUnauthorized{}
+}
+
+/*
+PcloudDhcpGetUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type PcloudDhcpGetUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud dhcp get unauthorized response has a 2xx status code
+func (o *PcloudDhcpGetUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud dhcp get unauthorized response has a 3xx status code
+func (o *PcloudDhcpGetUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud dhcp get unauthorized response has a 4xx status code
+func (o *PcloudDhcpGetUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud dhcp get unauthorized response has a 5xx status code
+func (o *PcloudDhcpGetUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud dhcp get unauthorized response a status code equal to that given
+func (o *PcloudDhcpGetUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the pcloud dhcp get unauthorized response
+func (o *PcloudDhcpGetUnauthorized) Code() int {
+	return 401
+}
+
+func (o *PcloudDhcpGetUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudDhcpGetUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudDhcpGetUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudDhcpGetUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -239,11 +320,13 @@ func (o *PcloudDhcpGetForbidden) Code() int {
 }
 
 func (o *PcloudDhcpGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudDhcpGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudDhcpGetForbidden) GetPayload() *models.Error {
@@ -307,11 +390,13 @@ func (o *PcloudDhcpGetNotFound) Code() int {
 }
 
 func (o *PcloudDhcpGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudDhcpGetNotFound) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudDhcpGetNotFound) GetPayload() *models.Error {
@@ -375,11 +460,13 @@ func (o *PcloudDhcpGetInternalServerError) Code() int {
 }
 
 func (o *PcloudDhcpGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudDhcpGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/services/dhcp/{dhcp_id}][%d] pcloudDhcpGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudDhcpGetInternalServerError) GetPayload() *models.Error {

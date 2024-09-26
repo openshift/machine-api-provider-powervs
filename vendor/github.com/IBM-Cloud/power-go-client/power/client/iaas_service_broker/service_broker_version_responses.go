@@ -6,6 +6,7 @@ package iaas_service_broker
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,24 @@ func (o *ServiceBrokerVersionReader) ReadResponse(response runtime.ClientRespons
 		return result, nil
 	case 400:
 		result := NewServiceBrokerVersionBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBrokerVersionUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBrokerVersionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceBrokerVersionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -85,11 +104,13 @@ func (o *ServiceBrokerVersionOK) Code() int {
 }
 
 func (o *ServiceBrokerVersionOK) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerVersionOK) String() string {
-	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerVersionOK) GetPayload() *models.Version {
@@ -153,11 +174,13 @@ func (o *ServiceBrokerVersionBadRequest) Code() int {
 }
 
 func (o *ServiceBrokerVersionBadRequest) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerVersionBadRequest) String() string {
-	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerVersionBadRequest) GetPayload() *models.Error {
@@ -165,6 +188,216 @@ func (o *ServiceBrokerVersionBadRequest) GetPayload() *models.Error {
 }
 
 func (o *ServiceBrokerVersionBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerVersionUnauthorized creates a ServiceBrokerVersionUnauthorized with default headers values
+func NewServiceBrokerVersionUnauthorized() *ServiceBrokerVersionUnauthorized {
+	return &ServiceBrokerVersionUnauthorized{}
+}
+
+/*
+ServiceBrokerVersionUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBrokerVersionUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker version unauthorized response has a 2xx status code
+func (o *ServiceBrokerVersionUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker version unauthorized response has a 3xx status code
+func (o *ServiceBrokerVersionUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker version unauthorized response has a 4xx status code
+func (o *ServiceBrokerVersionUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker version unauthorized response has a 5xx status code
+func (o *ServiceBrokerVersionUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker version unauthorized response a status code equal to that given
+func (o *ServiceBrokerVersionUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service broker version unauthorized response
+func (o *ServiceBrokerVersionUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBrokerVersionUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerVersionUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerVersionUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerVersionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerVersionForbidden creates a ServiceBrokerVersionForbidden with default headers values
+func NewServiceBrokerVersionForbidden() *ServiceBrokerVersionForbidden {
+	return &ServiceBrokerVersionForbidden{}
+}
+
+/*
+ServiceBrokerVersionForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBrokerVersionForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker version forbidden response has a 2xx status code
+func (o *ServiceBrokerVersionForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker version forbidden response has a 3xx status code
+func (o *ServiceBrokerVersionForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker version forbidden response has a 4xx status code
+func (o *ServiceBrokerVersionForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker version forbidden response has a 5xx status code
+func (o *ServiceBrokerVersionForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker version forbidden response a status code equal to that given
+func (o *ServiceBrokerVersionForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service broker version forbidden response
+func (o *ServiceBrokerVersionForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBrokerVersionForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerVersionForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerVersionForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerVersionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerVersionNotFound creates a ServiceBrokerVersionNotFound with default headers values
+func NewServiceBrokerVersionNotFound() *ServiceBrokerVersionNotFound {
+	return &ServiceBrokerVersionNotFound{}
+}
+
+/*
+ServiceBrokerVersionNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceBrokerVersionNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker version not found response has a 2xx status code
+func (o *ServiceBrokerVersionNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker version not found response has a 3xx status code
+func (o *ServiceBrokerVersionNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker version not found response has a 4xx status code
+func (o *ServiceBrokerVersionNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker version not found response has a 5xx status code
+func (o *ServiceBrokerVersionNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker version not found response a status code equal to that given
+func (o *ServiceBrokerVersionNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service broker version not found response
+func (o *ServiceBrokerVersionNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceBrokerVersionNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerVersionNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/version][%d] serviceBrokerVersionNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerVersionNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerVersionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 

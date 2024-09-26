@@ -6,6 +6,7 @@ package service_instances
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,18 @@ func (o *ServiceInstanceDeprovisionReader) ReadResponse(response runtime.ClientR
 		return nil, result
 	case 401:
 		result := NewServiceInstanceDeprovisionUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceInstanceDeprovisionForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceInstanceDeprovisionNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +122,13 @@ func (o *ServiceInstanceDeprovisionOK) Code() int {
 }
 
 func (o *ServiceInstanceDeprovisionOK) Error() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionOK %s", 200, payload)
 }
 
 func (o *ServiceInstanceDeprovisionOK) String() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionOK %s", 200, payload)
 }
 
 func (o *ServiceInstanceDeprovisionOK) GetPayload() models.Object {
@@ -175,11 +190,13 @@ func (o *ServiceInstanceDeprovisionAccepted) Code() int {
 }
 
 func (o *ServiceInstanceDeprovisionAccepted) Error() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionAccepted %s", 202, payload)
 }
 
 func (o *ServiceInstanceDeprovisionAccepted) String() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionAccepted %s", 202, payload)
 }
 
 func (o *ServiceInstanceDeprovisionAccepted) GetPayload() *models.AsyncOperation {
@@ -243,11 +260,13 @@ func (o *ServiceInstanceDeprovisionBadRequest) Code() int {
 }
 
 func (o *ServiceInstanceDeprovisionBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionBadRequest %s", 400, payload)
 }
 
 func (o *ServiceInstanceDeprovisionBadRequest) String() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionBadRequest %s", 400, payload)
 }
 
 func (o *ServiceInstanceDeprovisionBadRequest) GetPayload() *models.Error {
@@ -311,11 +330,13 @@ func (o *ServiceInstanceDeprovisionUnauthorized) Code() int {
 }
 
 func (o *ServiceInstanceDeprovisionUnauthorized) Error() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnauthorized %s", 401, payload)
 }
 
 func (o *ServiceInstanceDeprovisionUnauthorized) String() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnauthorized %s", 401, payload)
 }
 
 func (o *ServiceInstanceDeprovisionUnauthorized) GetPayload() *models.Error {
@@ -323,6 +344,146 @@ func (o *ServiceInstanceDeprovisionUnauthorized) GetPayload() *models.Error {
 }
 
 func (o *ServiceInstanceDeprovisionUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceInstanceDeprovisionForbidden creates a ServiceInstanceDeprovisionForbidden with default headers values
+func NewServiceInstanceDeprovisionForbidden() *ServiceInstanceDeprovisionForbidden {
+	return &ServiceInstanceDeprovisionForbidden{}
+}
+
+/*
+ServiceInstanceDeprovisionForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceInstanceDeprovisionForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service instance deprovision forbidden response has a 2xx status code
+func (o *ServiceInstanceDeprovisionForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service instance deprovision forbidden response has a 3xx status code
+func (o *ServiceInstanceDeprovisionForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service instance deprovision forbidden response has a 4xx status code
+func (o *ServiceInstanceDeprovisionForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service instance deprovision forbidden response has a 5xx status code
+func (o *ServiceInstanceDeprovisionForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service instance deprovision forbidden response a status code equal to that given
+func (o *ServiceInstanceDeprovisionForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service instance deprovision forbidden response
+func (o *ServiceInstanceDeprovisionForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceInstanceDeprovisionForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionForbidden %s", 403, payload)
+}
+
+func (o *ServiceInstanceDeprovisionForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionForbidden %s", 403, payload)
+}
+
+func (o *ServiceInstanceDeprovisionForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceInstanceDeprovisionForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceInstanceDeprovisionNotFound creates a ServiceInstanceDeprovisionNotFound with default headers values
+func NewServiceInstanceDeprovisionNotFound() *ServiceInstanceDeprovisionNotFound {
+	return &ServiceInstanceDeprovisionNotFound{}
+}
+
+/*
+ServiceInstanceDeprovisionNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceInstanceDeprovisionNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service instance deprovision not found response has a 2xx status code
+func (o *ServiceInstanceDeprovisionNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service instance deprovision not found response has a 3xx status code
+func (o *ServiceInstanceDeprovisionNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service instance deprovision not found response has a 4xx status code
+func (o *ServiceInstanceDeprovisionNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service instance deprovision not found response has a 5xx status code
+func (o *ServiceInstanceDeprovisionNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service instance deprovision not found response a status code equal to that given
+func (o *ServiceInstanceDeprovisionNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service instance deprovision not found response
+func (o *ServiceInstanceDeprovisionNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceInstanceDeprovisionNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionNotFound %s", 404, payload)
+}
+
+func (o *ServiceInstanceDeprovisionNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionNotFound %s", 404, payload)
+}
+
+func (o *ServiceInstanceDeprovisionNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceInstanceDeprovisionNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -379,11 +540,13 @@ func (o *ServiceInstanceDeprovisionGone) Code() int {
 }
 
 func (o *ServiceInstanceDeprovisionGone) Error() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionGone  %+v", 410, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionGone %s", 410, payload)
 }
 
 func (o *ServiceInstanceDeprovisionGone) String() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionGone  %+v", 410, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionGone %s", 410, payload)
 }
 
 func (o *ServiceInstanceDeprovisionGone) GetPayload() *models.Error {
@@ -447,11 +610,13 @@ func (o *ServiceInstanceDeprovisionUnprocessableEntity) Code() int {
 }
 
 func (o *ServiceInstanceDeprovisionUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceInstanceDeprovisionUnprocessableEntity) String() string {
-	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /v2/service_instances/{instance_id}][%d] serviceInstanceDeprovisionUnprocessableEntity %s", 422, payload)
 }
 
 func (o *ServiceInstanceDeprovisionUnprocessableEntity) GetPayload() *models.Error {

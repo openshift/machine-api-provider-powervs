@@ -6,6 +6,7 @@ package p_cloud_volume_groups
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,12 @@ func (o *PcloudVolumegroupsActionPostReader) ReadResponse(response runtime.Clien
 		return result, nil
 	case 400:
 		result := NewPcloudVolumegroupsActionPostBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewPcloudVolumegroupsActionPostUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +116,13 @@ func (o *PcloudVolumegroupsActionPostAccepted) Code() int {
 }
 
 func (o *PcloudVolumegroupsActionPostAccepted) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostAccepted) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostAccepted  %+v", 202, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostAccepted %s", 202, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostAccepted) GetPayload() models.Object {
@@ -175,11 +184,13 @@ func (o *PcloudVolumegroupsActionPostBadRequest) Code() int {
 }
 
 func (o *PcloudVolumegroupsActionPostBadRequest) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostBadRequest) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostBadRequest) GetPayload() *models.Error {
@@ -187,6 +198,76 @@ func (o *PcloudVolumegroupsActionPostBadRequest) GetPayload() *models.Error {
 }
 
 func (o *PcloudVolumegroupsActionPostBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudVolumegroupsActionPostUnauthorized creates a PcloudVolumegroupsActionPostUnauthorized with default headers values
+func NewPcloudVolumegroupsActionPostUnauthorized() *PcloudVolumegroupsActionPostUnauthorized {
+	return &PcloudVolumegroupsActionPostUnauthorized{}
+}
+
+/*
+PcloudVolumegroupsActionPostUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type PcloudVolumegroupsActionPostUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud volumegroups action post unauthorized response has a 2xx status code
+func (o *PcloudVolumegroupsActionPostUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud volumegroups action post unauthorized response has a 3xx status code
+func (o *PcloudVolumegroupsActionPostUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud volumegroups action post unauthorized response has a 4xx status code
+func (o *PcloudVolumegroupsActionPostUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud volumegroups action post unauthorized response has a 5xx status code
+func (o *PcloudVolumegroupsActionPostUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud volumegroups action post unauthorized response a status code equal to that given
+func (o *PcloudVolumegroupsActionPostUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the pcloud volumegroups action post unauthorized response
+func (o *PcloudVolumegroupsActionPostUnauthorized) Code() int {
+	return 401
+}
+
+func (o *PcloudVolumegroupsActionPostUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudVolumegroupsActionPostUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostUnauthorized %s", 401, payload)
+}
+
+func (o *PcloudVolumegroupsActionPostUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudVolumegroupsActionPostUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -243,11 +324,13 @@ func (o *PcloudVolumegroupsActionPostForbidden) Code() int {
 }
 
 func (o *PcloudVolumegroupsActionPostForbidden) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostForbidden %s", 403, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostForbidden) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostForbidden %s", 403, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostForbidden) GetPayload() *models.Error {
@@ -311,11 +394,13 @@ func (o *PcloudVolumegroupsActionPostNotFound) Code() int {
 }
 
 func (o *PcloudVolumegroupsActionPostNotFound) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostNotFound %s", 404, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostNotFound) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostNotFound %s", 404, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostNotFound) GetPayload() *models.Error {
@@ -379,11 +464,13 @@ func (o *PcloudVolumegroupsActionPostUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudVolumegroupsActionPostUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostUnprocessableEntity) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostUnprocessableEntity) GetPayload() *models.Error {
@@ -447,11 +534,13 @@ func (o *PcloudVolumegroupsActionPostInternalServerError) Code() int {
 }
 
 func (o *PcloudVolumegroupsActionPostInternalServerError) Error() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostInternalServerError) String() string {
-	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[POST /pcloud/v1/cloud-instances/{cloud_instance_id}/volume-groups/{volume_group_id}/action][%d] pcloudVolumegroupsActionPostInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVolumegroupsActionPostInternalServerError) GetPayload() *models.Error {

@@ -6,6 +6,7 @@ package service_bindings
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -29,6 +30,24 @@ func (o *ServiceBindingGetReader) ReadResponse(response runtime.ClientResponse, 
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewServiceBindingGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBindingGetUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBindingGetForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 404:
 		result := NewServiceBindingGetNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -85,11 +104,13 @@ func (o *ServiceBindingGetOK) Code() int {
 }
 
 func (o *ServiceBindingGetOK) Error() string {
-	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetOK %s", 200, payload)
 }
 
 func (o *ServiceBindingGetOK) String() string {
-	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetOK %s", 200, payload)
 }
 
 func (o *ServiceBindingGetOK) GetPayload() *models.ServiceBindingResource {
@@ -99,6 +120,216 @@ func (o *ServiceBindingGetOK) GetPayload() *models.ServiceBindingResource {
 func (o *ServiceBindingGetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.ServiceBindingResource)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBindingGetBadRequest creates a ServiceBindingGetBadRequest with default headers values
+func NewServiceBindingGetBadRequest() *ServiceBindingGetBadRequest {
+	return &ServiceBindingGetBadRequest{}
+}
+
+/*
+ServiceBindingGetBadRequest describes a response with status code 400, with default header values.
+
+Bad Request
+*/
+type ServiceBindingGetBadRequest struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service binding get bad request response has a 2xx status code
+func (o *ServiceBindingGetBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service binding get bad request response has a 3xx status code
+func (o *ServiceBindingGetBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service binding get bad request response has a 4xx status code
+func (o *ServiceBindingGetBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service binding get bad request response has a 5xx status code
+func (o *ServiceBindingGetBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service binding get bad request response a status code equal to that given
+func (o *ServiceBindingGetBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the service binding get bad request response
+func (o *ServiceBindingGetBadRequest) Code() int {
+	return 400
+}
+
+func (o *ServiceBindingGetBadRequest) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetBadRequest %s", 400, payload)
+}
+
+func (o *ServiceBindingGetBadRequest) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetBadRequest %s", 400, payload)
+}
+
+func (o *ServiceBindingGetBadRequest) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBindingGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBindingGetUnauthorized creates a ServiceBindingGetUnauthorized with default headers values
+func NewServiceBindingGetUnauthorized() *ServiceBindingGetUnauthorized {
+	return &ServiceBindingGetUnauthorized{}
+}
+
+/*
+ServiceBindingGetUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBindingGetUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service binding get unauthorized response has a 2xx status code
+func (o *ServiceBindingGetUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service binding get unauthorized response has a 3xx status code
+func (o *ServiceBindingGetUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service binding get unauthorized response has a 4xx status code
+func (o *ServiceBindingGetUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service binding get unauthorized response has a 5xx status code
+func (o *ServiceBindingGetUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service binding get unauthorized response a status code equal to that given
+func (o *ServiceBindingGetUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service binding get unauthorized response
+func (o *ServiceBindingGetUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBindingGetUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBindingGetUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBindingGetUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBindingGetUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBindingGetForbidden creates a ServiceBindingGetForbidden with default headers values
+func NewServiceBindingGetForbidden() *ServiceBindingGetForbidden {
+	return &ServiceBindingGetForbidden{}
+}
+
+/*
+ServiceBindingGetForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBindingGetForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service binding get forbidden response has a 2xx status code
+func (o *ServiceBindingGetForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service binding get forbidden response has a 3xx status code
+func (o *ServiceBindingGetForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service binding get forbidden response has a 4xx status code
+func (o *ServiceBindingGetForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service binding get forbidden response has a 5xx status code
+func (o *ServiceBindingGetForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service binding get forbidden response a status code equal to that given
+func (o *ServiceBindingGetForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service binding get forbidden response
+func (o *ServiceBindingGetForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBindingGetForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetForbidden %s", 403, payload)
+}
+
+func (o *ServiceBindingGetForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetForbidden %s", 403, payload)
+}
+
+func (o *ServiceBindingGetForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBindingGetForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -153,11 +384,13 @@ func (o *ServiceBindingGetNotFound) Code() int {
 }
 
 func (o *ServiceBindingGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetNotFound %s", 404, payload)
 }
 
 func (o *ServiceBindingGetNotFound) String() string {
-	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /v2/service_instances/{instance_id}/service_bindings/{binding_id}][%d] serviceBindingGetNotFound %s", 404, payload)
 }
 
 func (o *ServiceBindingGetNotFound) GetPayload() *models.Error {

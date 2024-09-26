@@ -6,6 +6,7 @@ package p_cloud_snapshots
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudCloudinstancesSnapshotsGetallReader) ReadResponse(response runtim
 		return nil, result
 	case 403:
 		result := NewPcloudCloudinstancesSnapshotsGetallForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudCloudinstancesSnapshotsGetallNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -103,11 +110,13 @@ func (o *PcloudCloudinstancesSnapshotsGetallOK) Code() int {
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallOK %s", 200, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallOK %s", 200, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallOK) GetPayload() *models.Snapshots {
@@ -171,11 +180,13 @@ func (o *PcloudCloudinstancesSnapshotsGetallBadRequest) Code() int {
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallBadRequest) GetPayload() *models.Error {
@@ -239,11 +250,13 @@ func (o *PcloudCloudinstancesSnapshotsGetallUnauthorized) Code() int {
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallUnauthorized) GetPayload() *models.Error {
@@ -307,11 +320,13 @@ func (o *PcloudCloudinstancesSnapshotsGetallForbidden) Code() int {
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallForbidden) GetPayload() *models.Error {
@@ -319,6 +334,76 @@ func (o *PcloudCloudinstancesSnapshotsGetallForbidden) GetPayload() *models.Erro
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudCloudinstancesSnapshotsGetallNotFound creates a PcloudCloudinstancesSnapshotsGetallNotFound with default headers values
+func NewPcloudCloudinstancesSnapshotsGetallNotFound() *PcloudCloudinstancesSnapshotsGetallNotFound {
+	return &PcloudCloudinstancesSnapshotsGetallNotFound{}
+}
+
+/*
+PcloudCloudinstancesSnapshotsGetallNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudCloudinstancesSnapshotsGetallNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud cloudinstances snapshots getall not found response has a 2xx status code
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud cloudinstances snapshots getall not found response has a 3xx status code
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud cloudinstances snapshots getall not found response has a 4xx status code
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud cloudinstances snapshots getall not found response has a 5xx status code
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud cloudinstances snapshots getall not found response a status code equal to that given
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud cloudinstances snapshots getall not found response
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudCloudinstancesSnapshotsGetallNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -375,11 +460,13 @@ func (o *PcloudCloudinstancesSnapshotsGetallInternalServerError) Code() int {
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/snapshots][%d] pcloudCloudinstancesSnapshotsGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudCloudinstancesSnapshotsGetallInternalServerError) GetPayload() *models.Error {

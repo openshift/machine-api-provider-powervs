@@ -6,6 +6,7 @@ package p_cloud_images
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -29,6 +30,12 @@ func (o *PcloudV1CloudinstancesCosimagesGetReader) ReadResponse(response runtime
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewPcloudV1CloudinstancesCosimagesGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 401:
 		result := NewPcloudV1CloudinstancesCosimagesGetUnauthorized()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
@@ -103,11 +110,13 @@ func (o *PcloudV1CloudinstancesCosimagesGetOK) Code() int {
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetOK %s", 200, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetOK %s", 200, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetOK) GetPayload() *models.Job {
@@ -117,6 +126,76 @@ func (o *PcloudV1CloudinstancesCosimagesGetOK) GetPayload() *models.Job {
 func (o *PcloudV1CloudinstancesCosimagesGetOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Job)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudV1CloudinstancesCosimagesGetBadRequest creates a PcloudV1CloudinstancesCosimagesGetBadRequest with default headers values
+func NewPcloudV1CloudinstancesCosimagesGetBadRequest() *PcloudV1CloudinstancesCosimagesGetBadRequest {
+	return &PcloudV1CloudinstancesCosimagesGetBadRequest{}
+}
+
+/*
+PcloudV1CloudinstancesCosimagesGetBadRequest describes a response with status code 400, with default header values.
+
+Bad Request
+*/
+type PcloudV1CloudinstancesCosimagesGetBadRequest struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud v1 cloudinstances cosimages get bad request response has a 2xx status code
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud v1 cloudinstances cosimages get bad request response has a 3xx status code
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud v1 cloudinstances cosimages get bad request response has a 4xx status code
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud v1 cloudinstances cosimages get bad request response has a 5xx status code
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud v1 cloudinstances cosimages get bad request response a status code equal to that given
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the pcloud v1 cloudinstances cosimages get bad request response
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) Code() int {
+	return 400
+}
+
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetBadRequest %s", 400, payload)
+}
+
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetBadRequest %s", 400, payload)
+}
+
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudV1CloudinstancesCosimagesGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -171,11 +250,13 @@ func (o *PcloudV1CloudinstancesCosimagesGetUnauthorized) Code() int {
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetUnauthorized) GetPayload() *models.Error {
@@ -239,11 +320,13 @@ func (o *PcloudV1CloudinstancesCosimagesGetForbidden) Code() int {
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetForbidden %s", 403, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetForbidden) GetPayload() *models.Error {
@@ -307,11 +390,13 @@ func (o *PcloudV1CloudinstancesCosimagesGetNotFound) Code() int {
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetNotFound) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetNotFound %s", 404, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetNotFound) GetPayload() *models.Error {
@@ -375,11 +460,13 @@ func (o *PcloudV1CloudinstancesCosimagesGetInternalServerError) Code() int {
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/cos-images][%d] pcloudV1CloudinstancesCosimagesGetInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudV1CloudinstancesCosimagesGetInternalServerError) GetPayload() *models.Error {

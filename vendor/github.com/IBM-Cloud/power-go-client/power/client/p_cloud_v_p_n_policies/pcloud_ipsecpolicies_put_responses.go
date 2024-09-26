@@ -6,6 +6,7 @@ package p_cloud_v_p_n_policies
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudIpsecpoliciesPutReader) ReadResponse(response runtime.ClientRespo
 		return nil, result
 	case 403:
 		result := NewPcloudIpsecpoliciesPutForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudIpsecpoliciesPutNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -115,11 +122,13 @@ func (o *PcloudIpsecpoliciesPutOK) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutOK) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutOK %s", 200, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutOK) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutOK %s", 200, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutOK) GetPayload() *models.IPSecPolicy {
@@ -183,11 +192,13 @@ func (o *PcloudIpsecpoliciesPutBadRequest) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutBadRequest) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutBadRequest %s", 400, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutBadRequest) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutBadRequest %s", 400, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutBadRequest) GetPayload() *models.Error {
@@ -251,11 +262,13 @@ func (o *PcloudIpsecpoliciesPutUnauthorized) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutUnauthorized) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutUnauthorized) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutUnauthorized) GetPayload() *models.Error {
@@ -319,11 +332,13 @@ func (o *PcloudIpsecpoliciesPutForbidden) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutForbidden) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutForbidden %s", 403, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutForbidden) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutForbidden %s", 403, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutForbidden) GetPayload() *models.Error {
@@ -331,6 +346,76 @@ func (o *PcloudIpsecpoliciesPutForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudIpsecpoliciesPutForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudIpsecpoliciesPutNotFound creates a PcloudIpsecpoliciesPutNotFound with default headers values
+func NewPcloudIpsecpoliciesPutNotFound() *PcloudIpsecpoliciesPutNotFound {
+	return &PcloudIpsecpoliciesPutNotFound{}
+}
+
+/*
+PcloudIpsecpoliciesPutNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudIpsecpoliciesPutNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud ipsecpolicies put not found response has a 2xx status code
+func (o *PcloudIpsecpoliciesPutNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud ipsecpolicies put not found response has a 3xx status code
+func (o *PcloudIpsecpoliciesPutNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud ipsecpolicies put not found response has a 4xx status code
+func (o *PcloudIpsecpoliciesPutNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud ipsecpolicies put not found response has a 5xx status code
+func (o *PcloudIpsecpoliciesPutNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud ipsecpolicies put not found response a status code equal to that given
+func (o *PcloudIpsecpoliciesPutNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud ipsecpolicies put not found response
+func (o *PcloudIpsecpoliciesPutNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudIpsecpoliciesPutNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutNotFound %s", 404, payload)
+}
+
+func (o *PcloudIpsecpoliciesPutNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutNotFound %s", 404, payload)
+}
+
+func (o *PcloudIpsecpoliciesPutNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudIpsecpoliciesPutNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -387,11 +472,13 @@ func (o *PcloudIpsecpoliciesPutConflict) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutConflict) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutConflict %s", 409, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutConflict) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutConflict  %+v", 409, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutConflict %s", 409, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutConflict) GetPayload() *models.Error {
@@ -455,11 +542,13 @@ func (o *PcloudIpsecpoliciesPutUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutUnprocessableEntity) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutUnprocessableEntity) GetPayload() *models.Error {
@@ -523,11 +612,13 @@ func (o *PcloudIpsecpoliciesPutInternalServerError) Code() int {
 }
 
 func (o *PcloudIpsecpoliciesPutInternalServerError) Error() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutInternalServerError) String() string {
-	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[PUT /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/ipsec-policies/{ipsec_policy_id}][%d] pcloudIpsecpoliciesPutInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudIpsecpoliciesPutInternalServerError) GetPayload() *models.Error {

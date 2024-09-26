@@ -6,6 +6,7 @@ package p_cloud_networks
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudNetworksGetallReader) ReadResponse(response runtime.ClientRespons
 		return nil, result
 	case 403:
 		result := NewPcloudNetworksGetallForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudNetworksGetallNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -103,11 +110,13 @@ func (o *PcloudNetworksGetallOK) Code() int {
 }
 
 func (o *PcloudNetworksGetallOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallOK %s", 200, payload)
 }
 
 func (o *PcloudNetworksGetallOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallOK %s", 200, payload)
 }
 
 func (o *PcloudNetworksGetallOK) GetPayload() *models.Networks {
@@ -171,11 +180,13 @@ func (o *PcloudNetworksGetallBadRequest) Code() int {
 }
 
 func (o *PcloudNetworksGetallBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudNetworksGetallBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudNetworksGetallBadRequest) GetPayload() *models.Error {
@@ -239,11 +250,13 @@ func (o *PcloudNetworksGetallUnauthorized) Code() int {
 }
 
 func (o *PcloudNetworksGetallUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudNetworksGetallUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudNetworksGetallUnauthorized) GetPayload() *models.Error {
@@ -307,11 +320,13 @@ func (o *PcloudNetworksGetallForbidden) Code() int {
 }
 
 func (o *PcloudNetworksGetallForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudNetworksGetallForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudNetworksGetallForbidden) GetPayload() *models.Error {
@@ -319,6 +334,76 @@ func (o *PcloudNetworksGetallForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudNetworksGetallForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudNetworksGetallNotFound creates a PcloudNetworksGetallNotFound with default headers values
+func NewPcloudNetworksGetallNotFound() *PcloudNetworksGetallNotFound {
+	return &PcloudNetworksGetallNotFound{}
+}
+
+/*
+PcloudNetworksGetallNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudNetworksGetallNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud networks getall not found response has a 2xx status code
+func (o *PcloudNetworksGetallNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud networks getall not found response has a 3xx status code
+func (o *PcloudNetworksGetallNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud networks getall not found response has a 4xx status code
+func (o *PcloudNetworksGetallNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud networks getall not found response has a 5xx status code
+func (o *PcloudNetworksGetallNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud networks getall not found response a status code equal to that given
+func (o *PcloudNetworksGetallNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud networks getall not found response
+func (o *PcloudNetworksGetallNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudNetworksGetallNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudNetworksGetallNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudNetworksGetallNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudNetworksGetallNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -375,11 +460,13 @@ func (o *PcloudNetworksGetallInternalServerError) Code() int {
 }
 
 func (o *PcloudNetworksGetallInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudNetworksGetallInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v1/cloud-instances/{cloud_instance_id}/networks][%d] pcloudNetworksGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudNetworksGetallInternalServerError) GetPayload() *models.Error {

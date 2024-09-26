@@ -6,6 +6,7 @@ package p_cloud_v_p_n_connections
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteReader) ReadResponse(response runt
 		return nil, result
 	case 403:
 		result := NewPcloudVpnconnectionsPeersubnetsDeleteForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudVpnconnectionsPeersubnetsDeleteNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -109,11 +116,13 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteOK) Code() int {
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteOK) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteOK %s", 200, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteOK) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteOK %s", 200, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteOK) GetPayload() *models.PeerSubnets {
@@ -177,11 +186,13 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteBadRequest) Code() int {
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteBadRequest) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteBadRequest) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteBadRequest %s", 400, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteBadRequest) GetPayload() *models.Error {
@@ -245,11 +256,13 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteUnauthorized) Code() int {
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteUnauthorized) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteUnauthorized) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteUnauthorized) GetPayload() *models.Error {
@@ -313,11 +326,13 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteForbidden) Code() int {
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteForbidden) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteForbidden %s", 403, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteForbidden) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteForbidden %s", 403, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteForbidden) GetPayload() *models.Error {
@@ -325,6 +340,76 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteForbidden) GetPayload() *models.Er
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudVpnconnectionsPeersubnetsDeleteNotFound creates a PcloudVpnconnectionsPeersubnetsDeleteNotFound with default headers values
+func NewPcloudVpnconnectionsPeersubnetsDeleteNotFound() *PcloudVpnconnectionsPeersubnetsDeleteNotFound {
+	return &PcloudVpnconnectionsPeersubnetsDeleteNotFound{}
+}
+
+/*
+PcloudVpnconnectionsPeersubnetsDeleteNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudVpnconnectionsPeersubnetsDeleteNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud vpnconnections peersubnets delete not found response has a 2xx status code
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud vpnconnections peersubnets delete not found response has a 3xx status code
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud vpnconnections peersubnets delete not found response has a 4xx status code
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud vpnconnections peersubnets delete not found response has a 5xx status code
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud vpnconnections peersubnets delete not found response a status code equal to that given
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud vpnconnections peersubnets delete not found response
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteNotFound %s", 404, payload)
+}
+
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteNotFound %s", 404, payload)
+}
+
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudVpnconnectionsPeersubnetsDeleteNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -381,11 +466,13 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity) Code() int {
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity  %+v", 422, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity %s", 422, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteUnprocessableEntity) GetPayload() *models.Error {
@@ -449,11 +536,13 @@ func (o *PcloudVpnconnectionsPeersubnetsDeleteInternalServerError) Code() int {
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteInternalServerError) Error() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteInternalServerError) String() string {
-	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[DELETE /pcloud/v1/cloud-instances/{cloud_instance_id}/vpn/vpn-connections/{vpn_connection_id}/peer-subnets][%d] pcloudVpnconnectionsPeersubnetsDeleteInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudVpnconnectionsPeersubnetsDeleteInternalServerError) GetPayload() *models.Error {

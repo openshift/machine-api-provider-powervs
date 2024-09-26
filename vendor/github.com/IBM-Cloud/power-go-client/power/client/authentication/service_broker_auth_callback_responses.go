@@ -6,6 +6,7 @@ package authentication
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -29,8 +30,26 @@ func (o *ServiceBrokerAuthCallbackReader) ReadResponse(response runtime.ClientRe
 			return nil, err
 		}
 		return result, nil
+	case 400:
+		result := NewServiceBrokerAuthCallbackBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
 	case 401:
 		result := NewServiceBrokerAuthCallbackUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBrokerAuthCallbackForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewServiceBrokerAuthCallbackNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -91,11 +110,13 @@ func (o *ServiceBrokerAuthCallbackOK) Code() int {
 }
 
 func (o *ServiceBrokerAuthCallbackOK) Error() string {
-	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerAuthCallbackOK) String() string {
-	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerAuthCallbackOK) GetPayload() *models.AccessToken {
@@ -105,6 +126,76 @@ func (o *ServiceBrokerAuthCallbackOK) GetPayload() *models.AccessToken {
 func (o *ServiceBrokerAuthCallbackOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.AccessToken)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerAuthCallbackBadRequest creates a ServiceBrokerAuthCallbackBadRequest with default headers values
+func NewServiceBrokerAuthCallbackBadRequest() *ServiceBrokerAuthCallbackBadRequest {
+	return &ServiceBrokerAuthCallbackBadRequest{}
+}
+
+/*
+ServiceBrokerAuthCallbackBadRequest describes a response with status code 400, with default header values.
+
+Bad Request
+*/
+type ServiceBrokerAuthCallbackBadRequest struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker auth callback bad request response has a 2xx status code
+func (o *ServiceBrokerAuthCallbackBadRequest) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker auth callback bad request response has a 3xx status code
+func (o *ServiceBrokerAuthCallbackBadRequest) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker auth callback bad request response has a 4xx status code
+func (o *ServiceBrokerAuthCallbackBadRequest) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker auth callback bad request response has a 5xx status code
+func (o *ServiceBrokerAuthCallbackBadRequest) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker auth callback bad request response a status code equal to that given
+func (o *ServiceBrokerAuthCallbackBadRequest) IsCode(code int) bool {
+	return code == 400
+}
+
+// Code gets the status code for the service broker auth callback bad request response
+func (o *ServiceBrokerAuthCallbackBadRequest) Code() int {
+	return 400
+}
+
+func (o *ServiceBrokerAuthCallbackBadRequest) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackBadRequest %s", 400, payload)
+}
+
+func (o *ServiceBrokerAuthCallbackBadRequest) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackBadRequest %s", 400, payload)
+}
+
+func (o *ServiceBrokerAuthCallbackBadRequest) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerAuthCallbackBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -159,11 +250,13 @@ func (o *ServiceBrokerAuthCallbackUnauthorized) Code() int {
 }
 
 func (o *ServiceBrokerAuthCallbackUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackUnauthorized %s", 401, payload)
 }
 
 func (o *ServiceBrokerAuthCallbackUnauthorized) String() string {
-	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackUnauthorized %s", 401, payload)
 }
 
 func (o *ServiceBrokerAuthCallbackUnauthorized) GetPayload() *models.Error {
@@ -171,6 +264,146 @@ func (o *ServiceBrokerAuthCallbackUnauthorized) GetPayload() *models.Error {
 }
 
 func (o *ServiceBrokerAuthCallbackUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerAuthCallbackForbidden creates a ServiceBrokerAuthCallbackForbidden with default headers values
+func NewServiceBrokerAuthCallbackForbidden() *ServiceBrokerAuthCallbackForbidden {
+	return &ServiceBrokerAuthCallbackForbidden{}
+}
+
+/*
+ServiceBrokerAuthCallbackForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBrokerAuthCallbackForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker auth callback forbidden response has a 2xx status code
+func (o *ServiceBrokerAuthCallbackForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker auth callback forbidden response has a 3xx status code
+func (o *ServiceBrokerAuthCallbackForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker auth callback forbidden response has a 4xx status code
+func (o *ServiceBrokerAuthCallbackForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker auth callback forbidden response has a 5xx status code
+func (o *ServiceBrokerAuthCallbackForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker auth callback forbidden response a status code equal to that given
+func (o *ServiceBrokerAuthCallbackForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service broker auth callback forbidden response
+func (o *ServiceBrokerAuthCallbackForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBrokerAuthCallbackForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerAuthCallbackForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerAuthCallbackForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerAuthCallbackForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerAuthCallbackNotFound creates a ServiceBrokerAuthCallbackNotFound with default headers values
+func NewServiceBrokerAuthCallbackNotFound() *ServiceBrokerAuthCallbackNotFound {
+	return &ServiceBrokerAuthCallbackNotFound{}
+}
+
+/*
+ServiceBrokerAuthCallbackNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type ServiceBrokerAuthCallbackNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker auth callback not found response has a 2xx status code
+func (o *ServiceBrokerAuthCallbackNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker auth callback not found response has a 3xx status code
+func (o *ServiceBrokerAuthCallbackNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker auth callback not found response has a 4xx status code
+func (o *ServiceBrokerAuthCallbackNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker auth callback not found response has a 5xx status code
+func (o *ServiceBrokerAuthCallbackNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker auth callback not found response a status code equal to that given
+func (o *ServiceBrokerAuthCallbackNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the service broker auth callback not found response
+func (o *ServiceBrokerAuthCallbackNotFound) Code() int {
+	return 404
+}
+
+func (o *ServiceBrokerAuthCallbackNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerAuthCallbackNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackNotFound %s", 404, payload)
+}
+
+func (o *ServiceBrokerAuthCallbackNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerAuthCallbackNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -227,11 +460,13 @@ func (o *ServiceBrokerAuthCallbackInternalServerError) Code() int {
 }
 
 func (o *ServiceBrokerAuthCallbackInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerAuthCallbackInternalServerError) String() string {
-	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /auth/v1/callback][%d] serviceBrokerAuthCallbackInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerAuthCallbackInternalServerError) GetPayload() *models.Error {

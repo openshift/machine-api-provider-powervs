@@ -6,6 +6,7 @@ package open_stacks
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -31,6 +32,18 @@ func (o *ServiceBrokerOpenstacksOpenstackGetReader) ReadResponse(response runtim
 		return result, nil
 	case 400:
 		result := NewServiceBrokerOpenstacksOpenstackGetBadRequest()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 401:
+		result := NewServiceBrokerOpenstacksOpenstackGetUnauthorized()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 403:
+		result := NewServiceBrokerOpenstacksOpenstackGetForbidden()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -97,11 +110,13 @@ func (o *ServiceBrokerOpenstacksOpenstackGetOK) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetOK) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetOK) String() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetOK %s", 200, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetOK) GetPayload() *models.OpenStackInfo {
@@ -165,11 +180,13 @@ func (o *ServiceBrokerOpenstacksOpenstackGetBadRequest) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetBadRequest) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetBadRequest) String() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetBadRequest %s", 400, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetBadRequest) GetPayload() *models.Error {
@@ -177,6 +194,146 @@ func (o *ServiceBrokerOpenstacksOpenstackGetBadRequest) GetPayload() *models.Err
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetBadRequest) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerOpenstacksOpenstackGetUnauthorized creates a ServiceBrokerOpenstacksOpenstackGetUnauthorized with default headers values
+func NewServiceBrokerOpenstacksOpenstackGetUnauthorized() *ServiceBrokerOpenstacksOpenstackGetUnauthorized {
+	return &ServiceBrokerOpenstacksOpenstackGetUnauthorized{}
+}
+
+/*
+ServiceBrokerOpenstacksOpenstackGetUnauthorized describes a response with status code 401, with default header values.
+
+Unauthorized
+*/
+type ServiceBrokerOpenstacksOpenstackGetUnauthorized struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker openstacks openstack get unauthorized response has a 2xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker openstacks openstack get unauthorized response has a 3xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker openstacks openstack get unauthorized response has a 4xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker openstacks openstack get unauthorized response has a 5xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker openstacks openstack get unauthorized response a status code equal to that given
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) IsCode(code int) bool {
+	return code == 401
+}
+
+// Code gets the status code for the service broker openstacks openstack get unauthorized response
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) Code() int {
+	return 401
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetUnauthorized %s", 401, payload)
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetUnauthorized) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewServiceBrokerOpenstacksOpenstackGetForbidden creates a ServiceBrokerOpenstacksOpenstackGetForbidden with default headers values
+func NewServiceBrokerOpenstacksOpenstackGetForbidden() *ServiceBrokerOpenstacksOpenstackGetForbidden {
+	return &ServiceBrokerOpenstacksOpenstackGetForbidden{}
+}
+
+/*
+ServiceBrokerOpenstacksOpenstackGetForbidden describes a response with status code 403, with default header values.
+
+Forbidden
+*/
+type ServiceBrokerOpenstacksOpenstackGetForbidden struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this service broker openstacks openstack get forbidden response has a 2xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this service broker openstacks openstack get forbidden response has a 3xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this service broker openstacks openstack get forbidden response has a 4xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this service broker openstacks openstack get forbidden response has a 5xx status code
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this service broker openstacks openstack get forbidden response a status code equal to that given
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) IsCode(code int) bool {
+	return code == 403
+}
+
+// Code gets the status code for the service broker openstacks openstack get forbidden response
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) Code() int {
+	return 403
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetForbidden %s", 403, payload)
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *ServiceBrokerOpenstacksOpenstackGetForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -233,11 +390,13 @@ func (o *ServiceBrokerOpenstacksOpenstackGetNotFound) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetNotFound) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetNotFound %s", 404, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetNotFound) String() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetNotFound  %+v", 404, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetNotFound %s", 404, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetNotFound) GetPayload() *models.Error {
@@ -301,11 +460,13 @@ func (o *ServiceBrokerOpenstacksOpenstackGetInternalServerError) Code() int {
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetInternalServerError) String() string {
-	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /broker/v1/openstacks/{openstack_id}][%d] serviceBrokerOpenstacksOpenstackGetInternalServerError %s", 500, payload)
 }
 
 func (o *ServiceBrokerOpenstacksOpenstackGetInternalServerError) GetPayload() *models.Error {

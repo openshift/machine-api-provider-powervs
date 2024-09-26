@@ -6,6 +6,7 @@ package p_cloud_volumes
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -43,6 +44,12 @@ func (o *PcloudV2VolumescloneGetallReader) ReadResponse(response runtime.ClientR
 		return nil, result
 	case 403:
 		result := NewPcloudV2VolumescloneGetallForbidden()
+		if err := result.readResponse(response, consumer, o.formats); err != nil {
+			return nil, err
+		}
+		return nil, result
+	case 404:
+		result := NewPcloudV2VolumescloneGetallNotFound()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -103,11 +110,13 @@ func (o *PcloudV2VolumescloneGetallOK) Code() int {
 }
 
 func (o *PcloudV2VolumescloneGetallOK) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallOK %s", 200, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallOK) String() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallOK  %+v", 200, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallOK %s", 200, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallOK) GetPayload() *models.VolumesClones {
@@ -171,11 +180,13 @@ func (o *PcloudV2VolumescloneGetallBadRequest) Code() int {
 }
 
 func (o *PcloudV2VolumescloneGetallBadRequest) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallBadRequest) String() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallBadRequest  %+v", 400, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallBadRequest %s", 400, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallBadRequest) GetPayload() *models.Error {
@@ -239,11 +250,13 @@ func (o *PcloudV2VolumescloneGetallUnauthorized) Code() int {
 }
 
 func (o *PcloudV2VolumescloneGetallUnauthorized) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallUnauthorized) String() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallUnauthorized  %+v", 401, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallUnauthorized %s", 401, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallUnauthorized) GetPayload() *models.Error {
@@ -307,11 +320,13 @@ func (o *PcloudV2VolumescloneGetallForbidden) Code() int {
 }
 
 func (o *PcloudV2VolumescloneGetallForbidden) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallForbidden) String() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallForbidden  %+v", 403, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallForbidden %s", 403, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallForbidden) GetPayload() *models.Error {
@@ -319,6 +334,76 @@ func (o *PcloudV2VolumescloneGetallForbidden) GetPayload() *models.Error {
 }
 
 func (o *PcloudV2VolumescloneGetallForbidden) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+
+	o.Payload = new(models.Error)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
+
+	return nil
+}
+
+// NewPcloudV2VolumescloneGetallNotFound creates a PcloudV2VolumescloneGetallNotFound with default headers values
+func NewPcloudV2VolumescloneGetallNotFound() *PcloudV2VolumescloneGetallNotFound {
+	return &PcloudV2VolumescloneGetallNotFound{}
+}
+
+/*
+PcloudV2VolumescloneGetallNotFound describes a response with status code 404, with default header values.
+
+Not Found
+*/
+type PcloudV2VolumescloneGetallNotFound struct {
+	Payload *models.Error
+}
+
+// IsSuccess returns true when this pcloud v2 volumesclone getall not found response has a 2xx status code
+func (o *PcloudV2VolumescloneGetallNotFound) IsSuccess() bool {
+	return false
+}
+
+// IsRedirect returns true when this pcloud v2 volumesclone getall not found response has a 3xx status code
+func (o *PcloudV2VolumescloneGetallNotFound) IsRedirect() bool {
+	return false
+}
+
+// IsClientError returns true when this pcloud v2 volumesclone getall not found response has a 4xx status code
+func (o *PcloudV2VolumescloneGetallNotFound) IsClientError() bool {
+	return true
+}
+
+// IsServerError returns true when this pcloud v2 volumesclone getall not found response has a 5xx status code
+func (o *PcloudV2VolumescloneGetallNotFound) IsServerError() bool {
+	return false
+}
+
+// IsCode returns true when this pcloud v2 volumesclone getall not found response a status code equal to that given
+func (o *PcloudV2VolumescloneGetallNotFound) IsCode(code int) bool {
+	return code == 404
+}
+
+// Code gets the status code for the pcloud v2 volumesclone getall not found response
+func (o *PcloudV2VolumescloneGetallNotFound) Code() int {
+	return 404
+}
+
+func (o *PcloudV2VolumescloneGetallNotFound) Error() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudV2VolumescloneGetallNotFound) String() string {
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallNotFound %s", 404, payload)
+}
+
+func (o *PcloudV2VolumescloneGetallNotFound) GetPayload() *models.Error {
+	return o.Payload
+}
+
+func (o *PcloudV2VolumescloneGetallNotFound) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models.Error)
 
@@ -375,11 +460,13 @@ func (o *PcloudV2VolumescloneGetallInternalServerError) Code() int {
 }
 
 func (o *PcloudV2VolumescloneGetallInternalServerError) Error() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallInternalServerError) String() string {
-	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallInternalServerError  %+v", 500, o.Payload)
+	payload, _ := json.Marshal(o.Payload)
+	return fmt.Sprintf("[GET /pcloud/v2/cloud-instances/{cloud_instance_id}/volumes-clone][%d] pcloudV2VolumescloneGetallInternalServerError %s", 500, payload)
 }
 
 func (o *PcloudV2VolumescloneGetallInternalServerError) GetPayload() *models.Error {
