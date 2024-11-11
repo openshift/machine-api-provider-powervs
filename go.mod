@@ -16,7 +16,7 @@ require (
 	github.com/openshift/api v0.0.0-20240904015708-69df64132c91
 	github.com/openshift/machine-api-operator v0.2.1-0.20240912100427-050b12eb6e05
 	github.com/pkg/errors v0.9.1
-	github.com/ppc64le-cloud/powervs-utils v0.0.0-20240105123432-7588e9595c17
+	github.com/ppc64le-cloud/powervs-utils v0.0.0-20240610070307-1c0d75a5c247
 
 	// kube 1.30
 	k8s.io/api v0.30.1
