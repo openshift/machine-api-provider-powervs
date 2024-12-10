@@ -19,9 +19,9 @@ import (
 
 var (
 	customEndpointsMap = map[string]string{
-		"iam": "https://test.iam.cloud.ibm.com",
-		"rc":  "https://test.resource-controller.cloud.ibm.com",
-		"pi":  "https://test-region.power-iaas.cloud.ibm.com",
+		"IAM":                "https://test.iam.cloud.ibm.com",
+		"ResourceController": "https://test.resource-controller.cloud.ibm.com",
+		"Power":              "https://test-region.power-iaas.cloud.ibm.com",
 	}
 	regionEnvironmentalVariable = "IBMCLOUD_REGION"
 	testRegion                  = "test-region"
@@ -103,7 +103,7 @@ func TestResolveEndpoints(t *testing.T) {
 		log.Fatalf("Expected length of endpointsMap is 2 but got %d", len(endpointsMap))
 	}
 
-	endpointKeys := []string{"iam", "rc"}
+	endpointKeys := []string{"IAM", "ResourceController"}
 
 	for _, key := range endpointKeys {
 		if val, ok := endpointsMap[key]; !ok {
@@ -132,12 +132,12 @@ func stubStatus() configv1.InfrastructureStatus {
 			PowerVS: &configv1.PowerVSPlatformStatus{
 				ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 					{
-						Name: "iam",
-						URL:  customEndpointsMap["iam"],
+						Name: "IAM",
+						URL:  customEndpointsMap["IAM"],
 					},
 					{
-						Name: "rc",
-						URL:  customEndpointsMap["rc"],
+						Name: "ResourceController",
+						URL:  customEndpointsMap["ResourceController"],
 					},
 				},
 				ResourceGroup: "Default",
