@@ -48,6 +48,9 @@ const (
 	// globalInfrastuctureName default name for infrastructure object
 	globalInfrastuctureName = "cluster"
 
+	// customIamEndpointName is the key to fetch IAM endpoint override
+	customIamEndpointName = "IAM"
+
 	// powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
 	powerIaaSCustomEndpointName = "Power"
 
@@ -136,6 +139,14 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 		ApiKey: apikey,
 	}
 
+	endpoints, err := resolveEndpoints(ctrlRuntimeClient)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to resolve endpoint overrides")
+	}
+	if endpoints[customIamEndpointName] != "" {
+		authenticator.URL = endpoints[customIamEndpointName]
+	}
+
 	// Create ResourceController client
 	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
 		Authenticator: authenticator,
@@ -222,10 +233,18 @@ func NewMinimalPowerVSClient(ctrlRuntimeClient client.Client) (Client, error) {
 		klog.Errorf("failed to read the API key from the secret: %v", err)
 		return nil, err
 	}
+	authenticator := &core.IamAuthenticator{
+		ApiKey: apiKey,
+	}
+	endpoints, err := resolveEndpoints(ctrlRuntimeClient)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to resolve endpoint overrides")
+	}
+	if endpoints[customIamEndpointName] != "" {
+		authenticator.URL = endpoints[customIamEndpointName]
+	}
 	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
-		Authenticator: &core.IamAuthenticator{
-			ApiKey: apiKey,
-		},
+		Authenticator: authenticator,
 	})
 	if err != nil {
 		return nil, err
