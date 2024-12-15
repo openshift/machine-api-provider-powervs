@@ -13,7 +13,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -33,7 +35,8 @@ var _ = Describe("MachineSet Reconciler", func() {
 	var namespace *corev1.Namespace
 
 	BeforeEach(func() {
-		mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"}})
+		mgr, err := manager.New(cfg, manager.Options{Metrics: metricsserver.Options{BindAddress: "0"},
+			Controller: config.Controller{SkipNameValidation: ptr.To(true)}})
 		Expect(err).ToNot(HaveOccurred())
 
 		r := Reconciler{

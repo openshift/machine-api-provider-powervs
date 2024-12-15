@@ -100,11 +100,11 @@ func TestResolveEndpoints(t *testing.T) {
 					PowerVS: &configv1.PowerVSPlatformStatus{
 						ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 							{
-								Name: "iam",
+								Name: "IAM",
 								URL:  "https://iam.test.cloud.ibm.com",
 							},
 							{
-								Name: "pe",
+								Name: "Power",
 								URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 							},
 						},
@@ -126,15 +126,15 @@ func TestResolveEndpoints(t *testing.T) {
 						PowerVS: &configv1.PowerVSPlatformSpec{
 							ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 								{
-									Name: "iam",
+									Name: "IAM",
 									URL:  "https://iam.test.cloud.ibm.com",
 								},
 								{
-									Name: "pe",
+									Name: "Power",
 									URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 								},
 								{
-									Name: "rc",
+									Name: "ResourceController",
 									URL:  "https://test.resource-controller.cloud.ibm.com",
 								},
 							},
@@ -149,11 +149,11 @@ func TestResolveEndpoints(t *testing.T) {
 					PowerVS: &configv1.PowerVSPlatformStatus{
 						ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 							{
-								Name: "iam",
+								Name: "IAM",
 								URL:  "https://iam.test.cloud.ibm.com",
 							},
 							{
-								Name: "pe",
+								Name: "Power",
 								URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 							},
 						},
@@ -170,15 +170,15 @@ func TestResolveEndpoints(t *testing.T) {
 						PowerVS: &configv1.PowerVSPlatformStatus{
 							ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 								{
-									Name: "iam",
+									Name: "IAM",
 									URL:  "https://iam.test.cloud.ibm.com",
 								},
 								{
-									Name: "pe",
+									Name: "Power",
 									URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 								},
 								{
-									Name: "rc",
+									Name: "ResourceController",
 									URL:  "https://test.resource-controller.cloud.ibm.com",
 								},
 							},
@@ -198,15 +198,15 @@ func TestResolveEndpoints(t *testing.T) {
 					PowerVS: &configv1.PowerVSPlatformStatus{
 						ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 							{
-								Name: "iam",
+								Name: "IAM",
 								URL:  "https://iam.test.cloud.ibm.com",
 							},
 							{
-								Name: "pe",
+								Name: "Power",
 								URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 							},
 							{
-								Name: "rc",
+								Name: "ResourceController",
 								URL:  "https://test.resource-controller.cloud.ibm.com",
 							},
 						},
@@ -259,11 +259,11 @@ func stubInfrastructure() *configv1.Infrastructure {
 				PowerVS: &configv1.PowerVSPlatformSpec{
 					ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 						{
-							Name: "iam",
+							Name: "IAM",
 							URL:  "https://iam.test.cloud.ibm.com",
 						},
 						{
-							Name: "pe",
+							Name: "Power",
 							URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 						},
 					},
@@ -284,7 +284,7 @@ func stubInvalidCustomServiceEndpoints() *configv1.Infrastructure {
 				PowerVS: &configv1.PowerVSPlatformSpec{
 					ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 						{
-							Name: "pe",
+							Name: "Power",
 							URL:  "https://dal.power-iaas.test.cloud.ibm.com/abc",
 						},
 					},
@@ -304,11 +304,11 @@ func expectedInfraObject() *configv1.Infrastructure {
 				PowerVS: &configv1.PowerVSPlatformStatus{
 					ServiceEndpoints: []configv1.PowerVSServiceEndpoint{
 						{
-							Name: "iam",
+							Name: "IAM",
 							URL:  "https://iam.test.cloud.ibm.com",
 						},
 						{
-							Name: "pe",
+							Name: "Power",
 							URL:  "https://dal.power-iaas.test.cloud.ibm.com",
 						},
 					},

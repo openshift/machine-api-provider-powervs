@@ -31,31 +31,31 @@ import (
 )
 
 const (
-	//DefaultCredentialNamespace is the default namespace used to create a client object
+	// DefaultCredentialNamespace is the default namespace used to create a client object
 	DefaultCredentialNamespace = "openshift-machine-api"
-	//DefaultCredentialSecret is the credential secret name used by node update controller to fetch API key
+	// DefaultCredentialSecret is the credential secret name used by node update controller to fetch API key
 	DefaultCredentialSecret = "powervs-credentials"
 
-	//InstanceStateNameShutoff is indicates the shutoff state of Power VS instance
+	// InstanceStateNameShutoff is indicates the shutoff state of Power VS instance
 	InstanceStateNameShutoff = "SHUTOFF"
-	//InstanceStateNameActive indicates the active state of Power VS instance
+	// InstanceStateNameActive indicates the active state of Power VS instance
 	InstanceStateNameActive = "ACTIVE"
-	//InstanceStateNameBuild indicates the build state of Power VS instance
+	// InstanceStateNameBuild indicates the build state of Power VS instance
 	InstanceStateNameBuild = "BUILD"
-	//InstanceBuildReason indicates that instance is in building state
+	// InstanceBuildReason indicates that instance is in building state
 	InstanceBuildReason = "InstanceBuildState"
 
 	// globalInfrastuctureName default name for infrastructure object
 	globalInfrastuctureName = "cluster"
 
-	//powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
-	powerIaaSCustomEndpointName = "pi"
+	// powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
+	powerIaaSCustomEndpointName = "Power"
 
-	//powerVSResourceID is Power VS power-iaas service id, can be retrieved using ibmcloud cli
+	// powerVSResourceID is Power VS power-iaas service id, can be retrieved using ibmcloud cli
 	// ibmcloud catalog service power-iaas
 	powerVSResourceID = "abd259f0-9990-11e8-acc8-b9f54a8f1661"
 
-	//powerVSResourcePlanID is Power VS power-iaas plan id, can be retrieved using ibmcloud cli
+	// powerVSResourcePlanID is Power VS power-iaas plan id, can be retrieved using ibmcloud cli
 	// ibmcloud catalog service power-iaas
 	powerVSResourcePlanID = "f165dd34-3a40-423b-9d95-e90a23f724dd"
 )
@@ -63,14 +63,14 @@ const (
 var _ Client = &powerVSClient{}
 
 var (
-	//ErrorInstanceNotFound is error type for Instance Not Found
+	// ErrorInstanceNotFound is error type for Instance Not Found
 	ErrorInstanceNotFound = errors.New("instance Not Found")
 
-	//endPointKeyToEnvNameMap contains the endpoint key to corresponding environment variable name 	//TODO: Finalize the custom service key names
+	// endPointKeyToEnvNameMap contains the endpoint key to corresponding environment variable name 	//TODO: Finalize the custom service key names
 	endPointKeyToEnvNameMap = map[string]string{
-		"iam": "IBMCLOUD_IAM_API_ENDPOINT",
-		"rc":  "IBMCLOUD_RESOURCE_CONTROLLER_API_ENDPOINT",
-		"pi":  "IBMCLOUD_POWER_API_ENDPOINT",
+		"IAM":                "IBMCLOUD_IAM_API_ENDPOINT",
+		"ResourceController": "IBMCLOUD_RESOURCE_CONTROLLER_API_ENDPOINT",
+		"Power":              "IBMCLOUD_POWER_API_ENDPOINT",
 	}
 )
 
@@ -126,7 +126,7 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 		return nil, err
 	}
 
-	//TODO: Use clients to override endpoints
+	// TODO: Use clients to override endpoints
 	if err := getAndSetServiceEndpoints(ctrlRuntimeClient); err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	c.region = instanceRegion
 	c.zone = *resourceInstance.RegionID
 
-	//Fetch User account details
+	// Fetch User account details
 	accountID, err := getAccount(authenticator)
 	if err != nil {
 		return nil, err
@@ -449,7 +449,7 @@ func resolveEndpoints(ctrlRuntimeClient client.Client) (map[string]string, error
 
 	customEndpointsMap := make(map[string]string)
 
-	//Build the custom endpoint map
+	// Build the custom endpoint map
 	for _, customEndpoint := range infra.Status.PlatformStatus.PowerVS.ServiceEndpoints {
 		// Power VS client expects the IBMCLOUD_POWER_API_ENDPOINT variable to be set without scheme (https)
 		if customEndpoint.Name == powerIaaSCustomEndpointName {
