@@ -51,6 +51,9 @@ const (
 	// customIamEndpointName is the key to fetch IAM endpoint override
 	customIamEndpointName = "IAM"
 
+	// customIamEndpointName is the key to fetch Resource Controller endpoint override
+	customRcEndpointName = "ResourceController"
+
 	// powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
 	powerIaaSCustomEndpointName = "Power"
 
@@ -243,9 +246,13 @@ func NewMinimalPowerVSClient(ctrlRuntimeClient client.Client) (Client, error) {
 	if endpoints[customIamEndpointName] != "" {
 		authenticator.URL = endpoints[customIamEndpointName]
 	}
-	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
+	rcOptions := &resourcecontrollerv2.ResourceControllerV2Options{
 		Authenticator: authenticator,
-	})
+	}
+	if endpoints[customRcEndpointName] != "" {
+		rcOptions.URL = endpoints[customRcEndpointName]
+	}
+	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(rcOptions)
 	if err != nil {
 		return nil, err
 	}
