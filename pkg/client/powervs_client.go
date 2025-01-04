@@ -151,9 +151,13 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	}
 
 	// Create ResourceController client
-	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(&resourcecontrollerv2.ResourceControllerV2Options{
+	rcOptions := &resourcecontrollerv2.ResourceControllerV2Options{
 		Authenticator: authenticator,
-	})
+	}
+	if endpoints[customRcEndpointName] != "" {
+		rcOptions.URL = endpoints[customRcEndpointName]
+	}
+	rcv2, err := resourcecontrollerv2.NewResourceControllerV2(rcOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create resource controller v2")
 	}
