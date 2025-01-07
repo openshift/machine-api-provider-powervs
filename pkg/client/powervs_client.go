@@ -51,8 +51,11 @@ const (
 	// customIamEndpointName is the key to fetch IAM endpoint override
 	customIamEndpointName = "IAM"
 
-	// customIamEndpointName is the key to fetch Resource Controller endpoint override
+	// customRcEndpointName is the key to fetch Resource Controller endpoint override
 	customRcEndpointName = "ResourceController"
+
+	// customVpcEndpointName is the key to fetch VPC endpoint override
+	customVpcEndpointName = "VPC"
 
 	// powerIaaSCustomEndpointName is the short name used to fetch Power IaaS endpoint URL
 	powerIaaSCustomEndpointName = "Power"
@@ -217,11 +220,14 @@ func NewValidatedClient(ctrlRuntimeClient client.Client, secretName, namespace, 
 	}
 
 	// Create VPC client
-	vpcClient, err := vpcv1.NewVpcV1(&vpcv1.VpcV1Options{
+	vpcOptions := &vpcv1.VpcV1Options{
 		Authenticator: authenticator,
-		// TODO: support custom service endpoints
-		URL: fmt.Sprintf("https://%s.iaas.cloud.ibm.com/v1", vpcRegion),
-	})
+		URL:           fmt.Sprintf("https://%s.iaas.cloud.ibm.com/v1", vpcRegion),
+	}
+	if endpoints[customVpcEndpointName] != "" {
+		vpcOptions.URL = fmt.Sprintf("%s/v1", endpoints[customVpcEndpointName])
+	}
+	vpcClient, err := vpcv1.NewVpcV1(vpcOptions)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create vpc client")
