@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION = 1.31.1
+ENVTEST_K8S_VERSION = 1.32.1
 
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 ENVTEST = go run ${PROJECT_DIR}/vendor/sigs.k8s.io/controller-runtime/tools/setup-envtest
@@ -37,7 +37,7 @@ REPO_PATH   ?= github.com/openshift/machine-api-provider-powervs
 LD_FLAGS    ?= -X $(REPO_PATH)/pkg/version.Raw=$(VERSION) -extldflags "-static"
 MUTABLE_TAG ?= latest
 IMAGE        = origin-powervs-machine-controllers
-BUILD_IMAGE ?= registry.ci.openshift.org/openshift/release:rhel-8-release-golang-1.20-openshift-4.14
+BUILD_IMAGE ?= registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.23-openshift-4.19
 
 NO_DOCKER ?= 1
 
