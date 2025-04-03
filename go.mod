@@ -31,7 +31,7 @@ require (
 
 require (
 	github.com/IBM/platform-services-go-sdk v0.59.1
-	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/openshift/library-go v0.0.0-20240903143724-7c5c5d305ac1
 	k8s.io/apiserver v0.30.1
 	k8s.io/component-base v0.30.1
