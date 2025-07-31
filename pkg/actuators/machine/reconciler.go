@@ -254,7 +254,7 @@ func (r *Reconciler) setProviderID(instance *models.PVMInstance) error {
 		klog.Infof("Found ServiceInstanceID from providerStatus %s", serviceInstanceID)
 	} else {
 		errStr := fmt.Errorf("serviceInstanceID is empty, Cannot set providerID")
-		klog.Errorf(errStr.Error())
+		klog.Errorf("%v", errStr.Error())
 		return errStr
 	}
 
@@ -391,7 +391,7 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 	networkID, err := getNetworkID(r.providerSpec.Network, r.powerVSClient)
 	if err != nil {
 		errStr := fmt.Errorf("failed to fetch network id from network resource for VM: %s error: %v", r.machine.Name, err)
-		klog.Errorf(errStr.Error())
+		klog.Errorf("%v", errStr.Error())
 		return errStr
 	}
 	// Fetch the details of the network attached to the VM
@@ -404,14 +404,14 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 	}
 	if pvmNetwork == nil {
 		errStr := fmt.Errorf("failed to get network attached to VM %s with id %s", *instance.ServerName, *networkID)
-		klog.Errorf(errStr.Error())
+		klog.Errorf("%v", errStr.Error())
 		return errStr
 	}
 	// Get all the DHCP servers
 	dhcpServer, err := r.powerVSClient.GetDHCPServers()
 	if err != nil {
 		errStr := fmt.Errorf("failed to get DHCP server error: %v", err)
-		klog.Errorf(errStr.Error())
+		klog.Errorf("%v", errStr.Error())
 		return errStr
 	}
 	// Get the Details of DHCP server associated with the network
@@ -422,7 +422,7 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 			dhcpServerDetails, err = r.powerVSClient.GetDHCPServerByID(*server.ID)
 			if err != nil || dhcpServerDetails == nil {
 				errStr := fmt.Errorf("failed to get DHCP server details with DHCP server ID: %s error: %v", *server.ID, err)
-				klog.Errorf(errStr.Error())
+				klog.Errorf("%v", errStr.Error())
 				return errStr
 			}
 			break
@@ -430,7 +430,7 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 	}
 	if dhcpServerDetails == nil {
 		errStr := fmt.Errorf("DHCP server detailis not found for network with ID %s", *networkID)
-		klog.Errorf(errStr.Error())
+		klog.Errorf("%v", errStr.Error())
 		return errStr
 	}
 
@@ -446,7 +446,7 @@ func (r *Reconciler) setMachineAddresses(instance *models.PVMInstance) error {
 	if internalIP == nil {
 		errStr := fmt.Errorf("failed to get internal IP, DHCP lease not found for VM %s with MAC %s in DHCP network %s", *instance.ServerName,
 			pvmNetwork.MacAddress, *dhcpServerDetails.ID)
-		klog.Errorf(errStr.Error())
+		klog.Errorf("%v", errStr.Error())
 		return errStr
 	}
 	klog.Infof("found internal IP: %s for VM: %s from DHCP lease", *internalIP, *instance.ServerName)
@@ -563,7 +563,7 @@ func createLoadBalancerPoolMember(powerVSClient client.Client, lbMap map[string]
 	for lbName, lbOptions := range lbMap {
 		if lbOptions.state != loadBalancerActiveState {
 			errStr := fmt.Errorf("cannot update load balancer %s, load balancer is not in %s state", lbName, loadBalancerActiveState)
-			klog.Errorf(errStr.Error())
+			klog.Errorf("%v", errStr.Error())
 			return errStr
 		}
 		if len(lbOptions.pools) == 0 {
@@ -659,7 +659,7 @@ func deleteLoadBalancerPoolMember(powerVSClient client.Client, lbMap map[string]
 	for lbName, lbOptions := range lbMap {
 		if lbOptions.state != loadBalancerActiveState {
 			errStr := fmt.Errorf("cannot update load balancer %s, load balancer is not in %s state", lbName, loadBalancerActiveState)
-			klog.Errorf(errStr.Error())
+			klog.Errorf("%v", errStr.Error())
 			return errStr
 		}
 		if len(lbOptions.pools) == 0 {
