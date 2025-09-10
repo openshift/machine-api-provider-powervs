@@ -25,7 +25,7 @@ ifeq ($(DBG),1)
 GOGCFLAGS ?= -gcflags=all="-N -l"
 endif
 
-VERSION     ?= $(shell git describe --always --abbrev=7)
+VERSION     ?= $(if $(OS_GIT_VERSION),$(OS_GIT_VERSION),$(shell git describe --always --abbrev=7))
 REPO_PATH   ?= github.com/openshift/machine-api-provider-powervs
 LD_FLAGS    ?= -X $(REPO_PATH)/pkg/version.Raw=$(VERSION) -extldflags "-static"
 MUTABLE_TAG ?= latest
