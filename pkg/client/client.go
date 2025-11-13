@@ -23,7 +23,7 @@ import (
 	"github.com/IBM/vpc-go-sdk/vpcv1"
 )
 
-//go:generate go run ../../vendor/github.com/golang/mock/mockgen -source=./client.go -destination=./mock/client_generated.go -package=mock
+//go:generate go run ../../vendor/go.uber.org/mock/mockgen -source=./client.go -destination=./mock/client_generated.go -package=mock
 
 // Client is a wrapper object for actual PowerVS SDK clients to allow for easier testing.
 type Client interface {
