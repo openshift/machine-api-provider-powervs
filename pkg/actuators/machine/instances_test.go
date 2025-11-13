@@ -9,7 +9,7 @@ import (
 	"github.com/IBM-Cloud/power-go-client/power/models"
 	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	"k8s.io/client-go/kubernetes/scheme"
 

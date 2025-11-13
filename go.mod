@@ -8,13 +8,13 @@ require (
 	github.com/IBM/vpc-go-sdk v0.58.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/go-logr/logr v1.4.3
-	github.com/golang/mock v1.6.0
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
 	github.com/openshift/api v0.0.0-20251106190826-ebe535b08719
 	github.com/openshift/machine-api-operator v0.2.1-0.20251110092458-e0af0f3f44b8
 	github.com/pkg/errors v0.9.1
 	github.com/ppc64le-cloud/powervs-utils v0.0.0-20240610070307-1c0d75a5c247
+	go.uber.org/mock v0.6.0
 
 	// kube 1.34
 	k8s.io/api v0.34.1
