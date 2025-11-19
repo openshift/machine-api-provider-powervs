@@ -5,5 +5,5 @@ COPY . .
 RUN unset VERSION \
  && GOPROXY=off NO_DOCKER=1 GOARCH=ppc64le make build
 
-FROM --platform=ppc64le registry.access.redhat.com/ubi8/ubi:8.4
+FROM --platform=ppc64le registry.redhat.io/ubi9/ubi-minimal:latest
 COPY --from=builder /go/src/github.com/openshift/machine-api-provider-powervs/bin/machine-controller-manager /
