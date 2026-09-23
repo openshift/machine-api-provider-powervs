@@ -8,7 +8,6 @@ require (
 	github.com/IBM/vpc-go-sdk v0.58.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/go-logr/logr v1.4.3
-	github.com/golang/mock v1.6.0
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.40.0
 	github.com/openshift/api v0.0.0-20260312224012-5e946e2d43b7
@@ -122,6 +121,7 @@ require (
 	go.opentelemetry.io/otel v1.41.0 // indirect
 	go.opentelemetry.io/otel/metric v1.41.0 // indirect
 	go.opentelemetry.io/otel/trace v1.41.0 // indirect
+	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
