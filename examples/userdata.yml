@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: powervs-actuator-user-data-secret
+type: Opaque
+data:
+  userData: IyEvYmluL2Jhc2gKZWNobyAiQWhvaiIgPiAvdG1wL3Rlc3QK
