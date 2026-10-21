@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/tools/events"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/drain"
@@ -37,14 +37,14 @@ type machineDrainController struct {
 	config *rest.Config
 	scheme *runtime.Scheme
 
-	eventRecorder record.EventRecorder
+	eventRecorder events.EventRecorder
 }
 
 // newDrainController returns a new reconcile.Reconciler for machine-drain-controller
 func newDrainController(mgr manager.Manager) reconcile.Reconciler {
 	d := &machineDrainController{
 		Client:        mgr.GetClient(),
-		eventRecorder: mgr.GetEventRecorderFor("machine-drain-controller"),
+		eventRecorder: mgr.GetEventRecorder("machine-drain-controller"),
 		config:        mgr.GetConfig(),
 		scheme:        mgr.GetScheme(),
 	}
@@ -75,6 +75,7 @@ func (d *machineDrainController) Reconcile(ctx context.Context, request reconcil
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+	machineCopy := m.DeepCopy()
 
 	existingDrainedCondition := conditions.Get(m, machinev1.MachineDrained)
 	alreadyDrained := existingDrainedCondition != nil && existingDrainedCondition.Status == corev1.ConditionTrue
@@ -87,10 +88,10 @@ func (d *machineDrainController) Reconcile(ctx context.Context, request reconcil
 			// Return early without error, will requeue if/when the hook owner removes the annotation.
 			if len(m.Spec.LifecycleHooks.PreDrain) > 0 {
 				klog.Infof("%v: not draining machine: lifecycle blocked by pre-drain hook", m.Name)
-				d.eventRecorder.Eventf(m, corev1.EventTypeNormal, "DrainBlocked", "Drain blocked by pre-drain hook")
+				d.eventRecorder.Eventf(m, nil, corev1.EventTypeNormal, "DrainBlocked", "Drain", "Drain blocked by pre-drain hook")
 				return reconcile.Result{}, nil
 			}
-			d.eventRecorder.Eventf(m, corev1.EventTypeNormal, "DrainProceeds", "Node drain proceeds")
+			d.eventRecorder.Eventf(m, nil, corev1.EventTypeNormal, "DrainProceeds", "Drain", "Node drain proceeds")
 			if err := d.drainNode(ctx, m); err != nil {
 				klog.Errorf("%v: failed to drain node for machine: %v", m.Name, err)
 				conditions.Set(m, conditions.FalseCondition(
@@ -99,20 +100,20 @@ func (d *machineDrainController) Reconcile(ctx context.Context, request reconcil
 					machinev1.ConditionSeverityWarning,
 					"could not drain machine: %v", err,
 				))
-				d.eventRecorder.Eventf(m, corev1.EventTypeNormal, "DrainRequeued", "Node drain requeued: %v", err.Error())
+				d.eventRecorder.Eventf(m, nil, corev1.EventTypeNormal, "DrainRequeued", "Drain", "Node drain requeued: %v", err.Error())
 				return delayIfRequeueAfterError(err)
 			}
-			d.eventRecorder.Eventf(m, corev1.EventTypeNormal, "DrainSucceeded", "Node drain succeeded")
+			d.eventRecorder.Eventf(m, nil, corev1.EventTypeNormal, "DrainSucceeded", "Drain", "Node drain succeeded")
 			drainFinishedCondition.Message = "Drain finished successfully"
 		} else {
-			d.eventRecorder.Eventf(m, corev1.EventTypeNormal, "DrainSkipped", "Node drain skipped")
+			d.eventRecorder.Eventf(m, nil, corev1.EventTypeNormal, "DrainSkipped", "Drain", "Node drain skipped")
 			drainFinishedCondition.Message = "Node drain skipped"
 		}
 
 		conditions.Set(m, drainFinishedCondition)
-		// requeue request in case of failed update
-		if err := d.Client.Status().Update(ctx, m); err != nil {
-			return reconcile.Result{}, fmt.Errorf("could not update machine status: %w", err)
+		// requeue request in case of failed patch
+		if err := d.Client.Status().Patch(ctx, m, client.MergeFrom(machineCopy)); err != nil {
+			return reconcile.Result{}, fmt.Errorf("could not patch machine status: %w", err)
 		}
 		return reconcile.Result{}, nil
 	}
@@ -188,7 +189,7 @@ func (d *machineDrainController) drainNode(ctx context.Context, machine *machine
 	}
 
 	klog.Infof("drain successful for machine %q", machine.Name)
-	d.eventRecorder.Eventf(machine, corev1.EventTypeNormal, "Deleted", "Node %q drained", node.Name)
+	d.eventRecorder.Eventf(machine, nil, corev1.EventTypeNormal, "Deleted", "Drain", "Node %q drained", node.Name)
 
 	return nil
 }
