@@ -6,7 +6,8 @@ approvers:
 - damdo
 - mkumatag
 - Karthik-K-N
-- JoelSpeed
 - multiarch-approvers
+advisory_approvers:
+- JoelSpeed
 
 component: "Multi-Arch / IBM P and Z"
